@@ -14,12 +14,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authService } from "@/lib/services/auth.service";
+import { loginSchema } from "@/lib/validations/authValidation";
+import { z } from "zod";
 
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -29,13 +32,26 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setServerError(null);
+    setFieldErrors({});
 
     try {
+      loginSchema.parse(formData);
+
       await authService.signInWithPassword(formData.email, formData.password);
       router.refresh();
       router.push("/dashboard");
     } catch (error: any) {
-      setServerError(error.message || "Failed to sign in");
+      if (error instanceof z.ZodError) {
+        const errors: { [key: string]: string } = {};
+        error.issues.forEach((issue) => {
+          if (issue.path[0]) {
+            errors[issue.path[0].toString()] = issue.message;
+          }
+        });
+        setFieldErrors(errors);
+      } else {
+        setServerError(error.message || "Failed to sign in");
+      }
     } finally {
       setLoading(false);
     }
@@ -84,6 +100,11 @@ export default function LoginPage() {
                 }
                 required
               />
+              {fieldErrors.email && (
+                <p className="text-xs font-medium text-red-500 ml-1">
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -108,6 +129,11 @@ export default function LoginPage() {
                 }
                 required
               />
+              {fieldErrors.password && (
+                <p className="text-xs font-medium text-red-500 ml-1">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             <div className="space-y-4">

@@ -24,7 +24,7 @@ const Input = React.forwardRef<
   const isTextarea = type === "textarea";
 
   const baseStyles =
-    "flex w-full rounded-xl border-2 border-primary-100 bg-primary-50 px-4 py-3 text-base ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-primary-400 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/10 focus-visible:border-brand-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 text-primary-900 shadow-xs";
+    "flex w-full rounded-xl border-2 border-primary-100 bg-primary-50 px-4 py-3 text-base ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-primary-400 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/10 focus-visible:border-brand-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 text-primary-900 focus:text-primary-950 shadow-xs";
 
   if (isTextarea) {
     return (
@@ -39,7 +39,7 @@ const Input = React.forwardRef<
   return (
     <div className="relative group">
       {icon && (
-        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-primary-400 group-focus-within:text-brand-600 transition-colors">
+        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-primary-400 group-focus-within:text-primary-600 transition-colors">
           {icon}
         </div>
       )}
@@ -48,7 +48,8 @@ const Input = React.forwardRef<
         className={twMerge(
           baseStyles,
           icon && "pl-12",
-          isPassword && "pr-12",
+          isPassword &&
+            "pr-12 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-password-toggle]:hidden",
           className,
         )}
         ref={ref as React.ForwardedRef<HTMLInputElement>}
@@ -58,7 +59,7 @@ const Input = React.forwardRef<
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute inset-y-0 right-4 flex items-center text-primary-400 hover:text-brand-600 focus:outline-none transition-colors"
+          className="absolute inset-y-0 right-4 flex items-center text-primary-400 group-focus-within:text-primary-600 hover:text-brand-600 focus:outline-none transition-colors"
           tabIndex={-1}
         >
           {showPassword ? (

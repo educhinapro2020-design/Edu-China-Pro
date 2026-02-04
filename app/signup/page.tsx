@@ -15,12 +15,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authService } from "@/lib/services/auth.service";
+import { registerSchema } from "@/lib/validations/authValidation";
+import { z } from "zod";
 
 export default function SignupPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -31,8 +34,12 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     setServerError(null);
+    setFieldErrors({});
 
     try {
+      // Validate form data
+      registerSchema.parse(formData);
+
       await authService.signUpWithPassword(
         formData.email,
         formData.password,
@@ -40,9 +47,20 @@ export default function SignupPage() {
         "student",
       );
 
+      router.refresh();
       router.push("/dashboard");
     } catch (error: any) {
-      setServerError(error.message || "Failed to create account");
+      if (error instanceof z.ZodError) {
+        const errors: { [key: string]: string } = {};
+        error.issues.forEach((issue) => {
+          if (issue.path[0]) {
+            errors[issue.path[0].toString()] = issue.message;
+          }
+        });
+        setFieldErrors(errors);
+      } else {
+        setServerError(error.message || "Failed to create account");
+      }
     } finally {
       setLoading(false);
     }
@@ -77,7 +95,7 @@ export default function SignupPage() {
           </div>
 
           <form className="space-y-6" onSubmit={handleSignup}>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <label className="block text-sm font-semibold text-primary-700 ml-1">
                 Full Name
               </label>
@@ -91,9 +109,14 @@ export default function SignupPage() {
                 }
                 required
               />
+              {fieldErrors.fullName && (
+                <p className="text-xs font-medium text-red-500 ml-1">
+                  {fieldErrors.fullName}
+                </p>
+              )}
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <label className="block text-sm font-semibold text-primary-700 ml-1">
                 Email Address
               </label>
@@ -107,9 +130,14 @@ export default function SignupPage() {
                 }
                 required
               />
+              {fieldErrors.email && (
+                <p className="text-xs font-medium text-red-500 ml-1">
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <label className="block text-sm font-semibold text-primary-700 ml-1">
                 Password
               </label>
@@ -122,8 +150,12 @@ export default function SignupPage() {
                   setFormData({ ...formData, password: e.target.value })
                 }
                 required
-                minLength={6}
               />
+              {fieldErrors.password && (
+                <p className="text-xs font-medium text-red-500 ml-1">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             <div className="space-y-4">
