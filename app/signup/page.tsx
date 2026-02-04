@@ -79,7 +79,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-white flex lg:flex-row flex-col relative overflow-hidden font-sans">
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 z-10 bg-white">
-        <div className="w-full max-w-lg">
+        <div className="w-full max-w-[440px]">
           <button
             onClick={() => router.back()}
             className="mb-6 p-2 -ml-2 text-primary-600 hover:text-brand-600 transition-colors active:scale-95 rounded-full hover:bg-primary-50"
@@ -89,8 +89,8 @@ export default function SignupPage() {
 
           <div className="mb-8">
             <h1 className="heading-1 mb-3">Create account</h1>
-            <p className="body-large text-primary-500">
-              Start your application to top Chinese universities.
+            <p className="body text-lg text-primary-500">
+              Join 12,000+ courses across 800+ partner universities.
             </p>
           </div>
 
@@ -238,11 +238,12 @@ export default function SignupPage() {
 
           <div className="text-center px-6">
             <h2 className="heading-2 mb-4">
-              Join the <br />
-              <span className="text-brand-600">Community.</span>
+              Start Your <br />
+              <span className="text-brand-600">Journey Today!</span>
             </h2>
             <p className="body-large text-primary-500">
-              Thousands of students are already exploring their future in China.
+              Join 12,000+ courses across 800+ partner universities. Secure,
+              simple, and 100% guaranteed admission support.
             </p>
           </div>
         </div>

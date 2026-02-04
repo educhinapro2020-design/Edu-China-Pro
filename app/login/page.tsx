@@ -80,7 +80,7 @@ export default function LoginPage() {
 
           <div className="mb-8">
             <h1 className="heading-1 mb-3">Welcome back</h1>
-            <p className="body-large text-primary-500">
+            <p className="body text-lg text-primary-500">
               Sign in to your account
             </p>
           </div>
@@ -220,7 +220,7 @@ export default function LoginPage() {
               <span className="text-brand-600">Your Future.</span>
             </h2>
             <p className="body-large text-primary-500">
-              Connect with top Chinese universities and fast-track your
+              Connect with 800+ Chinese universities and fast-track your
               admissions process.
             </p>
           </div>
