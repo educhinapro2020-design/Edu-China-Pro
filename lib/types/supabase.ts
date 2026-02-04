@@ -44,6 +44,96 @@ export type Database = {
         }
         Relationships: []
       }
+      student_documents: {
+        Row: {
+          created_at: string
+          documents: Json | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          documents?: Json | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          documents?: Json | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      student_profiles: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          date_of_birth: string | null
+          education_history: Json | null
+          family_info: Json | null
+          first_name: string | null
+          gender: string | null
+          has_visited_china: boolean | null
+          id: string
+          in_china_now: boolean | null
+          last_name: string | null
+          marital_status: string | null
+          mother_tongue: string | null
+          nationality: string | null
+          phone_number: string | null
+          religion: string | null
+          updated_at: string
+          whatsapp_number: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          education_history?: Json | null
+          family_info?: Json | null
+          first_name?: string | null
+          gender?: string | null
+          has_visited_china?: boolean | null
+          id: string
+          in_china_now?: boolean | null
+          last_name?: string | null
+          marital_status?: string | null
+          mother_tongue?: string | null
+          nationality?: string | null
+          phone_number?: string | null
+          religion?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          education_history?: Json | null
+          family_info?: Json | null
+          first_name?: string | null
+          gender?: string | null
+          has_visited_china?: boolean | null
+          id?: string
+          in_china_now?: boolean | null
+          last_name?: string | null
+          marital_status?: string | null
+          mother_tongue?: string | null
+          nationality?: string | null
+          phone_number?: string | null
+          religion?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "../supabase/client";
-import { Database } from "../../types/supabase";
+import { Database } from "@/lib/types/supabase";
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];

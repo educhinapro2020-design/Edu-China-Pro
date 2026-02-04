@@ -1,5 +1,6 @@
 /*
-** Initializes the auth and profiles tables
+** Date: 2026-02-03 Author: Nikesh
+** Initializes the auth and profiles tables 
 */
 
 DO $$ BEGIN
@@ -19,6 +20,11 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- Drop policies if they exist to prevent errors on re-run
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile." ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile." ON public.profiles;
 
 CREATE POLICY "Public profiles are viewable by everyone." ON public.profiles
     FOR SELECT USING (true);
