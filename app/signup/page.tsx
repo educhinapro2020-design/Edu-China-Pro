@@ -37,7 +37,6 @@ export default function SignupPage() {
     setFieldErrors({});
 
     try {
-      // Validate form data
       registerSchema.parse(formData);
 
       await authService.signUpWithPassword(
