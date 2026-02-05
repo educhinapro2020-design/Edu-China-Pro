@@ -82,6 +82,7 @@ export type Database = {
           marital_status: string | null
           mother_tongue: string | null
           nationality: string | null
+          passport_number: string | null
           phone_number: string | null
           religion: string | null
           updated_at: string
@@ -104,6 +105,7 @@ export type Database = {
           marital_status?: string | null
           mother_tongue?: string | null
           nationality?: string | null
+          passport_number?: string | null
           phone_number?: string | null
           religion?: string | null
           updated_at?: string
@@ -126,6 +128,7 @@ export type Database = {
           marital_status?: string | null
           mother_tongue?: string | null
           nationality?: string | null
+          passport_number?: string | null
           phone_number?: string | null
           religion?: string | null
           updated_at?: string
