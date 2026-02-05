@@ -79,6 +79,10 @@
   @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
 }
 
+@utility brand-text {
+  @apply bg-gradient-to-r from-brand-700 to-brand-500 bg-clip-text text-transparent;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
