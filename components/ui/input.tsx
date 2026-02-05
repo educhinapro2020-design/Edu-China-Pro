@@ -50,6 +50,8 @@ const Input = React.forwardRef<
           icon && "pl-12",
           isPassword &&
             "pr-12 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-password-toggle]:hidden",
+          type === "date" &&
+            "[&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:bg-transparent",
           className,
         )}
         ref={ref as React.ForwardedRef<HTMLInputElement>}
