@@ -29,7 +29,7 @@ export default async function DashboardPage() {
             </span>
             !
           </h1>
-          <p className="body-large text-primary-500 mt-1">
+          <p className="body md:body-large text-primary-500 mt-1">
             Track your applications, manage profile
           </p>
         </div>
@@ -43,7 +43,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 p-6 bg-white border border-primary-100 rounded-3xl shadow-sm min-h-[300px] flex flex-col justify-center items-center text-center">
-          <h3 className="heading-3 mb-2">No Active Applications</h3>
+          <h3 className="heading-4 mb-2">No Active Applications</h3>
           <p className="body text-primary-500 mb-6 max-w-sm">
             You haven't started any applications yet. Browse over 12,000 courses
             to find your perfect match.

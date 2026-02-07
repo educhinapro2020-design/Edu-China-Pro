@@ -111,7 +111,7 @@ export function StudentNavbar() {
           ref={mobileMenuRef}
         >
           <button className="relative p-2.5 text-primary-500 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-colors">
-            <FiBell className="size-5" />
+            <FiBell className="size-6" />
             <span className="absolute top-2 right-2 size-3.5 bg-red-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full ring-2 ring-white">
               2
             </span>
