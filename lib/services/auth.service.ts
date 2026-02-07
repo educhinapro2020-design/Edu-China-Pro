@@ -2,12 +2,17 @@ import { createClient } from "@/lib/supabase/client";
 import { profileRepo } from "@/lib/repositories/profile.repo";
 
 export const authService = {
-  async signInWithGoogle() {
+  async signInWithGoogle(next?: string) {
     const supabase = createClient();
+    const redirectTo = new URL(`${window.location.origin}/auth/callback`);
+    if (next) {
+      redirectTo.searchParams.set("next", next);
+    }
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: redirectTo.toString(),
       },
     });
 

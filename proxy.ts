@@ -1,8 +1,60 @@
-import { type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
+import { createServerClient } from "@supabase/ssr";
+import { type NextRequest, NextResponse } from "next/server";
 
-export default async function proxy(request: NextRequest) {
-  return await updateSession(request);
+export default async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value),
+          );
+          response = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options),
+          );
+        },
+      },
+    },
+  );
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const url = request.nextUrl.clone();
+  const next = url.pathname + url.search;
+
+  if (url.pathname.startsWith("/dashboard")) {
+    if (!user) {
+      url.pathname = "/login";
+      url.searchParams.set("next", next);
+      return NextResponse.redirect(url);
+    }
+  }
+
+  if (url.pathname.startsWith("/login") || url.pathname.startsWith("/signup")) {
+    if (user) {
+      const nextParam = url.searchParams.get("next");
+      const target = nextParam || "/dashboard";
+      return NextResponse.redirect(new URL(target, request.url));
+    }
+  }
+
+  return response;
 }
 
 export const config = {

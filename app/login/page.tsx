@@ -10,7 +10,7 @@ import {
   FiArrowLeft,
 } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authService } from "@/lib/services/auth.service";
@@ -57,10 +57,13 @@ export default function LoginPage() {
     }
   };
 
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/dashboard";
+
   const handleGoogleLogin = async () => {
     try {
       setGoogleLoading(true);
-      await authService.signInWithGoogle();
+      await authService.signInWithGoogle(next);
     } catch (error) {
       console.error("Google login failed", error);
     } finally {
