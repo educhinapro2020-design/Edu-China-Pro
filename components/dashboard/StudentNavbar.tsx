@@ -14,6 +14,8 @@ import {
   FiBell,
 } from "react-icons/fi";
 import { authService } from "@/lib/services/auth.service";
+import { User } from "@supabase/supabase-js";
+import Image from "next/image";
 import { twMerge } from "tailwind-merge";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -24,10 +26,15 @@ const navItems = [
   { name: "My Profile", href: "/dashboard/profile/build", icon: FiUser },
 ];
 
-export function StudentNavbar() {
+interface StudentNavbarProps {
+  user: User;
+}
+
+export function StudentNavbar({ user }: StudentNavbarProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const avatarUrl = user.user_metadata?.avatar_url;
 
   const handleSignOut = async () => {
     await authService.signOut();
@@ -65,13 +72,13 @@ export function StudentNavbar() {
     <>
       <nav className="sticky top-0 z-50 w-full border-b border-primary-200 bg-white/90 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-2 group">
             <span className="font-serif font-bold text-2xl brand-text tracking-tight group-hover:opacity-90 transition-opacity">
               EduChinaPro
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-2">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
@@ -82,7 +89,7 @@ export function StudentNavbar() {
                   className={twMerge(
                     "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2",
                     isActive
-                      ? "bg-brand-50 text-brand-700 shadow-sm ring-1 ring-brand-100"
+                      ? " text-brand-700 shadow-md ring-1 ring-brand-100"
                       : "text-primary-600 hover:bg-primary-50 hover:text-primary-900",
                   )}
                 >
@@ -100,14 +107,23 @@ export function StudentNavbar() {
             })}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
-            <button className="relative p-2.5 text-primary-500 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors">
-              <FiBell className="size-5" />
-              <span className="absolute top-1.5 right-1.5 size-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full ring-2 ring-white">
-                2
-              </span>
-            </button>
-            <div className="w-px h-6 bg-primary-200 mx-1" />
+          <div className="hidden md:flex items-center gap-4">
+            <div className="size-9 rounded-full overflow-hidden border border-primary-200 bg-primary-50 flex items-center justify-center">
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt="User avatar"
+                  width={36}
+                  height={36}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <FiUser className="w-5 h-5 text-primary-500" />
+              )}
+            </div>
+
+            <div className="w-px h-6 bg-primary-200" />
+
             <button
               onClick={handleSignOut}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-primary-500 hover:text-red-600 hover:bg-red-50 transition-colors"
@@ -164,16 +180,7 @@ export function StudentNavbar() {
               transition={{ type: "tween", duration: 0.2, ease: "easeOut" }}
               className="md:hidden fixed inset-y-0 right-0 z-70 w-72 bg-white border-l border-primary-200 shadow-2xl flex flex-col"
             >
-              <div className="flex items-center justify-between px-5 h-16 border-b border-primary-100">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 group"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <span className="font-serif font-bold text-xl brand-text tracking-tight group-hover:opacity-90 transition-opacity">
-                    EduChinaPro
-                  </span>
-                </Link>
+              <div className="flex items-center justify-end px-5 h-10">
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="p-2 rounded-full hover:bg-primary-100 text-primary-500 hover:text-primary-700 transition-colors"
@@ -184,6 +191,30 @@ export function StudentNavbar() {
               </div>
 
               <div className="flex flex-col flex-1 overflow-hidden">
+                <div className="px-5 py-2 pb-4 border-b border-primary-100 flex items-center gap-3">
+                  <div className="size-10 rounded-full overflow-hidden border border-primary-200 bg-primary-50 flex items-center justify-center shrink-0">
+                    {avatarUrl ? (
+                      <Image
+                        src={avatarUrl}
+                        alt="User avatar"
+                        width={40}
+                        height={40}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <FiUser className="w-5 h-5 text-primary-500" />
+                    )}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-semibold text-primary-900 truncate">
+                      {user.user_metadata?.full_name || "Student"}
+                    </span>
+                    <span className="text-sm text-primary-500 truncate">
+                      {user.email}
+                    </span>
+                  </div>
+                </div>
+
                 <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
                   {navItems.map((item) => {
                     const isActive = pathname === item.href;

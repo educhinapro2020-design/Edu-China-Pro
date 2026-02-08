@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google"; // Changed from Geist
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
