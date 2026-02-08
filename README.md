@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EduChinaPro
 
-## Getting Started
+A platform helping international students discover and apply to universities in China.
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+EduChinaPro is a comprehensive platform that simplifies the process of studying in China for international students. The platform offers:
+
+- **University Discovery** - Browse and search through top-ranked Chinese universities
+- **Program Exploration** - Find programs matching your academic interests
+- **Application Management** - Track and manage your university applications
+- **Profile Building** - Create a compelling student profile for applications
+
+## Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/)/ (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth/Google OAuth
+
+## Project Structure
+
+```
+educhinapro/
+├── app/
+│   ├── auth/              # Authentication callback routes
+│   ├── dashboard/         # Student dashboard pages
+│   ├── login/             # Login page
+│   ├── signup/            # Signup page
+│   └── page.tsx           # Homepage
+├── components/
+│   ├── dashboard/         # Dashboard-specific components
+│   ├── profile/           # Profile building components
+│   ├── shared/            # Shared components
+│   └── ui/                # Reusable UI components
+├── lib/
+│   ├── repositories/      # Data access layer
+│   ├── services/          # Business logic services
+│   └── supabase/          # Supabase client setup
+└── public/                # Static assets
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Design System
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The project uses a custom design system with:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Brand Colors**: Sky blue palette (brand-50 to brand-950)
+- **Primary Colors**: Slate gray palette (primary-50 to primary-950)
+- **Typography**: Inter (sans) + Outfit (serif)
+- Uses custom typography utilities like `brand-text`, `heading-1`, `body-large`, etc.
 
-## Learn More
+## Authentication
 
-To learn more about Next.js, take a look at the following resources:
+The app uses Supabase Auth with:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Email/Password authentication
+- OAuth (Google for now)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
+### Student Dashboard
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Build profile: One profile, apply to 12000+ universites
+- Track profile completion progress
+- Manage documents and submissions
+- Track applicaiton status
+- Notifications (In-app/email)
+- In-app chat with counselor
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### University Browsing
+
+- Filter by ranking, location, and programs
+- Detailed university pages
+
+### Admin Panel/Staff Panel
+
+- Add/Edit/Delete universities and programs
+- Mange program specific configs
+- Manage student applications
+- Admin only - Manage staff accounts
+- Admin only - Assign application to staff
+
+## License
+
+This project is proprietary software. All rights reserved.
