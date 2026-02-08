@@ -52,21 +52,23 @@ export function ProfileProgress({ percentage }: ProfileProgressProps) {
           <h3 className="text-lg font-bold text-primary-900 font-serif">
             Complete your profile
           </h3>
-          <p className="text-sm text-primary-500 mt-1">
-            Finish your profile to start applying to universities.
+          <p className="text-base text-primary-500 mt-1">
+            One profile, 12000+ universities.
           </p>
         </div>
       </div>
 
-      <Button
-        variant="brand"
-        size="sm"
-        asChild
-        endIcon={<FiArrowRight className="size-4" />}
-        className="w-full sm:w-auto"
-      >
-        <Link href="/dashboard/profile/build">Complete Profile</Link>
-      </Button>
+      <Link href="/dashboard/profile/build">
+        <Button
+          variant="brand"
+          size="sm"
+          asChild
+          endIcon={<FiArrowRight className="size-4" />}
+          className="w-full sm:w-auto"
+        >
+          Complete Profile
+        </Button>
+      </Link>
     </div>
   );
 }

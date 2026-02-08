@@ -25,6 +25,7 @@ import { studentRepository } from "@/lib/repositories/student.repo";
 import { Modal } from "@/components/ui/modal";
 import { builderProfileSchema } from "@/lib/validations/profileValidation";
 import { z } from "zod";
+import { calculateProfileProgress } from "@/lib/utils/profile-progress";
 
 const COUNTRIES = [
   { label: "Nepal", value: "Nepal" },
@@ -107,8 +108,14 @@ export function WizardClient({
     number | null
   >(null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  /* Removed duplicate errorsRef declaration */
+
   const errorsRef = useRef(errors);
   errorsRef.current = errors;
+
+  const [progress, setProgress] = useState(() =>
+    calculateProfileProgress(initialProfile),
+  );
 
   const validateField = (name: string, value: any) => {
     try {
@@ -144,7 +151,7 @@ export function WizardClient({
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
-      router.back();
+      router.push("/dashboard");
     }
   };
 
@@ -165,6 +172,8 @@ export function WizardClient({
     setSaveStatus("saving");
     try {
       await studentRepository.updateProfile(userId, data);
+      // Update progress only after successful save/validation (effectively on blur)
+      setProgress(calculateProfileProgress({ ...formData, ...data }));
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 1000);
     } catch (error) {
@@ -753,7 +762,7 @@ export function WizardClient({
     <div className="min-h-screen bg-primary-50 py-4 md:py-8 font-sans">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 px-1">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
             <button
               onClick={handleBack}
               className="p-2 -ml-2 rounded-full text-primary-500 hover:text-primary-700 transition-colors"
@@ -820,44 +829,97 @@ export function WizardClient({
           </div>
         </div>
 
-        <div className="flex items-center justify-between mb-6 px-4">
-          <div>
-            <h2 className="heading-3">{STEPS[currentStep - 1].label}</h2>
-            <p className="text-primary-500 mt-1">
-              {STEPS[currentStep - 1].description}
-            </p>
+        <div className="flex flex-col gap-6">
+          <div className="w-full">
+            <div className="bg-white rounded-3xl p-6 border border-primary-100 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-bold text-primary-900">Profile Progress</h4>
+                <span className="text-lg font-semibold text-brand-600">
+                  {progress}%
+                </span>
+              </div>
+
+              <p className="text-primary-500 mb-4">
+                One profile, 12000+ universities.
+              </p>
+
+              <div className="h-2 w-full bg-primary-100 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-brand-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-4xl shadow-xl shadow-primary-900/5 overflow-hidden border border-primary-100">
-          <div className="p-6 md:p-10 min-h-[400px]">
-            <label className="text-primary-500 font-medium text-sm inline-block mb-4">
-              * Details are{" "}
-              <span className="brand-text">saved automatically</span>
-            </label>
-            {renderStepContent()}
-          </div>
+          <div className="w-full min-w-0">
+            <div className="bg-white rounded-4xl shadow-xl shadow-primary-900/5 overflow-hidden border border-primary-100">
+              <div className="p-6 md:p-10 min-h-[400px]">
+                <label className="text-primary-500 font-medium text-sm inline-block mb-4">
+                  Step {currentStep}
+                </label>
+                <h2 className="heading-3 mb-2">
+                  {STEPS[currentStep - 1].label}
+                </h2>
+                <p className="body text-primary-500 mb-8 max-w-lg">
+                  {STEPS[currentStep - 1].description}
+                </p>
 
-          <div className="px-8 py-6 bg-white border-t border-primary-100 flex items-center justify-end gap-3">
-            <Button
-              variant="ghost"
-              onClick={handleBack}
-              disabled={currentStep === 1}
-              className={currentStep === 1 ? "invisible" : ""}
-            >
-              Back
-            </Button>
+                {renderStepContent()}
+              </div>
 
-            <Button
-              variant="brand"
-              onClick={handleNext}
-              loading={loading}
-              disabled={Object.values(errors).some(Boolean)}
-              className="pl-8 pr-6 shadow-brand-500/20 shadow-lg"
-              endIcon={<FiArrowRight className="size-5" />}
-            >
-              {currentStep === STEPS.length ? "Save" : "Continue"}
-            </Button>
+              <div className="p-6 md:px-10 md:py-8 bg-primary-50 border-t border-primary-100 flex justify-between items-center gap-4">
+                <Button
+                  variant="ghost"
+                  onClick={handleBack}
+                  disabled={loading}
+                  className="text-primary-500 hover:text-primary-900"
+                >
+                  Back
+                </Button>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary-400">
+                    <AnimatePresence mode="wait">
+                      {saveStatus === "saving" && (
+                        <motion.span
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          className="flex items-center gap-1.5 text-brand-500"
+                        >
+                          <FiLoader className="animate-spin" />
+                          Saving...
+                        </motion.span>
+                      )}
+                      {saveStatus === "saved" && (
+                        <motion.span
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          className="flex items-center gap-1.5 text-brand-600"
+                        >
+                          <FiCheckCircle />
+                          Saved
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  <Button
+                    variant="brand"
+                    onClick={handleNext}
+                    loading={loading}
+                    endIcon={<FiArrowRight className="size-4" />}
+                    className="px-8 shadow-brand-500/20 shadow-lg"
+                  >
+                    {currentStep === STEPS.length ? "Finish" : "Next Step"}
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -901,7 +963,7 @@ export function WizardClient({
               </>
             ) : (
               <>
-                <FiCheckCircle className="size-4 text-brand-500" />
+                <FiCheckCircle className="size-4 text-green-500" />
                 Saved
               </>
             )}
