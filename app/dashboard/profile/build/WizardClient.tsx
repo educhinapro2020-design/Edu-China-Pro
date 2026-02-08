@@ -108,7 +108,6 @@ export function WizardClient({
     number | null
   >(null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
-  /* Removed duplicate errorsRef declaration */
 
   const errorsRef = useRef(errors);
   errorsRef.current = errors;
@@ -172,7 +171,6 @@ export function WizardClient({
     setSaveStatus("saving");
     try {
       await studentRepository.updateProfile(userId, data);
-      // Update progress only after successful save/validation (effectively on blur)
       setProgress(calculateProfileProgress({ ...formData, ...data }));
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 1000);
@@ -834,8 +832,12 @@ export function WizardClient({
             <div className="bg-white rounded-3xl p-6 border border-primary-100 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-bold text-primary-900">Profile Progress</h4>
-                <span className="text-lg font-semibold text-brand-600">
-                  {progress}%
+                <span className="text-lg font-bold text-brand-600">
+                  {progress < 100 ? (
+                    `${progress}%`
+                  ) : (
+                    <span className="text-success">{progress}%</span>
+                  )}
                 </span>
               </div>
 
@@ -843,9 +845,9 @@ export function WizardClient({
                 One profile, 12000+ universities.
               </p>
 
-              <div className="h-2 w-full bg-primary-100 rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-primary-100 rounded-full overflow-hidden">
                 <motion.div
-                  className="h-full bg-brand-500 rounded-full"
+                  className={`h-full rounded-full ${progress === 100 ? "bg-success" : "bg-brand-500"}`}
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
@@ -881,33 +883,6 @@ export function WizardClient({
                 </Button>
 
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary-400">
-                    <AnimatePresence mode="wait">
-                      {saveStatus === "saving" && (
-                        <motion.span
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -5 }}
-                          className="flex items-center gap-1.5 text-brand-500"
-                        >
-                          <FiLoader className="animate-spin" />
-                          Saving...
-                        </motion.span>
-                      )}
-                      {saveStatus === "saved" && (
-                        <motion.span
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -5 }}
-                          className="flex items-center gap-1.5 text-brand-600"
-                        >
-                          <FiCheckCircle />
-                          Saved
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
                   <Button
                     variant="brand"
                     onClick={handleNext}
@@ -963,7 +938,7 @@ export function WizardClient({
               </>
             ) : (
               <>
-                <FiCheckCircle className="size-4 text-green-500" />
+                <FiCheckCircle className="size-4 text-success" />
                 Saved
               </>
             )}
