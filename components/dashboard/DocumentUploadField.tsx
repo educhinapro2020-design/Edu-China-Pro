@@ -15,6 +15,7 @@ interface DocumentUploadFieldProps {
   required?: boolean;
   description?: string;
   accept?: string;
+  maxSizeMB?: number;
 }
 
 interface StatusStyleConfig {
@@ -33,14 +34,25 @@ export function DocumentUploadField({
   required = false,
   description,
   accept = ".pdf,.jpg,.jpeg,.png",
+  maxSizeMB = 10,
 }: DocumentUploadFieldProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setError(null);
+
+    const maxBytes = maxSizeMB * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setError(`File too large. Maximum size is ${maxSizeMB}MB.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     try {
       setIsUploading(true);
@@ -55,6 +67,7 @@ export function DocumentUploadField({
       setUploadProgress(100);
     } catch (error) {
       console.error("Upload failed", error);
+      setError("Upload failed. Please try again.");
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
@@ -143,6 +156,9 @@ export function DocumentUploadField({
             <p className="text-xs font-medium text-primary-500 mt-2">
               * {accept.replace(/\./g, "").toUpperCase().replace(/,/g, ", ")}
             </p>
+          )}
+          {error && (
+            <p className="text-xs font-medium text-red-500 mt-2">{error}</p>
           )}
         </div>
 
