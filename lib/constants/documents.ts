@@ -86,8 +86,7 @@ export const DOCUMENT_REGISTRY: Record<DocumentKey, DocumentMetadata> = {
   health_check: {
     id: "health_check",
     label: "Foreigner Physical Examination Form",
-    description:
-      "Official medical report format for China. Must be recent (<6 months).",
+    description: "Official medical report. Must be recent (<6 months).",
     category: "health",
     acceptedFormats: [".pdf", ".jpg", ".png"],
   },
