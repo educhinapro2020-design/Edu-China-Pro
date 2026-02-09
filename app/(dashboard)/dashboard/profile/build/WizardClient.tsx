@@ -14,6 +14,7 @@ import {
   FiTrash2,
   FiEdit2,
   FiSave,
+  FiFileText,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,10 @@ import { Modal } from "@/components/ui/modal";
 import { builderProfileSchema } from "@/lib/validations/profileValidation";
 import { z } from "zod";
 import { calculateProfileProgress } from "@/lib/utils/profile-progress";
+import { DocumentUploadField } from "@/components/dashboard/DocumentUploadField";
+import { studentDocumentsRepository } from "@/lib/repositories/student-documents.repo";
+import { DOCUMENT_REGISTRY, DocumentKey } from "@/lib/constants/documents";
+import { StudentDocumentEntry } from "@/lib/types/student";
 
 const COUNTRIES = [
   { label: "Nepal", value: "Nepal" },
@@ -88,6 +93,12 @@ const STEPS = [
     icon: FiBookOpen,
     description: "Academic history and Education Background",
   },
+  {
+    id: 4,
+    label: "Documents",
+    icon: FiFileText,
+    description: "Upload supporting documents for your profile.",
+  },
 ];
 
 export function WizardClient({
@@ -115,6 +126,43 @@ export function WizardClient({
   const [progress, setProgress] = useState(() =>
     calculateProfileProgress(initialProfile),
   );
+
+  const [documents, setDocuments] = useState<
+    Record<DocumentKey, StudentDocumentEntry>
+  >({} as any);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [docsFetched, setDocsFetched] = useState(false);
+
+  const fetchDocuments = async () => {
+    if (docsFetched) return;
+    setDocsLoading(true);
+    try {
+      const docs = await studentDocumentsRepository.getDocuments(userId);
+      if (docs?.documents) setDocuments(docs.documents as any);
+      setDocsFetched(true);
+    } catch (e) {
+      console.error("Failed to fetch documents", e);
+    } finally {
+      setDocsLoading(false);
+    }
+  };
+
+  const handleDocumentUpload = async (file: File, docKey: DocumentKey) => {
+    const result = await studentDocumentsRepository.uploadDocument(
+      userId,
+      file,
+      docKey,
+    );
+    setDocuments((prev) => ({
+      ...prev,
+      [docKey]: {
+        status: "uploaded",
+        url: result.url,
+        file_name: file.name,
+        uploaded_at: new Date().toISOString(),
+      },
+    }));
+  };
 
   const validateField = (name: string, value: any) => {
     try {
@@ -753,6 +801,227 @@ export function WizardClient({
             </Button>
           </div>
         );
+
+      case 4:
+        if (!docsFetched && !docsLoading) fetchDocuments();
+
+        const educationLevels = (formData.education_history || []).map(
+          (e) => e.level,
+        );
+        const hasBachelor = educationLevels.includes("Bachelor");
+        const hasMaster = educationLevels.includes("Master");
+
+        return (
+          <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
+            <section className="space-y-6">
+              <h3 className="text-lg font-bold text-primary-900 border-b border-primary-100 pb-2">
+                Passport Photo
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <DocumentUploadField
+                  label={DOCUMENT_REGISTRY.photo.label}
+                  docKey="photo"
+                  description={DOCUMENT_REGISTRY.photo.description}
+                  accept={DOCUMENT_REGISTRY.photo.acceptedFormats?.join(",")}
+                  status={documents.photo?.status}
+                  currentUrl={documents.photo?.url}
+                  onUpload={(f) => handleDocumentUpload(f, "photo")}
+                />
+              </div>
+            </section>
+
+            <section className="space-y-6">
+              <h3 className="text-lg font-bold text-primary-900 border-b border-primary-100 pb-2">
+                Passport Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="inline-block text-sm font-semibold text-primary-700">
+                    Passport Number
+                  </label>
+                  <Input
+                    placeholder="e.g. A12345678"
+                    value={formData.passport_number || ""}
+                    onChange={(e) =>
+                      updateField("passport_number", e.target.value)
+                    }
+                    onBlur={handleBlur}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="inline-block text-sm font-semibold text-primary-700">
+                    Passport Expiry
+                  </label>
+                  <Input
+                    type="date"
+                    placeholder="Enter expiry date"
+                    value={
+                      formData.passport_expiry
+                        ? new Date(formData.passport_expiry)
+                            .toISOString()
+                            .split("T")[0]
+                        : ""
+                    }
+                    onChange={(e) =>
+                      updateField("passport_expiry", e.target.value)
+                    }
+                    onBlur={handleBlur}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <DocumentUploadField
+                  label={DOCUMENT_REGISTRY.passport.label}
+                  docKey="passport"
+                  description={DOCUMENT_REGISTRY.passport.description}
+                  accept={DOCUMENT_REGISTRY.passport.acceptedFormats?.join(",")}
+                  status={documents.passport?.status}
+                  currentUrl={documents.passport?.url}
+                  onUpload={(f) => handleDocumentUpload(f, "passport")}
+                />
+              </div>
+            </section>
+
+            <section className="space-y-6">
+              <h3 className="text-lg font-bold text-primary-900 border-b border-primary-100 pb-2">
+                Education Documents
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <DocumentUploadField
+                  label={DOCUMENT_REGISTRY.transcript_highschool.label}
+                  docKey="transcript_highschool"
+                  description={
+                    DOCUMENT_REGISTRY.transcript_highschool.description
+                  }
+                  accept={DOCUMENT_REGISTRY.transcript_highschool.acceptedFormats?.join(
+                    ",",
+                  )}
+                  status={documents.transcript_highschool?.status}
+                  currentUrl={documents.transcript_highschool?.url}
+                  onUpload={(f) =>
+                    handleDocumentUpload(f, "transcript_highschool")
+                  }
+                />
+                <DocumentUploadField
+                  label={DOCUMENT_REGISTRY.degree_highschool.label}
+                  docKey="degree_highschool"
+                  description={DOCUMENT_REGISTRY.degree_highschool.description}
+                  accept={DOCUMENT_REGISTRY.degree_highschool.acceptedFormats?.join(
+                    ",",
+                  )}
+                  status={documents.degree_highschool?.status}
+                  currentUrl={documents.degree_highschool?.url}
+                  onUpload={(f) => handleDocumentUpload(f, "degree_highschool")}
+                />
+                {hasBachelor && (
+                  <>
+                    <DocumentUploadField
+                      label={DOCUMENT_REGISTRY.transcript_bachelors.label}
+                      docKey="transcript_bachelors"
+                      description={
+                        DOCUMENT_REGISTRY.transcript_bachelors.description
+                      }
+                      accept={DOCUMENT_REGISTRY.transcript_bachelors.acceptedFormats?.join(
+                        ",",
+                      )}
+                      status={documents.transcript_bachelors?.status}
+                      currentUrl={documents.transcript_bachelors?.url}
+                      onUpload={(f) =>
+                        handleDocumentUpload(f, "transcript_bachelors")
+                      }
+                    />
+                    <DocumentUploadField
+                      label={DOCUMENT_REGISTRY.degree_bachelors.label}
+                      docKey="degree_bachelors"
+                      description={
+                        DOCUMENT_REGISTRY.degree_bachelors.description
+                      }
+                      accept={DOCUMENT_REGISTRY.degree_bachelors.acceptedFormats?.join(
+                        ",",
+                      )}
+                      status={documents.degree_bachelors?.status}
+                      currentUrl={documents.degree_bachelors?.url}
+                      onUpload={(f) =>
+                        handleDocumentUpload(f, "degree_bachelors")
+                      }
+                    />
+                  </>
+                )}
+                {hasMaster && (
+                  <>
+                    <DocumentUploadField
+                      label={DOCUMENT_REGISTRY.transcript_masters.label}
+                      docKey="transcript_masters"
+                      description={
+                        DOCUMENT_REGISTRY.transcript_masters.description
+                      }
+                      accept={DOCUMENT_REGISTRY.transcript_masters.acceptedFormats?.join(
+                        ",",
+                      )}
+                      status={documents.transcript_masters?.status}
+                      currentUrl={documents.transcript_masters?.url}
+                      onUpload={(f) =>
+                        handleDocumentUpload(f, "transcript_masters")
+                      }
+                    />
+                    <DocumentUploadField
+                      label={DOCUMENT_REGISTRY.degree_masters.label}
+                      docKey="degree_masters"
+                      description={DOCUMENT_REGISTRY.degree_masters.description}
+                      accept={DOCUMENT_REGISTRY.degree_masters.acceptedFormats?.join(
+                        ",",
+                      )}
+                      status={documents.degree_masters?.status}
+                      currentUrl={documents.degree_masters?.url}
+                      onUpload={(f) =>
+                        handleDocumentUpload(f, "degree_masters")
+                      }
+                    />
+                  </>
+                )}
+              </div>
+            </section>
+
+            <section className="space-y-6">
+              <div className="border-b border-primary-100 pb-2 space-y-2">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-bold text-primary-900">
+                    Other Documents
+                  </h3>
+                  <span className="text-xs bg-primary-100 text-primary-600 px-2 py-0.5 rounded-full">
+                    Optional
+                  </span>
+                </div>
+                <p className="text-sm text-primary-600">
+                  Upload any additional documents that may support your
+                  application.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {(
+                  [
+                    "health_check",
+                    "police_clearance",
+                    "bank_statement",
+                    "english_proficiency",
+                    "study_plan",
+                  ] as DocumentKey[]
+                ).map((key) => (
+                  <DocumentUploadField
+                    key={key}
+                    label={DOCUMENT_REGISTRY[key].label}
+                    docKey={key}
+                    description={DOCUMENT_REGISTRY[key].description}
+                    accept={DOCUMENT_REGISTRY[key].acceptedFormats?.join(",")}
+                    status={documents[key]?.status}
+                    currentUrl={documents[key]?.url}
+                    onUpload={(f) => handleDocumentUpload(f, key)}
+                  />
+                ))}
+              </div>
+            </section>
+          </div>
+        );
     }
   };
 
@@ -837,14 +1106,24 @@ export function WizardClient({
                 <h2 className="heading-3 mb-2">
                   {STEPS[currentStep - 1].label}
                 </h2>
-                <p className="body text-primary-500 mb-8 max-w-lg">
+                <p className="body text-primary-500 mb-5 max-w-lg">
                   {STEPS[currentStep - 1].description}
+                </p>
+                <p className="text-sm brand-text font-medium mb-4">
+                  * Your progress is automatically saved.
                 </p>
 
                 {renderStepContent()}
               </div>
 
-              <div className="p-6 md:px-10 md:py-8 bg-primary-50 border-t border-primary-100 flex justify-between items-center gap-4">
+              <div className="px-6 md:px-10 pt-6 pb-4 border-primary-100">
+                <p className="text-xs text-primary-500 text-center">
+                  * By proceeding, I confirm that the information provided is
+                  accurate and I agree to the terms of service.
+                </p>
+              </div>
+
+              <div className="p-6 md:px-10 md:py-6 bg-primary-50 border-t border-primary-100 flex justify-between items-center gap-4">
                 <Button
                   variant="ghost"
                   onClick={handleBack}
