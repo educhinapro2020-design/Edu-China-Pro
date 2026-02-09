@@ -70,7 +70,7 @@ export function StudentNavbar({ user }: StudentNavbarProps) {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full border-b border-primary-200 bg-white/90 backdrop-blur-md">
+      <nav className="print:hidden sticky top-0 z-50 w-full border-b border-primary-200 bg-white/90 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="font-serif font-bold text-2xl brand-text tracking-tight group-hover:opacity-90 transition-opacity">
