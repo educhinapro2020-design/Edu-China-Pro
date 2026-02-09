@@ -140,3 +140,30 @@ export const DOCUMENT_REGISTRY: Record<DocumentKey, DocumentMetadata> = {
     acceptedFormats: [".pdf", ".jpg", ".png", ".doc", ".docx"],
   },
 };
+
+export type EducationLevel = "high_school" | "bachelors" | "masters";
+
+export interface EducationLevelConfig {
+  value: string;
+  label: string;
+  documents: DocumentKey[];
+}
+
+export const EDUCATION_DOCUMENTS: Record<EducationLevel, EducationLevelConfig> =
+  {
+    high_school: {
+      value: "High School",
+      label: "High School",
+      documents: ["transcript_highschool", "degree_highschool"],
+    },
+    bachelors: {
+      value: "Bachelor",
+      label: "Bachelor's Degree",
+      documents: ["transcript_bachelors", "degree_bachelors"],
+    },
+    masters: {
+      value: "Master",
+      label: "Master's Degree",
+      documents: ["transcript_masters", "degree_masters"],
+    },
+  };

@@ -29,7 +29,11 @@ import { z } from "zod";
 import { calculateProfileProgress } from "@/lib/utils/profile-progress";
 import { DocumentUploadField } from "@/components/dashboard/DocumentUploadField";
 import { studentDocumentsRepository } from "@/lib/repositories/student-documents.repo";
-import { DOCUMENT_REGISTRY, DocumentKey } from "@/lib/constants/documents";
+import {
+  DOCUMENT_REGISTRY,
+  EDUCATION_DOCUMENTS,
+  DocumentKey,
+} from "@/lib/constants/documents";
 import { StudentDocumentEntry } from "@/lib/types/student";
 
 const COUNTRIES = [
@@ -805,12 +809,6 @@ export function WizardClient({
       case 4:
         if (!docsFetched && !docsLoading) fetchDocuments();
 
-        const educationLevels = (formData.education_history || []).map(
-          (e) => e.level,
-        );
-        const hasBachelor = educationLevels.includes("Bachelor");
-        const hasMaster = educationLevels.includes("Master");
-
         return (
           <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
             <section className="space-y-6">
@@ -886,100 +884,60 @@ export function WizardClient({
               <h3 className="text-lg font-bold text-primary-900 border-b border-primary-100 pb-2">
                 Education Documents
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <DocumentUploadField
-                  label={DOCUMENT_REGISTRY.transcript_highschool.label}
-                  docKey="transcript_highschool"
-                  description={
-                    DOCUMENT_REGISTRY.transcript_highschool.description
-                  }
-                  accept={DOCUMENT_REGISTRY.transcript_highschool.acceptedFormats?.join(
-                    ",",
-                  )}
-                  status={documents.transcript_highschool?.status}
-                  currentUrl={documents.transcript_highschool?.url}
-                  onUpload={(f) =>
-                    handleDocumentUpload(f, "transcript_highschool")
-                  }
-                />
-                <DocumentUploadField
-                  label={DOCUMENT_REGISTRY.degree_highschool.label}
-                  docKey="degree_highschool"
-                  description={DOCUMENT_REGISTRY.degree_highschool.description}
-                  accept={DOCUMENT_REGISTRY.degree_highschool.acceptedFormats?.join(
-                    ",",
-                  )}
-                  status={documents.degree_highschool?.status}
-                  currentUrl={documents.degree_highschool?.url}
-                  onUpload={(f) => handleDocumentUpload(f, "degree_highschool")}
-                />
-                {hasBachelor && (
-                  <>
-                    <DocumentUploadField
-                      label={DOCUMENT_REGISTRY.transcript_bachelors.label}
-                      docKey="transcript_bachelors"
-                      description={
-                        DOCUMENT_REGISTRY.transcript_bachelors.description
-                      }
-                      accept={DOCUMENT_REGISTRY.transcript_bachelors.acceptedFormats?.join(
-                        ",",
-                      )}
-                      status={documents.transcript_bachelors?.status}
-                      currentUrl={documents.transcript_bachelors?.url}
-                      onUpload={(f) =>
-                        handleDocumentUpload(f, "transcript_bachelors")
-                      }
-                    />
-                    <DocumentUploadField
-                      label={DOCUMENT_REGISTRY.degree_bachelors.label}
-                      docKey="degree_bachelors"
-                      description={
-                        DOCUMENT_REGISTRY.degree_bachelors.description
-                      }
-                      accept={DOCUMENT_REGISTRY.degree_bachelors.acceptedFormats?.join(
-                        ",",
-                      )}
-                      status={documents.degree_bachelors?.status}
-                      currentUrl={documents.degree_bachelors?.url}
-                      onUpload={(f) =>
-                        handleDocumentUpload(f, "degree_bachelors")
-                      }
-                    />
-                  </>
-                )}
-                {hasMaster && (
-                  <>
-                    <DocumentUploadField
-                      label={DOCUMENT_REGISTRY.transcript_masters.label}
-                      docKey="transcript_masters"
-                      description={
-                        DOCUMENT_REGISTRY.transcript_masters.description
-                      }
-                      accept={DOCUMENT_REGISTRY.transcript_masters.acceptedFormats?.join(
-                        ",",
-                      )}
-                      status={documents.transcript_masters?.status}
-                      currentUrl={documents.transcript_masters?.url}
-                      onUpload={(f) =>
-                        handleDocumentUpload(f, "transcript_masters")
-                      }
-                    />
-                    <DocumentUploadField
-                      label={DOCUMENT_REGISTRY.degree_masters.label}
-                      docKey="degree_masters"
-                      description={DOCUMENT_REGISTRY.degree_masters.description}
-                      accept={DOCUMENT_REGISTRY.degree_masters.acceptedFormats?.join(
-                        ",",
-                      )}
-                      status={documents.degree_masters?.status}
-                      currentUrl={documents.degree_masters?.url}
-                      onUpload={(f) =>
-                        handleDocumentUpload(f, "degree_masters")
-                      }
-                    />
-                  </>
-                )}
-              </div>
+
+              {Object.values(EDUCATION_DOCUMENTS).map((levelConfig) => {
+                const eduEntry = (formData.education_history || []).find(
+                  (e) => e.level === levelConfig.value,
+                );
+                if (!eduEntry) return null;
+
+                return (
+                  <div
+                    key={levelConfig.value}
+                    className="p-4 bg-primary-50 rounded-xl space-y-4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-primary-500">
+                        {levelConfig.label}
+                      </span>
+                      <div className="flex-1">
+                        <p className="font-semibold text-primary-900">
+                          {eduEntry.schoolName || "School not specified"}
+                        </p>
+                        {eduEntry.fieldOfStudy && (
+                          <p className="text-sm text-primary-600">
+                            {eduEntry.fieldOfStudy}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {levelConfig.documents.map((docKey) => (
+                        <DocumentUploadField
+                          key={docKey}
+                          label={DOCUMENT_REGISTRY[docKey]?.label}
+                          docKey={docKey}
+                          description={DOCUMENT_REGISTRY[docKey]?.description}
+                          accept={DOCUMENT_REGISTRY[
+                            docKey
+                          ]?.acceptedFormats?.join(",")}
+                          status={documents[docKey]?.status}
+                          currentUrl={documents[docKey]?.url}
+                          onUpload={(f) => handleDocumentUpload(f, docKey)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {(!formData.education_history ||
+                formData.education_history.length === 0) && (
+                <p className="text-sm text-primary-500 italic">
+                  No education history added. Please add your education in Step
+                  3 first.
+                </p>
+              )}
             </section>
 
             <section className="space-y-6">
