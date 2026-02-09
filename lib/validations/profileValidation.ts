@@ -55,6 +55,9 @@ export const builderProfileSchema = z.object({
 
   has_visited_china: z.boolean().nullish(),
   in_china_now: z.boolean().nullish(),
+
+  passport_number: z.string().nullish().or(z.literal("")),
+  passport_expiry: z.string().nullish().or(z.literal("")),
 });
 
 export const profileSchema = z.object({
@@ -105,6 +108,9 @@ export const profileSchema = z.object({
 
   has_visited_china: z.boolean().optional(),
   in_china_now: z.boolean().optional(),
+
+  passport_number: z.string().optional(),
+  passport_expiry: z.string().optional(),
 });
 
 export type BuilderProfileValues = z.infer<typeof builderProfileSchema>;

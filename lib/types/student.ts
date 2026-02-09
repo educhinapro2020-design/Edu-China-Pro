@@ -28,10 +28,11 @@ type StudentProfileRow =
 
 export interface StudentProfile extends Omit<
   StudentProfileRow,
-  "education_history" | "family_info"
+  "education_history" | "family_info" | "passport_expiry"
 > {
   education_history: EducationEntry[];
   family_info: FamilyInfo;
+  passport_expiry?: string | null;
 }
 
 export type DocumentStatus =
