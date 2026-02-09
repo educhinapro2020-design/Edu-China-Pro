@@ -23,7 +23,7 @@ const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: FiLayout },
   { name: "My Applications", href: "/applications", icon: FiFileText },
   { name: "Find Programs", href: "/programs", icon: FiSearch },
-  { name: "My Profile", href: "/dashboard/profile/build", icon: FiUser },
+  { name: "My Profile", href: "/dashboard/profile", icon: FiUser },
 ];
 
 interface StudentNavbarProps {

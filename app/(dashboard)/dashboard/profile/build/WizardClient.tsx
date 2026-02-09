@@ -828,34 +828,6 @@ export function WizardClient({
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="w-full">
-            <div className="bg-white rounded-3xl p-6 border border-primary-100 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-bold text-primary-900">Profile Progress</h4>
-                <span className="text-lg font-bold text-brand-600">
-                  {progress < 100 ? (
-                    `${progress}%`
-                  ) : (
-                    <span className="text-success">{progress}%</span>
-                  )}
-                </span>
-              </div>
-
-              <p className="text-primary-500 mb-4">
-                One profile, 12000+ universities.
-              </p>
-
-              <div className="h-1.5 w-full bg-primary-100 rounded-full overflow-hidden">
-                <motion.div
-                  className={`h-full rounded-full ${progress === 100 ? "bg-success" : "bg-brand-500"}`}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                />
-              </div>
-            </div>
-          </div>
-
           <div className="w-full min-w-0">
             <div className="bg-white rounded-4xl shadow-xl shadow-primary-900/5 overflow-hidden border border-primary-100">
               <div className="p-6 md:p-10 min-h-[400px]">
@@ -890,7 +862,7 @@ export function WizardClient({
                     endIcon={<FiArrowRight className="size-4" />}
                     className="px-8 shadow-brand-500/20 shadow-lg"
                   >
-                    {currentStep === STEPS.length ? "Finish" : "Next Step"}
+                    {currentStep === STEPS.length ? "Save" : "Next"}
                   </Button>
                 </div>
               </div>
