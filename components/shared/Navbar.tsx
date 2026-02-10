@@ -4,6 +4,7 @@ import { UserMenu } from "./UserMenu";
 import { Button } from "@/components/ui/button";
 import { MdOutlineSchool } from "react-icons/md";
 import { LiaUniversitySolid } from "react-icons/lia";
+import Image from "next/image";
 
 export async function Navbar() {
   const supabase = await createClient();
@@ -16,9 +17,19 @@ export async function Navbar() {
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         <Link
           href="/"
-          className="font-serif font-bold text-2xl brand-text tracking-tight hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
         >
-          EduChinaPro
+          <Image
+            src="/images/logo/educhinapro-logo.svg"
+            alt="EduChinaPro"
+            width={32}
+            height={32}
+            className="size-12"
+            priority
+          />
+          <span className="font-serif font-bold text-2xl brand-text tracking-tight">
+            EduChinaPro
+          </span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8">

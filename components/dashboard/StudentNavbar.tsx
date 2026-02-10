@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import {
   FiFileText,
@@ -32,12 +32,14 @@ interface StudentNavbarProps {
 
 export function StudentNavbar({ user }: StudentNavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const avatarUrl = user.user_metadata?.avatar_url;
 
   const handleSignOut = async () => {
     await authService.signOut();
+    router.refresh();
   };
 
   useEffect(() => {
@@ -72,7 +74,15 @@ export function StudentNavbar({ user }: StudentNavbarProps) {
     <>
       <nav className="print:hidden sticky top-0 z-50 w-full border-b border-primary-200 bg-white/90 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <Image
+              src="/images/logo/educhinapro-logo.svg"
+              alt="EduChinaPro"
+              width={28}
+              height={28}
+              className="size-12 group-hover:opacity-90 transition-opacity"
+              priority
+            />
             <span className="font-serif font-bold text-2xl brand-text tracking-tight group-hover:opacity-90 transition-opacity">
               EduChinaPro
             </span>
