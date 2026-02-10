@@ -47,7 +47,7 @@ export default function SignupPage() {
       );
 
       router.refresh();
-      router.push("/dashboard");
+      router.push("/onboarding");
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         const errors: { [key: string]: string } = {};
@@ -68,7 +68,7 @@ export default function SignupPage() {
   const handleGoogleLogin = async () => {
     try {
       setGoogleLoading(true);
-      await authService.signInWithGoogle();
+      await authService.signInWithGoogle("/onboarding");
     } catch (error) {
       console.error("Google signup failed", error);
     } finally {

@@ -1,12 +1,6 @@
-export type DocumentKey =
+export type GeneralDocumentKey =
   | "passport"
   | "photo"
-  | "transcript_highschool"
-  | "transcript_bachelors"
-  | "transcript_masters"
-  | "degree_highschool"
-  | "degree_bachelors"
-  | "degree_masters"
   | "health_check"
   | "police_clearance"
   | "english_proficiency"
@@ -16,6 +10,16 @@ export type DocumentKey =
   | "recommendation_letter_2"
   | "other";
 
+export type EducationDocumentKey =
+  | "transcript_highschool"
+  | "transcript_bachelors"
+  | "transcript_masters"
+  | "degree_highschool"
+  | "degree_bachelors"
+  | "degree_masters";
+
+export type DocumentKey = GeneralDocumentKey | EducationDocumentKey;
+
 export interface DocumentMetadata {
   id: DocumentKey;
   label: string;
@@ -24,7 +28,14 @@ export interface DocumentMetadata {
   acceptedFormats?: string[];
 }
 
-export const DOCUMENT_REGISTRY: Record<DocumentKey, DocumentMetadata> = {
+export interface EducationDocConfig {
+  id: EducationDocumentKey;
+  label: string;
+  description?: string;
+  acceptedFormats?: string[];
+}
+
+export const DOCUMENT_REGISTRY: Record<GeneralDocumentKey, DocumentMetadata> = {
   passport: {
     id: "passport",
     label: "Passport Scan",
@@ -40,52 +51,9 @@ export const DOCUMENT_REGISTRY: Record<DocumentKey, DocumentMetadata> = {
     category: "identity",
     acceptedFormats: [".jpg", ".png"],
   },
-  transcript_highschool: {
-    id: "transcript_highschool",
-    label: "High School Transcript",
-    description:
-      "Official grade sheets for Year 10, 11, and 12 (or equivalent).",
-    category: "education",
-    acceptedFormats: [".pdf", ".jpg", ".png"],
-  },
-  degree_highschool: {
-    id: "degree_highschool",
-    label: "High School Diploma",
-    description: "Certificate of graduation.",
-    category: "education",
-    acceptedFormats: [".pdf", ".jpg", ".png"],
-  },
-  transcript_bachelors: {
-    id: "transcript_bachelors",
-    label: "Bachelor's Transcript",
-    description: "Transcript of Bachelor's degree.",
-    category: "education",
-    acceptedFormats: [".pdf", ".jpg", ".png"],
-  },
-  degree_bachelors: {
-    id: "degree_bachelors",
-    label: "Bachelor's Degree",
-    description: "Certificate of graduation.",
-    category: "education",
-    acceptedFormats: [".pdf", ".jpg", ".png"],
-  },
-  transcript_masters: {
-    id: "transcript_masters",
-    label: "Master's Transcript",
-    description: "Required for PhD applicants.",
-    category: "education",
-    acceptedFormats: [".pdf", ".jpg", ".png"],
-  },
-  degree_masters: {
-    id: "degree_masters",
-    label: "Master's Degree",
-    description: "Certificate of graduation.",
-    category: "education",
-    acceptedFormats: [".pdf", ".jpg", ".png"],
-  },
   health_check: {
     id: "health_check",
-    label: "Foreigner Physical Examination Form",
+    label: "Health Check Report",
     description: "Official medical report. Must be recent (<6 months).",
     category: "health",
     acceptedFormats: [".pdf", ".jpg", ".png"],
@@ -146,7 +114,7 @@ export type EducationLevel = "high_school" | "bachelors" | "masters";
 export interface EducationLevelConfig {
   value: string;
   label: string;
-  documents: DocumentKey[];
+  documents: EducationDocConfig[];
 }
 
 export const EDUCATION_DOCUMENTS: Record<EducationLevel, EducationLevelConfig> =
@@ -154,16 +122,80 @@ export const EDUCATION_DOCUMENTS: Record<EducationLevel, EducationLevelConfig> =
     high_school: {
       value: "High School",
       label: "High School",
-      documents: ["transcript_highschool", "degree_highschool"],
+      documents: [
+        {
+          id: "transcript_highschool",
+          label: "High School Transcript",
+          description:
+            "Official grade sheets for Year 10, 11, and 12 (or equivalent).",
+          acceptedFormats: [".pdf", ".jpg", ".png"],
+        },
+        {
+          id: "degree_highschool",
+          label: "High School Diploma",
+          description: "Certificate of graduation.",
+          acceptedFormats: [".pdf", ".jpg", ".png"],
+        },
+      ],
     },
     bachelors: {
       value: "Bachelor",
       label: "Bachelor's Degree",
-      documents: ["transcript_bachelors", "degree_bachelors"],
+      documents: [
+        {
+          id: "transcript_bachelors",
+          label: "Bachelor's Transcript",
+          description: "Transcript of Bachelor's degree.",
+          acceptedFormats: [".pdf", ".jpg", ".png"],
+        },
+        {
+          id: "degree_bachelors",
+          label: "Bachelor's Degree",
+          description: "Certificate of graduation.",
+          acceptedFormats: [".pdf", ".jpg", ".png"],
+        },
+      ],
     },
     masters: {
       value: "Master",
       label: "Master's Degree",
-      documents: ["transcript_masters", "degree_masters"],
+      documents: [
+        {
+          id: "transcript_masters",
+          label: "Master's Transcript",
+          description: "Required for PhD applicants.",
+          acceptedFormats: [".pdf", ".jpg", ".png"],
+        },
+        {
+          id: "degree_masters",
+          label: "Master's Degree",
+          description: "Certificate of graduation.",
+          acceptedFormats: [".pdf", ".jpg", ".png"],
+        },
+      ],
     },
   };
+
+export function getDocumentMeta(
+  key: DocumentKey,
+): { label: string; description?: string; acceptedFormats?: string[] } | null {
+  if (key in DOCUMENT_REGISTRY) {
+    return DOCUMENT_REGISTRY[key as GeneralDocumentKey];
+  }
+  for (const level of Object.values(EDUCATION_DOCUMENTS)) {
+    const doc = level.documents.find((d) => d.id === key);
+    if (doc) return doc;
+  }
+  return null;
+}
+
+export function getEducationLevelKey(
+  levelValue: string,
+): EducationLevel | null {
+  for (const [key, config] of Object.entries(EDUCATION_DOCUMENTS)) {
+    if (config.value === levelValue || config.label === levelValue) {
+      return key as EducationLevel;
+    }
+  }
+  return null;
+}
