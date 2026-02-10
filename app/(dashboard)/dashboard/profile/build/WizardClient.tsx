@@ -194,7 +194,7 @@ export function WizardClient({
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      router.push("/dashboard");
+      router.push("/dashboard/profile");
     }
   };
 
@@ -202,7 +202,7 @@ export function WizardClient({
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
-      router.push("/dashboard");
+      router.back();
     }
   };
 
@@ -912,18 +912,16 @@ export function WizardClient({
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {levelConfig.documents.map((docKey) => (
+                      {levelConfig.documents.map((doc) => (
                         <DocumentUploadField
-                          key={docKey}
-                          label={DOCUMENT_REGISTRY[docKey]?.label}
-                          docKey={docKey}
-                          description={DOCUMENT_REGISTRY[docKey]?.description}
-                          accept={DOCUMENT_REGISTRY[
-                            docKey
-                          ]?.acceptedFormats?.join(",")}
-                          status={documents[docKey]?.status}
-                          currentUrl={documents[docKey]?.url}
-                          onUpload={(f) => handleDocumentUpload(f, docKey)}
+                          key={doc.id}
+                          label={doc.label}
+                          docKey={doc.id}
+                          description={doc.description}
+                          accept={doc.acceptedFormats?.join(",")}
+                          status={documents[doc.id]?.status}
+                          currentUrl={documents[doc.id]?.url}
+                          onUpload={(f) => handleDocumentUpload(f, doc.id)}
                         />
                       ))}
                     </div>
@@ -938,45 +936,6 @@ export function WizardClient({
                   3 first.
                 </p>
               )}
-            </section>
-
-            <section className="space-y-6">
-              <div className="border-b border-primary-100 pb-2 space-y-2">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-bold text-primary-900">
-                    Other Documents
-                  </h3>
-                  <span className="text-xs bg-primary-100 text-primary-600 px-2 py-0.5 rounded-full">
-                    Optional
-                  </span>
-                </div>
-                <p className="text-sm text-primary-600">
-                  Upload any additional documents that may support your
-                  application.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {(
-                  [
-                    "health_check",
-                    "police_clearance",
-                    "bank_statement",
-                    "english_proficiency",
-                    "study_plan",
-                  ] as DocumentKey[]
-                ).map((key) => (
-                  <DocumentUploadField
-                    key={key}
-                    label={DOCUMENT_REGISTRY[key].label}
-                    docKey={key}
-                    description={DOCUMENT_REGISTRY[key].description}
-                    accept={DOCUMENT_REGISTRY[key].acceptedFormats?.join(",")}
-                    status={documents[key]?.status}
-                    currentUrl={documents[key]?.url}
-                    onUpload={(f) => handleDocumentUpload(f, key)}
-                  />
-                ))}
-              </div>
             </section>
           </div>
         );
