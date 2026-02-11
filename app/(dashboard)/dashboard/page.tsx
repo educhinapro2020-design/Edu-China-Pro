@@ -4,6 +4,8 @@ import { studentRepository } from "@/lib/repositories/student.repo";
 import { ProfileProgress } from "@/components/dashboard/ProfileProgress";
 import { calculateProfileProgress } from "@/lib/utils/profile-progress";
 
+import { studentDocumentsRepository } from "@/lib/repositories/student-documents.repo";
+
 export default async function DashboardPage() {
   const supabase = await createClient();
   const {
@@ -14,9 +16,15 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const profile = await studentRepository.getProfile(user.id, supabase);
+  const [profile, documents] = await Promise.all([
+    studentRepository.getProfile(user.id, supabase),
+    studentDocumentsRepository.getDocuments(user.id, supabase),
+  ]);
 
-  const progressPercentage = calculateProfileProgress(profile);
+  const progressPercentage = calculateProfileProgress(
+    profile,
+    documents?.documents,
+  );
 
   return (
     <div className="space-y-8">

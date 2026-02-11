@@ -13,14 +13,14 @@ import {
   FiMapPin,
   FiPhone,
   FiMail,
-  FiCheckCircle,
-  FiAlertCircle,
   FiSearch,
   FiBookOpen,
 } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
+import { ProgressiveLoader } from "@/components/ui/ProgressiveLoader";
 import { ProfileDocument } from "@/components/shared/ProfileDocument";
 import { DocumentUploadField } from "@/components/dashboard/DocumentUploadField";
+import { ProfileChecklistModal } from "@/components/dashboard/ProfileChecklistModal";
 import Link from "next/link";
 import { studentRepository } from "@/lib/repositories/student.repo";
 import { createClient } from "@/lib/supabase/client";
@@ -399,8 +399,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <FiLoader className="size-8 text-brand-600 animate-spin" />
+      <div className="flex items-center justify-center min-h-[95vh]">
+        <ProgressiveLoader message="Loading your profile..." />
       </div>
     );
   }
@@ -480,7 +480,7 @@ export default function ProfilePage() {
         })}
       </div>
 
-      <div className="bg-white rounded-2xl border border-primary-100 p-4 md:p-8 shadow-sm">
+      <div className="bg-white rounded-lg border border-primary-100 p-4 md:p-8 shadow-sm">
         {activeTab === "profile" ? (
           <ProfileTab
             profile={profile}
@@ -504,6 +504,8 @@ export default function ProfilePage() {
           email={userEmail}
         />
       </div>
+
+      <ProfileChecklistModal profile={profile} documents={docsMap} />
     </div>
   );
 }
