@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   FiArrowLeft,
   FiArrowRight,
@@ -26,7 +26,6 @@ import { studentRepository } from "@/lib/repositories/student.repo";
 import { Modal } from "@/components/ui/modal";
 import { builderProfileSchema } from "@/lib/validations/profileValidation";
 import { z } from "zod";
-import { calculateProfileProgress } from "@/lib/utils/profile-progress";
 import { DocumentUploadField } from "@/components/dashboard/DocumentUploadField";
 import { studentDocumentsRepository } from "@/lib/repositories/student-documents.repo";
 import {
@@ -111,7 +110,43 @@ export function WizardClient({
   userId,
 }: WizardClientProps) {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+  const searchParams = useSearchParams();
+
+  const initialStep = Number(searchParams.get("step"));
+  const [currentStep, setCurrentStep] = useState(
+    initialStep >= 1 && initialStep <= 4 ? initialStep : 1,
+  );
+
+  useEffect(() => {
+    const step = Number(searchParams.get("step"));
+    if (step >= 1 && step <= 4 && step !== currentStep) {
+      setCurrentStep(step);
+    }
+  }, [searchParams, currentStep]);
+
+  useEffect(() => {
+    const focusId = searchParams.get("focus");
+    if (focusId) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(focusId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+          element.focus();
+
+          element.classList.add("ring-2", "ring-brand-500", "ring-offset-2");
+          setTimeout(() => {
+            element.classList.remove(
+              "ring-2",
+              "ring-brand-500",
+              "ring-offset-2",
+            );
+          }, 3000);
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, currentStep]);
+
   const [formData, setFormData] =
     useState<Partial<StudentProfile>>(initialProfile);
   const [loading, setLoading] = useState(false);
@@ -126,10 +161,6 @@ export function WizardClient({
 
   const errorsRef = useRef(errors);
   errorsRef.current = errors;
-
-  const [progress, setProgress] = useState(() =>
-    calculateProfileProgress(initialProfile),
-  );
 
   const [documents, setDocuments] = useState<
     Record<DocumentKey, StudentDocumentEntry>
@@ -191,7 +222,11 @@ export function WizardClient({
     setLoading(false);
 
     if (currentStep < STEPS.length) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("step", String(nextStep));
+      router.push(`?${params.toString()}`);
+      setCurrentStep(nextStep);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       router.push("/dashboard/profile");
@@ -200,7 +235,12 @@ export function WizardClient({
 
   const handleBack = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      const prevStep = currentStep - 1;
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("step", String(prevStep));
+      router.push(`?${params.toString()}`);
+      setCurrentStep(prevStep);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       router.back();
     }
@@ -223,7 +263,6 @@ export function WizardClient({
     setSaveStatus("saving");
     try {
       await studentRepository.updateProfile(userId, data);
-      setProgress(calculateProfileProgress({ ...formData, ...data }));
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 1000);
     } catch (error) {
@@ -259,6 +298,7 @@ export function WizardClient({
                   First Name
                 </label>
                 <Input
+                  id="first_name"
                   placeholder="e.g. John"
                   value={formData.first_name || ""}
                   onChange={(e) => updateField("first_name", e.target.value)}
@@ -275,6 +315,7 @@ export function WizardClient({
                   Last Name
                 </label>
                 <Input
+                  id="last_name"
                   placeholder="e.g. Doe"
                   value={formData.last_name || ""}
                   onChange={(e) => updateField("last_name", e.target.value)}
@@ -294,6 +335,7 @@ export function WizardClient({
                   Gender
                 </label>
                 <Select
+                  id="gender"
                   options={GENDERS}
                   value={formData.gender || ""}
                   onChange={(val) => {
@@ -308,6 +350,7 @@ export function WizardClient({
                   Marital Status
                 </label>
                 <Select
+                  id="marital_status"
                   options={MARITAL_STATUS}
                   value={formData.marital_status || ""}
                   onChange={(val) => {
@@ -325,6 +368,7 @@ export function WizardClient({
                   Nationality
                 </label>
                 <Select
+                  id="nationality"
                   options={COUNTRIES}
                   value={formData.nationality || ""}
                   onChange={(val) => {
@@ -339,6 +383,7 @@ export function WizardClient({
                   Religion
                 </label>
                 <Select
+                  id="religion"
                   options={RELIGIONS}
                   value={formData.religion || ""}
                   onChange={(val) => {
@@ -356,6 +401,7 @@ export function WizardClient({
                   Mother Tongue
                 </label>
                 <Input
+                  id="mother_tongue"
                   placeholder="e.g. Nepali"
                   value={formData.mother_tongue || ""}
                   onChange={(e) => updateField("mother_tongue", e.target.value)}
@@ -372,6 +418,7 @@ export function WizardClient({
                   Date of Birth
                 </label>
                 <Input
+                  id="date_of_birth"
                   type="date"
                   value={
                     formData.date_of_birth
@@ -455,6 +502,7 @@ export function WizardClient({
                   Phone Number
                 </label>
                 <Input
+                  id="phone_number"
                   placeholder="+977 9800000000"
                   value={formData.phone_number || ""}
                   onChange={(e) => updateField("phone_number", e.target.value)}
@@ -472,6 +520,7 @@ export function WizardClient({
                 WhatsApp / WeChat
               </label>
               <Input
+                id="whatsapp_number"
                 placeholder="e.g. +977 9800000000"
                 value={formData.whatsapp_number || ""}
                 onChange={(e) => updateField("whatsapp_number", e.target.value)}
@@ -488,6 +537,7 @@ export function WizardClient({
                 Address
               </label>
               <Input
+                id="address"
                 placeholder="Street Address, Ward No."
                 value={formData.address || ""}
                 onChange={(e) => updateField("address", e.target.value)}
@@ -503,6 +553,7 @@ export function WizardClient({
                   City
                 </label>
                 <Input
+                  id="city"
                   placeholder="e.g. Kathmandu"
                   value={formData.city || ""}
                   onChange={(e) => updateField("city", e.target.value)}
@@ -517,6 +568,7 @@ export function WizardClient({
                   Zip Code
                 </label>
                 <Input
+                  id="zip_code"
                   placeholder="e.g. 44600"
                   value={formData.zip_code || ""}
                   onChange={(e) => updateField("zip_code", e.target.value)}
@@ -838,6 +890,7 @@ export function WizardClient({
                     Passport Number
                   </label>
                   <Input
+                    id="passport_number"
                     placeholder="e.g. A12345678"
                     value={formData.passport_number || ""}
                     onChange={(e) =>
@@ -851,6 +904,7 @@ export function WizardClient({
                     Passport Expiry
                   </label>
                   <Input
+                    id="passport_expiry"
                     type="date"
                     placeholder="Enter expiry date"
                     value={
@@ -970,7 +1024,18 @@ export function WizardClient({
                   key={step.id}
                   className="flex items-start flex-1 last:flex-none"
                 >
-                  <div className="flex flex-col items-center gap-3 group cursor-default">
+                  <div
+                    onClick={() => {
+                      const params = new URLSearchParams(
+                        searchParams.toString(),
+                      );
+                      params.set("step", String(step.id));
+                      router.push(`?${params.toString()}`);
+                      setCurrentStep(step.id);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="flex flex-col items-center gap-3 group cursor-pointer"
+                  >
                     <div
                       className={twMerge(
                         "size-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm bg-white",

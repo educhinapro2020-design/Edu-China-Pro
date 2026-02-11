@@ -121,6 +121,7 @@ export function DocumentUploadField({
 
   return (
     <div
+      id={docKey}
       className={twMerge(
         "border-2 border-dashed rounded-xl border-primary-300 hover:border-brand-300 p-4 transition-all duration-200 flex flex-col",
       )}
