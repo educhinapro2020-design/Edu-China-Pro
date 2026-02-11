@@ -17,6 +17,7 @@ export interface SelectProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  id?: string;
 }
 
 export function Select({
@@ -26,6 +27,7 @@ export function Select({
   placeholder = "Select...",
   className,
   disabled,
+  id,
 }: SelectProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -55,6 +57,7 @@ export function Select({
     <div className="relative" ref={containerRef}>
       <button
         type="button"
+        id={id}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={twMerge(

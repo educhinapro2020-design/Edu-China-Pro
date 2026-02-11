@@ -1,6 +1,5 @@
 import { StudentProfile, StudentDocumentEntry } from "@/lib/types/student";
 import {
-  DOCUMENT_REGISTRY,
   EDUCATION_DOCUMENTS,
   getEducationLevelKey,
   DocumentKey,
