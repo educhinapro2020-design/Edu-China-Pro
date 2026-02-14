@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import {
   FiMail,
   FiLock,
@@ -17,7 +17,7 @@ import { authService } from "@/lib/services/auth.service";
 import { loginSchema } from "@/lib/validations/authValidation";
 import { z } from "zod";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -230,5 +230,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageContent />
+    </Suspense>
   );
 }
