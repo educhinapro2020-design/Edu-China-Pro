@@ -73,7 +73,7 @@ export function StudentNavbar({ user }: StudentNavbarProps) {
   return (
     <>
       <nav className="print:hidden sticky top-0 z-50 w-full border-b border-primary-200 bg-white/90 backdrop-blur-md">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
             <Image
               src="/images/logo/educhinapro-logo.svg"
@@ -99,7 +99,7 @@ export function StudentNavbar({ user }: StudentNavbarProps) {
                   className={twMerge(
                     "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2",
                     isActive
-                      ? " text-brand-700 shadow-md ring-1 ring-brand-100"
+                      ? " text-brand-700 shadow-sm ring-1 ring-brand-100"
                       : "text-primary-600 hover:bg-primary-50 hover:text-primary-900",
                   )}
                 >

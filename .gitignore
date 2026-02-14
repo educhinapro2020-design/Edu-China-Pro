@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scraping code and output json
+scrape-china-universities/
+
+#scripts
+scripts/seed-universities.ts
