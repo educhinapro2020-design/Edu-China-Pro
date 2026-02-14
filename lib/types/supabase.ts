@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      cities: {
+        Row: {
+          country_id: string
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name_en: string
+          region: string | null
+          slug: string
+        }
+        Insert: {
+          country_id: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name_en: string
+          region?: string | null
+          slug: string
+        }
+        Update: {
+          country_id?: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name_en?: string
+          region?: string | null
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cities_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      countries: {
+        Row: {
+          created_at: string
+          description: string | null
+          flag_url: string | null
+          id: string
+          name_en: string
+          name_local: string | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          flag_url?: string | null
+          id?: string
+          name_en: string
+          name_local?: string | null
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          flag_url?: string | null
+          id?: string
+          name_en?: string
+          name_local?: string | null
+          slug?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -43,6 +114,135 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      programs: {
+        Row: {
+          accepts_minors: boolean | null
+          accepts_students_in_china: boolean | null
+          application_deadline: string | null
+          application_fee_amount: number | null
+          application_fee_currency: string | null
+          cover_image_url: string | null
+          created_at: string
+          degree_level: Database["public"]["Enums"]["degree_level"]
+          detail_images: Json | null
+          duration: string | null
+          eligibility: Json | null
+          estimated_living_cost: number | null
+          estimated_living_currency: string | null
+          id: string
+          intake_season: Database["public"]["Enums"]["intake_season"] | null
+          intake_year: number | null
+          is_scholarship_program: boolean | null
+          is_self_funded: boolean | null
+          language: Database["public"]["Enums"]["teaching_language"]
+          name_en: string
+          name_local: string | null
+          scholarship_duration: string | null
+          scholarship_memo: string | null
+          scholarship_policy_html: string | null
+          scholarship_type:
+            | Database["public"]["Enums"]["scholarship_type"]
+            | null
+          slug: string
+          subject_area_id: string | null
+          tuition_after_scholarship: number | null
+          tuition_currency: string | null
+          tuition_original: number | null
+          tuition_per: string | null
+          university_id: string
+          updated_at: string
+        }
+        Insert: {
+          accepts_minors?: boolean | null
+          accepts_students_in_china?: boolean | null
+          application_deadline?: string | null
+          application_fee_amount?: number | null
+          application_fee_currency?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          degree_level: Database["public"]["Enums"]["degree_level"]
+          detail_images?: Json | null
+          duration?: string | null
+          eligibility?: Json | null
+          estimated_living_cost?: number | null
+          estimated_living_currency?: string | null
+          id?: string
+          intake_season?: Database["public"]["Enums"]["intake_season"] | null
+          intake_year?: number | null
+          is_scholarship_program?: boolean | null
+          is_self_funded?: boolean | null
+          language?: Database["public"]["Enums"]["teaching_language"]
+          name_en: string
+          name_local?: string | null
+          scholarship_duration?: string | null
+          scholarship_memo?: string | null
+          scholarship_policy_html?: string | null
+          scholarship_type?:
+            | Database["public"]["Enums"]["scholarship_type"]
+            | null
+          slug: string
+          subject_area_id?: string | null
+          tuition_after_scholarship?: number | null
+          tuition_currency?: string | null
+          tuition_original?: number | null
+          tuition_per?: string | null
+          university_id: string
+          updated_at?: string
+        }
+        Update: {
+          accepts_minors?: boolean | null
+          accepts_students_in_china?: boolean | null
+          application_deadline?: string | null
+          application_fee_amount?: number | null
+          application_fee_currency?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          degree_level?: Database["public"]["Enums"]["degree_level"]
+          detail_images?: Json | null
+          duration?: string | null
+          eligibility?: Json | null
+          estimated_living_cost?: number | null
+          estimated_living_currency?: string | null
+          id?: string
+          intake_season?: Database["public"]["Enums"]["intake_season"] | null
+          intake_year?: number | null
+          is_scholarship_program?: boolean | null
+          is_self_funded?: boolean | null
+          language?: Database["public"]["Enums"]["teaching_language"]
+          name_en?: string
+          name_local?: string | null
+          scholarship_duration?: string | null
+          scholarship_memo?: string | null
+          scholarship_policy_html?: string | null
+          scholarship_type?:
+            | Database["public"]["Enums"]["scholarship_type"]
+            | null
+          slug?: string
+          subject_area_id?: string | null
+          tuition_after_scholarship?: number | null
+          tuition_currency?: string | null
+          tuition_original?: number | null
+          tuition_per?: string | null
+          university_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programs_subject_area_id_fkey"
+            columns: ["subject_area_id"]
+            isOneToOne: false
+            referencedRelation: "subject_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programs_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       student_documents: {
         Row: {
@@ -140,14 +340,143 @@ export type Database = {
         }
         Relationships: []
       }
+      subject_areas: {
+        Row: {
+          created_at: string
+          id: string
+          name_en: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name_en: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name_en?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      universities: {
+        Row: {
+          accommodation_currency: string | null
+          accommodation_double_room: number | null
+          accommodation_single_room: number | null
+          advantages_html: string | null
+          albums: Json | null
+          city_id: string
+          country_specific_data: Json | null
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          institution_type: Database["public"]["Enums"]["institution_type"]
+          level: string | null
+          logo_url: string | null
+          majors_count: number | null
+          name_en: string
+          name_local: string | null
+          profile_html: string | null
+          profile_text: string | null
+          qs_rank: number | null
+          qs_rank_year: number | null
+          self_financed_available: boolean | null
+          shanghai_rank: number | null
+          shanghai_rank_year: number | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          accommodation_currency?: string | null
+          accommodation_double_room?: number | null
+          accommodation_single_room?: number | null
+          advantages_html?: string | null
+          albums?: Json | null
+          city_id: string
+          country_specific_data?: Json | null
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          institution_type?: Database["public"]["Enums"]["institution_type"]
+          level?: string | null
+          logo_url?: string | null
+          majors_count?: number | null
+          name_en: string
+          name_local?: string | null
+          profile_html?: string | null
+          profile_text?: string | null
+          qs_rank?: number | null
+          qs_rank_year?: number | null
+          self_financed_available?: boolean | null
+          shanghai_rank?: number | null
+          shanghai_rank_year?: number | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          accommodation_currency?: string | null
+          accommodation_double_room?: number | null
+          accommodation_single_room?: number | null
+          advantages_html?: string | null
+          albums?: Json | null
+          city_id?: string
+          country_specific_data?: Json | null
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          institution_type?: Database["public"]["Enums"]["institution_type"]
+          level?: string | null
+          logo_url?: string | null
+          majors_count?: number | null
+          name_en?: string
+          name_local?: string | null
+          profile_html?: string | null
+          profile_text?: string | null
+          qs_rank?: number | null
+          qs_rank_year?: number | null
+          self_financed_available?: boolean | null
+          shanghai_rank?: number | null
+          shanghai_rank_year?: number | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "universities_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
+      degree_level:
+        | "bachelor"
+        | "master"
+        | "doctoral"
+        | "non_degree"
+        | "upgrade"
+      institution_type: "public" | "private"
+      intake_season: "spring" | "summer" | "autumn"
+      scholarship_type:
+        | "self_financed"
+        | "type_a"
+        | "type_b"
+        | "type_c"
+        | "type_d"
+      teaching_language: "chinese" | "english" | "chinese_english_bilingual"
       user_role: "student" | "counselor" | "admin"
     }
     CompositeTypes: {
@@ -276,6 +605,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      degree_level: ["bachelor", "master", "doctoral", "non_degree", "upgrade"],
+      institution_type: ["public", "private"],
+      intake_season: ["spring", "summer", "autumn"],
+      scholarship_type: [
+        "self_financed",
+        "type_a",
+        "type_b",
+        "type_c",
+        "type_d",
+      ],
+      teaching_language: ["chinese", "english", "chinese_english_bilingual"],
       user_role: ["student", "counselor", "admin"],
     },
   },
