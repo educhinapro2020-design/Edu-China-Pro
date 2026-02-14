@@ -34,15 +34,7 @@ import {
   DocumentKey,
 } from "@/lib/constants/documents";
 import { StudentDocumentEntry } from "@/lib/types/student";
-
-const COUNTRIES = [
-  { label: "Nepal", value: "Nepal" },
-  { label: "India", value: "India" },
-  { label: "Pakistan", value: "Pakistan" },
-  { label: "Bangladesh", value: "Bangladesh" },
-  { label: "China", value: "China" },
-  { label: "Other", value: "Other" },
-];
+import { COUNTRIES } from "@/lib/constants/countries";
 
 const GENDERS = [
   { label: "Male", value: "Male" },
