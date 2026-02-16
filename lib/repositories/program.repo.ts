@@ -10,7 +10,7 @@ export const programRepository = {
     const supabase = client ?? createClient();
     let query = supabase
       .from("programs")
-      .select("*, university:universities(name_en, slug)");
+      .select("*, university:universities(name_en, slug, logo_url)");
 
     if (filter.search) {
       query = query.ilike("name_en", `%${filter.search}%`);
@@ -70,18 +70,23 @@ export const programRepository = {
   },
 
   async getProgramBySlug(
-    slug: string,
+    universitySlug: string,
+    programSlug: string,
     client?: SupabaseClient,
   ): Promise<Program | null> {
     const supabase = client ?? createClient();
     const { data, error } = await supabase
       .from("programs")
-      .select("*, university:universities(*)")
-      .eq("slug", slug)
+      .select("*, university:universities!inner(*)")
+      .eq("university.slug", universitySlug)
+      .eq("slug", programSlug)
       .single();
 
     if (error) {
-      console.error(`Error fetching program by slug ${slug}:`, error);
+      console.error(
+        `Error fetching program ${programSlug} at ${universitySlug}:`,
+        error,
+      );
       return null;
     }
 
