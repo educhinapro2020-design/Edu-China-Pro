@@ -1,19 +1,11 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { FiMapPin, FiStar } from "react-icons/fi";
+import { University } from "@/lib/types/university";
 import { twMerge } from "tailwind-merge";
-
-export interface University {
-  id: string;
-  name: string;
-  location: string;
-  description: string;
-  image_url?: string;
-  ranking?: number;
-}
+import { FiAward, FiMapPin, FiStar } from "react-icons/fi";
+import { HiOutlineExternalLink } from "react-icons/hi";
 
 interface UniversityCardProps {
-  university: University;
+  university: University & { city?: { name_en: string } | null };
   className?: string;
   featured?: boolean;
 }
@@ -23,82 +15,70 @@ export default function UniversityCard({
   className = "",
   featured = false,
 }: UniversityCardProps) {
+  const displayLogo = university.logo_url;
+  const rank = university.shanghai_rank || university.qs_rank;
+  const rankLabel = university.shanghai_rank ? "ARWU" : "QS";
+
   return (
-    <div
+    <Link
+      href={`/universities/${university.slug}`}
       className={twMerge(
-        "group h-full flex flex-col bg-white rounded-2xl overflow-hidden transition-all duration-300",
-        featured
-          ? "border-2 border-brand-200 shadow-xl hover:shadow-2xl hover:border-brand-300 hover:-translate-y-1 relative"
-          : "border border-primary-200 shadow-md hover:shadow-xl hover:-translate-y-1 hover:border-brand-200",
+        "group bg-white border border-primary-200 rounded-xl p-6 hover:shadow-xl hover:-translate-y-1 hover:border-brand-300 transition-all duration-300 flex flex-col h-full relative",
+        featured && "border-brand-200 shadow-md",
         className,
       )}
     >
       {featured && (
-        <div className="absolute top-0 right-0 z-10 bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl shadow-sm flex items-center gap-1">
+        <div className="absolute top-0 right-0 z-10 bg-brand-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl shadow-sm flex items-center gap-1">
           <FiStar className="fill-current w-3 h-3" />
           Featured
         </div>
       )}
 
-      <div className="relative h-48 w-full overflow-hidden">
-        {university.image_url ? (
+      <div className="relative w-full h-24 mb-6 bg-white p-4 rounded-lg flex items-center justify-center border border-primary-100/50 transition-colors">
+        {displayLogo ? (
           <img
-            src={university.image_url}
-            alt={university.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            src={displayLogo}
+            alt={`${university.name_en} logo`}
+            className="w-full h-full object-contain transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full bg-brand-50 flex items-center justify-center">
-            <span className="text-brand-300 font-bold text-3xl font-serif">
-              {university.name.charAt(0)}
+          <div className="w-full h-full flex items-center justify-center bg-brand-50 rounded-lg">
+            <span className="text-4xl font-bold text-brand-300 font-serif">
+              {university.name_en?.charAt(0) || "U"}
             </span>
           </div>
         )}
-        {university.ranking && (
-          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur shadow-sm px-3 py-1.5 rounded-full text-xs font-bold text-brand-600 border border-brand-100">
-            Rank #{university.ranking}
+
+        {rank && (
+          <div className="absolute flex items-center gap-1 top-2 left-2 bg-gold-50 text-gold-700 border border-gold-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+            <FiAward /> {rank} {rankLabel}
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
-      <div className="flex-grow p-5 flex flex-col">
-        <h3
-          className={twMerge(
-            "text-lg font-bold text-primary-900 mb-2 truncate font-serif transition-colors",
-            featured && "text-brand-700",
-          )}
-        >
-          {university.name}
+      <div className="flex flex-col grow">
+        <h3 className="text-xl font-bold text-primary-900 font-serif mb-2 group-hover:text-brand-600 transition-colors duration-300 line-clamp-2">
+          {university.name_en}
         </h3>
 
-        <p className="text-primary-600 text-sm flex items-center gap-1.5 mb-3">
+        <p className="text-primary-500 text-sm flex items-center gap-1.5 mb-3">
           <FiMapPin className="w-4 h-4 text-brand-500 shrink-0" />
-          {university.location}
+          {university.city?.name_en || "China"}
         </p>
 
-        <p className="text-primary-500 text-sm line-clamp-2 mb-4 flex-grow">
-          {university.description}
+        <p className="text-sm text-primary-600 leading-relaxed grow line-clamp-4 mb-4">
+          {university.profile_text ||
+            "A prestigious university offering comprehensive programs for international students."}
         </p>
 
-        <div className="pt-4 mt-auto border-t border-primary-100">
-          <Link
-            href={`/universities/${university.id}`}
-            className="w-full block"
-          >
-            <Button
-              variant={featured ? "brand" : "ghost"}
-              className={twMerge(
-                "w-full transition-colors",
-                !featured &&
-                  "text-brand-600 hover:text-brand-700 hover:bg-brand-50",
-              )}
-            >
-              {featured ? "View Details" : "View Programs"}
-            </Button>
-          </Link>
+        <div className="mt-auto pt-4 border-t border-primary-100">
+          <span className="text-sm font-medium text-brand-600 group-hover:text-brand-700 flex items-center gap-2 transition-colors">
+            View University
+            <HiOutlineExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
