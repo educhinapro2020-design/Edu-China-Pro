@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { FiArrowRight, FiX, FiSend, FiEdit3 } from "react-icons/fi";
 import Link from "next/link";
 import { twMerge } from "tailwind-merge";
+import { ApplyButton } from "./ApplyButton";
 
 interface ProgramCTAProps {
   program: Program & { university?: University };
@@ -107,14 +108,13 @@ export function ProgramCTA({ program }: ProgramCTAProps) {
           </div>
 
           <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-            <Link href="#application" className="grow md:grow-0">
-              <Button
-                className="w-full px-8 shadow-lg shadow-brand-500/20"
-                endIcon={<FiArrowRight />}
-              >
-                Apply Now
-              </Button>
-            </Link>
+            <ApplyButton
+              programId={program.id}
+              universityId={program.university?.id || ""}
+              className="w-full px-8 shadow-lg shadow-brand-500/20"
+            >
+              Apply Now
+            </ApplyButton>
           </div>
         </div>
       </div>
