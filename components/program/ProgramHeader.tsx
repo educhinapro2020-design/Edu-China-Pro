@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { University, Program } from "@/lib/types/university";
-import { Button } from "@/components/ui/button";
-import { FiChevronRight, FiArrowRight } from "react-icons/fi";
+import { FiChevronRight } from "react-icons/fi";
 import { getTuition } from "@/lib/utils/program";
+import { ApplyButton } from "./ApplyButton";
 
 interface ProgramHeaderProps {
   program: Program & { university?: University };
@@ -103,9 +103,12 @@ export function ProgramHeader({ program }: ProgramHeaderProps) {
           </div>
 
           <div className="shrink-0">
-            <Link href="#application" className="w-full sm:w-auto">
-              <Button endIcon={<FiArrowRight />}>Apply Now</Button>
-            </Link>
+            <ApplyButton
+              programId={program.id}
+              universityId={program.university?.id || ""}
+            >
+              Apply Now
+            </ApplyButton>
           </div>
         </div>
       </div>

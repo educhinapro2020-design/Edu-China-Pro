@@ -21,7 +21,11 @@ import { AnimatePresence, motion } from "framer-motion";
 
 const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: FiLayout },
-  { name: "My Applications", href: "/applications", icon: FiFileText },
+  {
+    name: "My Applications",
+    href: "/dashboard/applications",
+    icon: FiFileText,
+  },
   { name: "Find Programs", href: "/programs", icon: FiSearch },
   { name: "My Profile", href: "/dashboard/profile", icon: FiUser },
 ];
@@ -99,7 +103,7 @@ export function StudentNavbar({ user }: StudentNavbarProps) {
                   className={twMerge(
                     "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2",
                     isActive
-                      ? " text-brand-700 shadow-sm ring-1 ring-brand-100"
+                      ? " text-brand-700"
                       : "text-primary-600 hover:bg-primary-50 hover:text-primary-900",
                   )}
                 >

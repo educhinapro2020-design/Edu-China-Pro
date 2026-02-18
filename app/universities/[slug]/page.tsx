@@ -68,7 +68,7 @@ export default async function UniversityPage({ params }: PageProps) {
           <RelatedUniversities universities={relatedUniversities} />
         </div>
 
-        <UniversityCTA university={university} />
+        {/*<UniversityCTA university={university} /> temporarily hidden*/}
       </main>
 
       <Footer />

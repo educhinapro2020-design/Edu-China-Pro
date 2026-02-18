@@ -2,11 +2,12 @@ import { Program } from "@/lib/types/university";
 import { getTuition } from "@/lib/utils/program";
 import {
   FiCheckCircle,
-  FiFileText,
   FiShield,
   FiPieChart,
   FiAlertCircle,
 } from "react-icons/fi";
+import { ProgramRequirements } from "./ProgramRequirements";
+import { DocumentKey } from "@/lib/constants/documents";
 
 interface ProgramContentProps {
   program: Program;
@@ -24,8 +25,6 @@ export function ProgramContent({ program }: ProgramContentProps) {
     tuitionPer,
     currency,
   } = getTuition(program);
-
-  console.log(getTuition(program));
 
   return (
     <div className="bg-primary-50/30 py-6 md:py-16">
@@ -82,29 +81,18 @@ export function ProgramContent({ program }: ProgramContentProps) {
               </div>
 
               <div>
-                <h4 className="flex items-center gap-2 text-sm font-bold text-primary-400 uppercase tracking-widest mb-4">
-                  <FiFileText className="w-4 h-4" /> Required Documents
-                </h4>
-                <ul className="space-y-3">
-                  {(
-                    eligibility?.documents_required || [
-                      "Passport Copy",
-                      "Academic Transcripts",
-                      "Degree Certificates",
-                      "Personal Statement",
-                      "Recommendation Letters",
-                      "Physical Exam form",
-                    ]
-                  ).map((doc, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-center gap-3 text-primary-700 bg-primary-50/50 p-3 rounded-lg hover:bg-primary-50 transition-colors"
-                    >
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-400 shrink-0" />
-                      {doc}
-                    </li>
-                  ))}
-                </ul>
+                <ProgramRequirements
+                  requirements={
+                    (program.document_requirements || [
+                      "passport",
+                      "transcript",
+                      "degree_certificate",
+                      "personal_statement",
+                      "recommendation_letters",
+                      "physical_exam",
+                    ]) as DocumentKey[]
+                  }
+                />
               </div>
             </div>
 
