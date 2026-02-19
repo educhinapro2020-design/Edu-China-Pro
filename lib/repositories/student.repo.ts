@@ -56,6 +56,7 @@ export const studentRepository = {
       .single();
 
     if (error) {
+      if (error.code === "PGRST116") return null;
       console.error("Error fetching student documents:", error);
       return null;
     }
