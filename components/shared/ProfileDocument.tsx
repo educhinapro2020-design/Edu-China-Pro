@@ -27,18 +27,24 @@ import Link from "next/link";
 interface ProfileDocumentProps {
   profile: Partial<StudentProfile>;
   documents?: StudentDocuments | null;
+  appDocuments?: Record<string, StudentDocumentEntry> | null;
   email?: string;
+  docRequirements?: DocumentKey[];
 }
 
 const PassportCard = ({
   profile,
   document,
+  isVisible = true,
 }: {
   profile: Partial<StudentProfile>;
   document?: StudentDocumentEntry;
+  isVisible?: boolean;
 }) => {
   const isUploaded =
     document?.status === "uploaded" || document?.status === "verified";
+
+  if (!isUploaded || !isVisible) return null;
 
   const formatDate = (dateString?: string | null) => {
     if (!dateString) return "N/A";
@@ -166,7 +172,9 @@ const DocumentCard = ({
 export const ProfileDocument = React.forwardRef<
   HTMLDivElement,
   ProfileDocumentProps
->(({ profile, documents, email }, ref) => {
+>(({ profile, documents, appDocuments, email, docRequirements }, ref) => {
+  const docSource = appDocuments ?? documents?.documents;
+
   const formatDate = (dateString?: string | null) => {
     if (!dateString) return "N/A";
     try {
@@ -180,7 +188,7 @@ export const ProfileDocument = React.forwardRef<
     }
   };
 
-  const photoUrl = documents?.documents?.["photo"]?.url;
+  const photoUrl = docSource?.["photo"]?.url;
 
   const otherDocs: GeneralDocumentKey[] = [
     "health_check",
@@ -367,12 +375,25 @@ export const ProfileDocument = React.forwardRef<
 
           <PassportCard
             profile={profile}
-            document={documents?.documents?.["passport"]}
+            document={docSource?.["passport"]}
+            isVisible={!docRequirements || docRequirements.includes("passport")}
           />
 
-          <h4 className="text-xs font-bold text-primary-500 uppercase tracking-wider mb-3 mt-6">
-            Education Documents
-          </h4>
+          {(profile.education_history || []).some((edu) => {
+            const levelKey = getEducationLevelKey(edu.level);
+            if (!levelKey) return false;
+            return EDUCATION_DOCUMENTS[levelKey].documents.some((eduDoc) => {
+              const isRequired =
+                !docRequirements || docRequirements.includes(eduDoc.id);
+              if (!isRequired) return false;
+              const doc = docSource?.[eduDoc.id];
+              return doc?.status === "uploaded" || doc?.status === "verified";
+            });
+          }) && (
+            <h4 className="text-xs font-bold text-primary-500 uppercase tracking-wider mb-3 mt-6">
+              Education Documents
+            </h4>
+          )}
 
           <div className="space-y-6 mb-8">
             {(profile.education_history || []).map((edu, idx) => {
@@ -396,45 +417,57 @@ export const ProfileDocument = React.forwardRef<
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {docsForLevel.map((eduDoc) => {
-                        const doc = documents?.documents?.[eduDoc.id];
-                        const isUploaded =
-                          doc?.status === "uploaded" ||
-                          doc?.status === "verified";
+                      {docsForLevel
+                        .filter((eduDoc) => {
+                          const isRequired =
+                            !docRequirements ||
+                            docRequirements.includes(eduDoc.id);
+                          if (!isRequired) return false;
+                          const doc = docSource?.[eduDoc.id];
+                          return (
+                            doc?.status === "uploaded" ||
+                            doc?.status === "verified"
+                          );
+                        })
+                        .map((eduDoc) => {
+                          const doc = docSource?.[eduDoc.id];
+                          const isUploaded =
+                            doc?.status === "uploaded" ||
+                            doc?.status === "verified";
 
-                        return (
-                          <div
-                            key={eduDoc.id}
-                            className="flex items-center gap-1.5"
-                          >
+                          return (
                             <div
-                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${
-                                isUploaded
-                                  ? "bg-white border-success/20 text-success"
-                                  : "bg-white border-primary-300 text-primary-400"
-                              }`}
+                              key={eduDoc.id}
+                              className="flex items-center gap-1.5"
                             >
-                              {isUploaded ? (
-                                <FiCheckCircle className="size-3.5" />
-                              ) : null}
-                              <span className="font-medium">
-                                {eduDoc.label}
-                              </span>
-                            </div>
-                            {isUploaded && doc?.url && (
-                              <Link
-                                href={doc.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                              <div
+                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${
+                                  isUploaded
+                                    ? "bg-white border-success/20 text-success"
+                                    : "bg-white border-primary-300 text-primary-400"
+                                }`}
                               >
-                                <div className="print:hidden rounded-full size-6 bg-white border border-primary-200 hover:bg-primary-50 text-primary-600 flex items-center justify-center transition-colors shadow-sm">
-                                  <FiEye className="size-3" />
-                                </div>
-                              </Link>
-                            )}
-                          </div>
-                        );
-                      })}
+                                {isUploaded ? (
+                                  <FiCheckCircle className="size-3.5" />
+                                ) : null}
+                                <span className="font-medium">
+                                  {eduDoc.label}
+                                </span>
+                              </div>
+                              {isUploaded && doc?.url && (
+                                <Link
+                                  href={doc.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <div className="print:hidden rounded-full size-6 bg-white border border-primary-200 hover:bg-primary-50 text-primary-600 flex items-center justify-center transition-colors shadow-sm">
+                                    <FiEye className="size-3" />
+                                  </div>
+                                </Link>
+                              )}
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
                 </div>
@@ -449,22 +482,40 @@ export const ProfileDocument = React.forwardRef<
             )}
           </div>
 
-          <h4 className="text-xs font-bold text-primary-500 uppercase tracking-wider mb-3">
-            Documents Checklist
-          </h4>
-          <p className="text-xs text-primary-500 mb-4">
-            All documents might not be required. Please refer to the program
-            details for more information.
-          </p>
+          {otherDocs.some((key) => {
+            const isRequired =
+              !docRequirements || docRequirements.includes(key);
+            if (!isRequired) return false;
+            const doc = docSource?.[key];
+            return doc?.status === "uploaded" || doc?.status === "verified";
+          }) && (
+            <>
+              <h4 className="text-xs font-bold text-primary-500 uppercase tracking-wider mb-3">
+                Documents Checklist
+              </h4>
+              <p className="text-xs text-primary-500 mb-4">
+                All documents might not be required. Please refer to the program
+                details for more information.
+              </p>
+            </>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4">
-            {otherDocs.map((key) => (
-              <DocumentCard
-                key={key}
-                docKey={key}
-                document={documents?.documents?.[key]}
-              />
-            ))}
+            {otherDocs
+              .filter((key) => {
+                const isRequired =
+                  !docRequirements || docRequirements.includes(key);
+                if (!isRequired) return false;
+                const doc = docSource?.[key];
+                return doc?.status === "uploaded" || doc?.status === "verified";
+              })
+              .map((key) => (
+                <DocumentCard
+                  key={key}
+                  docKey={key}
+                  document={docSource?.[key]}
+                />
+              ))}
           </div>
         </section>
       </div>
