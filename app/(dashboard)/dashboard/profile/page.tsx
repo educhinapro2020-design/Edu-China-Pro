@@ -427,8 +427,8 @@ export default function ProfilePage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-primary-900">My Profile</h1>
-            <p className="text-sm text-primary-500">
+            <h1 className="text-2xl font-bold text-primary-900">My Profile</h1>
+            <p className="text-base text-primary-500">
               View and manage your profile & documents
             </p>
           </div>
