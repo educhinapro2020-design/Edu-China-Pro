@@ -111,3 +111,20 @@ body {
   color: var(--foreground);
   font-family: var(--font-inter), sans-serif;
 }
+
+/* Remove focus outline from Recharts containers on click */
+.recharts-responsive-container:focus,
+.recharts-responsive-container:focus-visible,
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-surface:focus {
+  outline: none !important;
+}
+
+.recharts-responsive-container > div:first-child:focus-visible {
+  outline: none !important;
+}
+
+.recharts-wrapper svg g {
+  outline: none !important;
+}
