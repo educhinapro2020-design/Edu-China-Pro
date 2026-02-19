@@ -19,12 +19,20 @@ export function getApplicationStatusColor(
       return "bg-indigo-100 text-indigo-800";
     case "payment_pending":
       return "bg-orange-100 text-orange-800";
+    case "payment_received":
+      return "bg-sky-100 text-sky-800 border-sky-200";
     case "admission_success":
       return "bg-green-100 text-green-800";
     case "admission_failure":
       return "bg-red-100 text-red-800";
+    case "offer_letter_uploaded":
+      return "bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200";
+    case "jw202_processing":
+      return "bg-purple-100 text-purple-800 border-purple-200";
+    case "visa_docs_ready":
+      return "bg-teal-100 text-teal-800 border-teal-200";
     case "visa_granted":
-      return "bg-emerald-100 text-emerald-800";
+      return "bg-emerald-600 text-white";
     default:
       return "bg-primary-100 text-primary-800";
   }
@@ -37,7 +45,58 @@ export function getApplicationStatusLabel(
   status: ApplicationStatus | string | null | undefined,
 ): string {
   if (!status) return "Unknown";
-  return status.replace(/_/g, " ");
+  const labels: Record<string, string> = {
+    document_pending: "Document Pending",
+    applied: "Applied",
+    processing: "Processing",
+    payment_pending: "Payment Pending",
+    payment_received: "Payment Received",
+    admission_success: "Admission Success",
+    admission_failure: "Admission Failure",
+    offer_letter_uploaded: "Offer Letter Uploaded",
+    jw202_processing: "JW202 Processing",
+    visa_docs_ready: "Visa Docs Ready",
+    visa_granted: "Visa Granted",
+  };
+  return (
+    labels[status as string] ||
+    status
+      .replace(/_/g, " ")
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+  );
+}
+
+/**
+ * Formats a date string into a relative human-readable time (e.g., "2h ago").
+ */
+export function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+/**
+ * Extracts initials from a student's full name.
+ */
+export function getStudentInitials(name: string): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 }
 
 /**

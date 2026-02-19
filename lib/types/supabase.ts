@@ -14,6 +14,152 @@ export type Database = {
   }
   public: {
     Tables: {
+      application_messages: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          message: string
+          sender_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          message: string
+          sender_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_messages_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_notes: {
+        Row: {
+          application_id: string
+          author_id: string
+          created_at: string
+          id: string
+          note: string
+        }
+        Insert: {
+          application_id: string
+          author_id: string
+          created_at?: string
+          id?: string
+          note: string
+        }
+        Update: {
+          application_id?: string
+          author_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_notes_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_notes_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      applications: {
+        Row: {
+          counselor_id: string | null
+          created_at: string
+          documents: Json | null
+          id: string
+          program_id: string
+          status: Database["public"]["Enums"]["application_status"]
+          student_id: string
+          submitted_at: string | null
+          university_id: string
+          updated_at: string
+        }
+        Insert: {
+          counselor_id?: string | null
+          created_at?: string
+          documents?: Json | null
+          id?: string
+          program_id: string
+          status?: Database["public"]["Enums"]["application_status"]
+          student_id: string
+          submitted_at?: string | null
+          university_id: string
+          updated_at?: string
+        }
+        Update: {
+          counselor_id?: string | null
+          created_at?: string
+          documents?: Json | null
+          id?: string
+          program_id?: string
+          status?: Database["public"]["Enums"]["application_status"]
+          student_id?: string
+          submitted_at?: string | null
+          university_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_counselor_id_fkey"
+            columns: ["counselor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           country_id: string
@@ -126,6 +272,7 @@ export type Database = {
           created_at: string
           degree_level: Database["public"]["Enums"]["degree_level"]
           detail_images: Json | null
+          document_requirements: Json | null
           duration: string | null
           eligibility: Json | null
           estimated_living_cost: number | null
@@ -163,6 +310,7 @@ export type Database = {
           created_at?: string
           degree_level: Database["public"]["Enums"]["degree_level"]
           detail_images?: Json | null
+          document_requirements?: Json | null
           duration?: string | null
           eligibility?: Json | null
           estimated_living_cost?: number | null
@@ -200,6 +348,7 @@ export type Database = {
           created_at?: string
           degree_level?: Database["public"]["Enums"]["degree_level"]
           detail_images?: Json | null
+          document_requirements?: Json | null
           duration?: string | null
           eligibility?: Json | null
           estimated_living_cost?: number | null
@@ -458,10 +607,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_admin_dashboard: { Args: { p_weeks?: number }; Returns: Json }
+      is_admin: { Args: never; Returns: boolean }
+      search_admin_applications: {
+        Args: {
+          p_page?: number
+          p_page_size?: number
+          p_search?: string
+          p_status?: string
+        }
+        Returns: Json
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
+      application_status:
+        | "document_pending"
+        | "applied"
+        | "processing"
+        | "payment_pending"
+        | "payment_received"
+        | "admission_success"
+        | "admission_failure"
+        | "offer_letter_uploaded"
+        | "jw202_processing"
+        | "visa_docs_ready"
+        | "visa_granted"
       degree_level:
         | "bachelor"
         | "master"
@@ -605,6 +777,19 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      application_status: [
+        "document_pending",
+        "applied",
+        "processing",
+        "payment_pending",
+        "payment_received",
+        "admission_success",
+        "admission_failure",
+        "offer_letter_uploaded",
+        "jw202_processing",
+        "visa_docs_ready",
+        "visa_granted",
+      ],
       degree_level: ["bachelor", "master", "doctoral", "non_degree", "upgrade"],
       institution_type: ["public", "private"],
       intake_season: ["spring", "summer", "autumn"],

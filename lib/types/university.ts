@@ -49,10 +49,11 @@ export interface University extends Omit<
 
 export interface Program extends Omit<
   Row<"programs">,
-  "eligibility" | "detail_images"
+  "eligibility" | "detail_images" | "document_requirements"
 > {
   eligibility: ProgramEligibility | null;
   detail_images: string[];
+  document_requirements: string[] | null;
 }
 
 export interface UniversityFilter {
