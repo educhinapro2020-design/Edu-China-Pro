@@ -73,6 +73,14 @@ export const universityRepository = {
       query = query.eq("institution_type", filter.institutionType);
     }
 
+    if (filter.labels && filter.labels.length > 0) {
+      const jsonFilter: Record<string, boolean> = {};
+      filter.labels.forEach((label) => {
+        jsonFilter[label] = true;
+      });
+      query = query.contains("country_specific_data", jsonFilter);
+    }
+
     query = query.order("name_en", { ascending: true });
 
     if (filter.limit) {
