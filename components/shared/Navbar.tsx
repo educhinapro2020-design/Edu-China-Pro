@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { UserMenu } from "./UserMenu";
+import { NavLinks } from "./NavLinks";
 import { Button } from "@/components/ui/button";
 import { MdOutlineSchool } from "react-icons/md";
-import { LiaUniversitySolid } from "react-icons/lia";
 import Image from "next/image";
 
 export async function Navbar() {
@@ -32,28 +32,7 @@ export async function Navbar() {
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
-          <Link
-            href="/"
-            className="font-medium text-primary-600 hover:text-brand-600 transition-colors"
-          >
-            Home
-          </Link>
-          <Link
-            href="/universities"
-            className="font-medium text-primary-600 flex items-center gap-2 hover:text-brand-600 transition-colors"
-          >
-            <LiaUniversitySolid size={20} />
-            Find Universities
-          </Link>
-          <Link
-            href="/programs"
-            className="font-medium text-primary-600 flex items-center gap-2 hover:text-brand-600 transition-colors"
-          >
-            <MdOutlineSchool size={20} />
-            Explore Programs
-          </Link>
-        </div>
+        <NavLinks />
 
         <div className="flex items-center gap-4">
           {!user && (
