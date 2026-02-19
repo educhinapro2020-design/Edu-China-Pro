@@ -44,12 +44,44 @@ export default async function middleware(request: NextRequest) {
       url.searchParams.set("next", next);
       return NextResponse.redirect(url);
     }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile?.role === "admin") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+  }
+
+  if (url.pathname.startsWith("/admin")) {
+    if (!user) {
+      url.pathname = "/login";
+      url.searchParams.set("next", next);
+      return NextResponse.redirect(url);
+    }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile?.role !== "admin") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
   }
 
   if (url.pathname.startsWith("/login") || url.pathname.startsWith("/signup")) {
     if (user) {
       const nextParam = url.searchParams.get("next");
-      const target = nextParam || "/dashboard";
+      if (nextParam) {
+        return NextResponse.redirect(new URL(nextParam, request.url));
+      }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      const target = profile?.role === "admin" ? "/admin" : "/dashboard";
       return NextResponse.redirect(new URL(target, request.url));
     }
   }
