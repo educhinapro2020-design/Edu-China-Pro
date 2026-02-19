@@ -50,32 +50,18 @@ export const INSTITUTION_TYPE_OPTIONS = [
 export const COUNTRY_SPECIFIC_LABELS: {
   key: string;
   label: string;
-  color: string;
 }[] = [
   {
     key: "is_985_project",
     label: "985 Project",
-    color: "bg-red-100 text-red-700",
   },
   {
     key: "is_211_project",
     label: "211 Project",
-    color: "bg-blue-100 text-blue-700",
   },
   {
     key: "is_double_first_class",
     label: "Double First Class",
-    color: "bg-amber-100 text-amber-700",
-  },
-  {
-    key: "is_hot_university",
-    label: "Hot University",
-    color: "bg-orange-100 text-orange-700",
-  },
-  {
-    key: "is_issp_university",
-    label: "ISSP University",
-    color: "bg-purple-100 text-purple-700",
   },
 ];
 

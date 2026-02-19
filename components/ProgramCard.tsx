@@ -64,7 +64,7 @@ export default function ProgramCard({
           href={`/universities/${university?.slug || "unknown"}/programs/${program.slug}`}
           className="flex flex-col grow"
         >
-          <h3 className="text-lg font-bold text-primary-900 mb-2 font-serif line-clamp-2 min-h-14 group-hover:text-brand-700 transition-colors">
+          <h3 className="text-lg capitalize font-bold text-primary-900 mb-2 font-serif line-clamp-2 min-h-14 group-hover:text-brand-700 transition-colors">
             {program.name_en}
           </h3>
 

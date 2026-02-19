@@ -14,6 +14,7 @@ export interface SelectProps {
   value: string;
   onChange: (value: string) => void;
   options: SelectOption[];
+  textClassName?: string;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -24,6 +25,7 @@ export function Select({
   value,
   onChange,
   options,
+  textClassName,
   placeholder = "Select...",
   className,
   disabled,
@@ -68,7 +70,10 @@ export function Select({
         )}
       >
         <span
-          className={!selectedOption ? "text-primary-400" : "text-primary-900"}
+          className={twMerge(
+            !selectedOption ? "text-primary-400" : "text-primary-900",
+            textClassName,
+          )}
         >
           {selectedOption ? selectedOption.label : placeholder}
         </span>
@@ -100,6 +105,7 @@ export function Select({
                     value === option.value
                       ? "bg-brand-50 text-brand-700"
                       : "text-primary-600 hover:bg-primary-50 hover:text-primary-900",
+                    textClassName,
                   )}
                 >
                   {option.label}

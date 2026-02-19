@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { User } from "@supabase/supabase-js";
 import { authService } from "@/lib/services/auth.service";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { FiUser, FiLogOut, FiMenu, FiX, FiUserPlus } from "react-icons/fi";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
@@ -18,6 +18,7 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const avatarUrl = user?.user_metadata?.avatar_url;
@@ -105,17 +106,24 @@ export function UserMenu({ user }: UserMenuProps) {
                 </div>
               )}
 
-              {menuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-primary-600 hover:bg-primary-50 hover:text-primary-900 transition-colors"
-                >
-                  <item.icon className="size-4.5" />
-                  {item.label}
-                </Link>
-              ))}
+              {menuItems.map((item) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-brand-50 text-brand-700"
+                        : "text-primary-600 hover:bg-primary-50 hover:text-primary-900"
+                    }`}
+                  >
+                    <item.icon className="size-4.5" />
+                    {item.label}
+                  </Link>
+                );
+              })}
 
               <div className="h-px bg-primary-100 my-1 mx-2" />
 
