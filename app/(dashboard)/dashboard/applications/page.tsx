@@ -116,13 +116,12 @@ export default function ApplicationsPage() {
                       )}
                     </div>
 
-                    {/* Content */}
                     <div className="grow min-w-0">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
                         <h3 className="text-lg font-semibold text-primary-900 truncate group-hover:text-primary-600 transition-colors">
                           {app.program?.name_en}
                         </h3>
-                        {/* Status Badge */}
+
                         <span
                           className={`
                           px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide
