@@ -1,198 +1,108 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ScrollRow } from "@/components/ui/scroll-row";
-import UniversityCard, { University } from "@/components/UniversityCard";
+import UniversityCard from "@/components/UniversityCard";
+import ProgramCard from "@/components/ProgramCard";
 import {
   FiChevronRight,
   FiSearch,
   FiZap,
   FiMessageCircle,
   FiUsers,
+  FiTarget,
+  FiCheckCircle,
 } from "react-icons/fi";
-
 import { Navbar } from "@/components/shared/Navbar";
+import { Footer } from "@/components/shared/Footer";
+import { homepageDataService } from "@/lib/services/homepage-data";
+import { FiUser } from "react-icons/fi";
 
-const topUniversities: University[] = [
-  {
-    id: "tsinghua",
-    name: "Tsinghua University",
-    location: "Beijing",
-    description:
-      "One of China's most prestigious universities, renowned for engineering, science, and technology programs.",
-    image_url:
-      "https://images.unsplash.com/photo-1564981797816-1043664bf78d?w=800&q=80",
-    ranking: 1,
-  },
-  {
-    id: "peking",
-    name: "Peking University",
-    location: "Beijing",
-    description:
-      "A comprehensive research university with excellence in humanities, social sciences, and natural sciences.",
-    image_url:
-      "https://images.unsplash.com/photo-1569152811536-fb47aced8409?w=800&q=80",
-    ranking: 2,
-  },
-  {
-    id: "fudan",
-    name: "Fudan University",
-    location: "Shanghai",
-    description:
-      "Leading university known for medicine, economics, and international relations programs.",
-    image_url:
-      "https://images.unsplash.com/photo-1562774053-701939374585?w=800&q=80",
-    ranking: 3,
-  },
-  {
-    id: "zhejiang",
-    name: "Zhejiang University",
-    location: "Hangzhou",
-    description:
-      "Top-tier research university excelling in computer science, engineering, and business.",
-    image_url:
-      "https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?w=800&q=80",
-    ranking: 4,
-  },
-  {
-    id: "sjtu",
-    name: "Shanghai Jiao Tong University",
-    location: "Shanghai",
-    description:
-      "Renowned for engineering, medicine, and management programs with global partnerships.",
-    image_url:
-      "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=80",
-    ranking: 5,
-  },
-  {
-    id: "nanjing",
-    name: "Nanjing University",
-    location: "Nanjing",
-    description:
-      "Historic institution with strong programs in physics, chemistry, and Chinese literature.",
-    image_url:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80",
-    ranking: 6,
-  },
-];
+export default async function HomePage() {
+  const data = await homepageDataService.getHomepageData();
 
-const featuredUniversities: University[] = [
-  {
-    id: "wuhan",
-    name: "Wuhan University",
-    location: "Wuhan",
-    description:
-      "Known for its beautiful cherry blossom campus and strong programs in law, literature, and life sciences.",
-    image_url:
-      "https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?w=800&q=80",
-  },
-  {
-    id: "xian",
-    name: "Xi'an Jiaotong University",
-    location: "Xi'an",
-    description:
-      "A pioneer in western China for engineering, medicine, and economics research.",
-    image_url:
-      "https://images.unsplash.com/photo-1592280771190-3e2e4d571952?w=800&q=80",
-  },
-  {
-    id: "harbin",
-    name: "Harbin Institute of Technology",
-    location: "Harbin",
-    description:
-      "Premier institution for aerospace, robotics, and advanced manufacturing technologies.",
-    image_url:
-      "https://images.unsplash.com/photo-1559135197-8a45ea74d367?w=800&q=80",
-  },
-  {
-    id: "beihang",
-    name: "Beihang University",
-    location: "Beijing",
-    description:
-      "Leading aerospace and aeronautical engineering university with cutting-edge research facilities.",
-    image_url:
-      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&q=80",
-  },
-];
-
-export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-50 via-white to-primary-50 pt-24 pb-32">
-        <div className="container mx-auto px-6">
+      <section className="relative overflow-hidden bg-linear-to-br from-brand-50 via-white to-primary-50 pt-24 pb-24 lg:pt-32">
+        <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-primary-900 mb-6 leading-tight font-serif tracking-tight">
+            <h1 className="hero mb-6 py-2">
               Your Gateway to
-              <span className="block brand-text">Studying in China</span>
+              <span className="block brand-text mt-2">Studying in China</span>
             </h1>
-            <p className="text-xl text-primary-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Discover top universities, explore diverse programs, and apply
-              with confidence. We make your dream of studying in China a
-              reality.
+            <p className="body-large text-primary-600 mb-10 max-w-2xl mx-auto">
+              We connect ambitious students to China's excellent universities.
+              Get personalized guidance, and end-to-end application support.
             </p>
+
+            <div className="flex justify-center gap-8 md:gap-16 mb-12 py-6 border-y border-primary-200/60 bg-white/50 backdrop-blur-sm rounded-xl">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-brand-600 font-serif">
+                  1000
+                </div>
+                <div className="text-xs uppercase tracking-wider text-primary-500 font-semibold mt-1">
+                  Universities
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-brand-600 font-serif">
+                  5000+
+                </div>
+                <div className="text-xs uppercase tracking-wider text-primary-500 font-semibold mt-1">
+                  Programs
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-brand-600 font-serif">
+                  100+
+                </div>
+                <div className="text-xs uppercase tracking-wider text-primary-500 font-semibold mt-1">
+                  Cities
+                </div>
+              </div>
+            </div>
+
             <div className="flex gap-4 justify-center flex-wrap">
-              <Link href="/universities">
-                <Button size="lg">Explore Universities</Button>
-              </Link>
               <Link href="/signup">
+                <Button size="lg" className="shadow-lg shadow-brand-500/20">
+                  Get Free Consultation
+                </Button>
+              </Link>
+              <Link href="/programs">
                 <Button size="lg" variant="outline">
-                  Start Application
+                  Explore Programs
                 </Button>
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-200 rounded-full filter blur-3xl opacity-20 -z-10"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary-200 rounded-full filter blur-3xl opacity-20 -z-10"></div>
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-200 rounded-full filter blur-[120px] opacity-20 -z-10 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary-200 rounded-full filter blur-[120px] opacity-20 -z-10"></div>
       </section>
 
-      <section className="py-20 overflow-hidden">
-        <div className="container mx-auto px-6 text-center lg:text-left">
-          <div className="flex flex-col lg:flex-row justify-between items-end mb-12 gap-6">
-            <div className="max-w-2xl">
-              <h2 className="heading-2 mb-4">
-                Top Ranked Universities in China
-              </h2>
-              <p className="body-large">
-                Explore the most prestigious institutions in China, recognized
-                worldwide for academic excellence.
+      <section className="py-20 overflow-hidden bg-white">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+            <div>
+              <h2 className="heading-2 mb-3">Trusted by Elite Institutions</h2>
+              <p className="body text-primary-500 max-w-xl">
+                We partner directly with China's "Double First-Class" and
+                Project 985 universities to ensure you get the best education.
               </p>
             </div>
             <Link
               href="/universities"
-              className="hidden lg:flex items-center gap-2 text-brand-600 font-bold hover:text-brand-700 transition-all group"
+              className="hidden md:flex items-center gap-2 text-brand-600 font-bold hover:text-brand-700 transition-all group"
             >
               View All Universities
               <FiChevronRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
-          <ScrollRow itemClassName="w-[300px] md:w-[350px]">
-            {topUniversities.map((uni) => (
-              <UniversityCard key={uni.id} university={uni} />
-            ))}
-          </ScrollRow>
-
-          <Link href="/universities" className="inline-block mt-8 lg:hidden">
-            <Button variant="outline">View All Universities</Button>
-          </Link>
-        </div>
-      </section>
-
-      <section className="py-20 bg-primary-50 overflow-hidden">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="heading-2 mb-4">Featured Institutions</h2>
-            <p className="body-large max-w-2xl mx-auto">
-              Hand-picked universities offering exceptional programs and unique
-              campus experiences.
-            </p>
-          </div>
-
-          <ScrollRow itemClassName="w-[300px] md:w-[400px]">
-            {featuredUniversities.map((uni) => (
+          <ScrollRow itemClassName="w-[250px] md:w-[320px]">
+            {data.featuredUniversities.map((uni) => (
               <UniversityCard
                 key={uni.id}
                 university={uni}
@@ -201,6 +111,12 @@ export default function HomePage() {
               />
             ))}
           </ScrollRow>
+
+          <Link href="/universities" className="inline-block mt-8 md:hidden">
+            <Button variant="outline" className="w-full">
+              View All Universities
+            </Button>
+          </Link>
         </div>
       </section>
 
@@ -211,31 +127,30 @@ export default function HomePage() {
               Why Choose <span className="brand-text">EduChinaPro?</span>
             </h2>
             <p className="body-large">
-              We've combined world-class technology with localized expertise to
+              We combine world-class technology with localized expertise to
               create the ultimate gateway for your academic success in China.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6 h-full md:h-[600px]">
-            {/* Main Feature: Smart Discovery */}
-            <div className="md:col-span-2 md:row-span-1 group relative overflow-hidden rounded-3xl bg-primary-900 p-8 flex flex-col justify-end text-white border border-primary-800 shadow-2xl transition-all duration-500 hover:shadow-brand-500/10 hover:-translate-y-1">
+            <div className="md:col-span-2 md:row-span-1 group relative overflow-hidden rounded-3xl bg-primary-700 p-8 flex flex-col justify-end text-white border border-primary-800 shadow-2xl transition-all duration-500 hover:shadow-brand-500/10 hover:-translate-y-1">
               <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-brand-500/20 rounded-full blur-3xl group-hover:bg-brand-500/30 transition-colors duration-500"></div>
               <div className="relative z-10">
                 <div className="w-12 h-12 bg-brand-500/20 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-xl border border-brand-500/30">
                   <FiSearch className="w-6 h-6 text-brand-400" />
                 </div>
                 <h3 className="text-2xl font-bold mb-3 font-serif">
-                  Smart Discovery System
+                  Personalized University Matching
                 </h3>
                 <p className="text-primary-300 max-w-md leading-relaxed">
-                  Real-time access to 2,500+ programs across China's elite C9
+                  Real-time access to 5000+ programs across China's elite C9
                   League universities with intelligent matching based on your
                   profile.
                 </p>
               </div>
             </div>
 
-            <div className="md:col-span-1 md:row-span-2 group relative overflow-hidden rounded-3xl bg-gradient-to-b from-brand-600 to-brand-800 p-8 flex flex-col text-white shadow-2xl transition-all duration-500 hover:shadow-brand-600/20 hover:-translate-y-1">
+            <div className="md:col-span-1 md:row-span-2 group relative overflow-hidden rounded-3xl bg-linear-to-b from-brand-600 to-brand-800 p-8 flex flex-col text-white shadow-2xl transition-all duration-500 hover:shadow-brand-600/20 hover:-translate-y-1">
               <div className="absolute inset-0 opacity-10"></div>
               <div className="relative z-10 h-full flex flex-col justify-between">
                 <div>
@@ -243,10 +158,10 @@ export default function HomePage() {
                     <FiZap className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold mb-3 font-serif">
-                    One-Click Apply
+                    End-to-End Management
                   </h3>
                   <p className="text-brand-100 leading-relaxed">
-                    Upload your documents once. We'll handle translation,
+                    Upload your documents once. We handle translation,
                     verification, and multi-university submissions
                     automatically.
                   </p>
@@ -274,7 +189,7 @@ export default function HomePage() {
                   <FiMessageCircle className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-primary-900 mb-2 font-serif">
-                  24/7 Expert Support
+                  Dedicated Counselor
                 </h3>
                 <p className="text-primary-600 text-sm leading-relaxed">
                   Real humans, real answers. Our consultants are based in
@@ -310,35 +225,78 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-24 bg-gradient-to-br from-brand-600 to-brand-800 text-white">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif">
-            Ready to Start Your Journey?
-          </h2>
-          <p className="text-xl text-brand-100 mb-10 max-w-2xl mx-auto">
-            Join thousands of students who have successfully started their
-            academic adventure in China with EduChinaPro.
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Link href="/signup">
-              <Button
-                size="lg"
-                className="bg-white text-brand-600 hover:bg-brand-50 shadow-xl"
-              >
-                Create Free Account
-              </Button>
+      <section className="py-20 bg-primary-50">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+            <div>
+              <h2 className="heading-2 mb-3">Popular Programs</h2>
+              <p className="body text-primary-500 max-w-xl">
+                Discover courses that international students are applying to
+                right now.
+              </p>
+            </div>
+            <Link
+              href="/programs"
+              className="hidden md:flex items-center gap-2 text-brand-600 font-bold hover:text-brand-700 transition-all group"
+            >
+              Browse All Programs
+              <FiChevronRight className="w-5 h-5 transform transition-transform group-hover:translate-x-1" />
             </Link>
-            <Link href="/universities">
-              <Button
-                size="lg"
-                className="bg-white text-brand-600 hover:bg-brand-50 shadow-xl"
-              >
-                Browse Programs
-              </Button>
-            </Link>
+          </div>
+
+          <ScrollRow itemClassName="w-[300px] md:w-[320px]">
+            {data.popularPrograms.map((prog) => (
+              <ProgramCard key={prog.id} program={prog} className="h-full" />
+            ))}
+          </ScrollRow>
+
+          <Link href="/programs" className="inline-block mt-8 md:hidden">
+            <Button variant="outline" className="w-full">
+              Browse All Programs
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      <section className="py-24">
+        <div className="container mx-auto px-6">
+          <div className="relative rounded-[2.5rem] overflow-hidden bg-brand-900 px-8 py-16 md:px-16 md:py-20 text-center">
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+              <div className="absolute -top-[100px] -left-[100px] w-[300px] h-[300px] bg-brand-500/30 rounded-full blur-[80px]"></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-800/20 rounded-full blur-[100px]"></div>
+              <div className="absolute -bottom-[100px] -right-[100px] w-[400px] h-[400px] bg-gold-500/20 rounded-full blur-[80px]"></div>
+            </div>
+
+            <div className="relative z-10 max-w-3xl mx-auto">
+              <div className="inline-block bg-gold-400/20 text-gold-300 font-bold px-4 py-1.5 rounded-full text-sm mb-6 border border-gold-400/30 backdrop-blur-sm">
+                💰 Financial Aid Available
+              </div>
+              <h2 className="text-3xl md:text-5xl font-bold text-white font-serif mb-6 leading-tight">
+                Concerned about costs? <br />
+                <span className="text-white">
+                  We help you secure up to
+                </span>{" "}
+                <span className="text-gold-400">100% Scholarships.</span>
+              </h2>
+              <p className="text-white/90 text-lg md:text-xl mb-10 leading-relaxed">
+                From CSC Government Scholarships to University-specific grants,
+                our team identifies every financial opportunity you're eligible
+                for.
+              </p>
+              <Link href="/signup">
+                <Button
+                  size="lg"
+                  className="bg-gold-500 hover:bg-gold-600 text-white border-none shadow-xl shadow-gold-500/20"
+                >
+                  Check Your Eligibility
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
