@@ -50,4 +50,27 @@ export const referenceRepository = {
     }
     return data;
   },
+
+  async createCity(
+    input: {
+      name_en: string;
+      region?: string | null;
+      country_id: string;
+      slug: string;
+    },
+    client?: SupabaseClient,
+  ): Promise<City> {
+    const supabase = client ?? createClient();
+    const { data, error } = await supabase
+      .from("cities")
+      .insert(input)
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("Error creating city:", error);
+      throw error;
+    }
+    return data as City;
+  },
 };

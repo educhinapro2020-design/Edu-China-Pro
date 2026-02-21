@@ -1,72 +1,61 @@
 "use client";
 
-import { useState, useRef } from "react";
-import Image from "next/image";
-import { FiUpload, FiX, FiLoader } from "react-icons/fi";
+import { useRef, useState, type ChangeEvent } from "react";
+import { FiUploadCloud, FiX } from "react-icons/fi";
 import { createClient } from "@/lib/supabase/client";
-import { ADMIN_ASSETS_BUCKET } from "@/lib/constants/admin";
 import { twMerge } from "tailwind-merge";
+import { universityRepository } from "@/lib/repositories/university.repo";
 
-interface ImageUploadProps {
+interface LogoUploadProps {
+  universityId?: string;
   value?: string | null;
   onChange: (url: string | null) => void;
-  label: string;
-  folder?: string;
-  className?: string;
-  aspectRatio?: "square" | "video" | "wide";
 }
 
-export function ImageUpload({
+export default function ImageUpload({
+  universityId,
   value,
   onChange,
-  label,
-  folder = "uploads",
-  className,
-  aspectRatio = "square",
-}: ImageUploadProps) {
+}: LogoUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [progress, setProgress] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      console.error("File size must be less than 5MB");
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      console.error("File must be an image");
-      return;
-    }
+    if (file.size > 5 * 1024 * 1024) return;
+    if (!file.type.startsWith("image/")) return;
 
     setIsUploading(true);
+    setProgress(0);
+
+    const ticker = setInterval(() => {
+      setProgress((p) => (p < 85 ? p + 12 : p));
+    }, 120);
+
     try {
       const supabase = createClient();
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${folder}/${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2)}.${fileExt}`;
+      const publicUrl = await universityRepository.uploadLogo(
+        file,
+        universityId ?? "temp",
+        supabase,
+      );
 
-      const { error: uploadError } = await supabase.storage
-        .from(ADMIN_ASSETS_BUCKET)
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from(ADMIN_ASSETS_BUCKET).getPublicUrl(fileName);
-
-      onChange(publicUrl);
-    } catch (error) {
-      console.error("Upload failed:", error);
-    } finally {
+      clearInterval(ticker);
+      setProgress(100);
+      setTimeout(() => {
+        onChange(publicUrl);
+        setIsUploading(false);
+        setProgress(0);
+      }, 300);
+    } catch (err) {
+      clearInterval(ticker);
+      console.error("Upload failed:", err);
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      setProgress(0);
+    } finally {
+      if (inputRef.current) inputRef.current.value = "";
     }
   };
 
@@ -75,66 +64,74 @@ export function ImageUpload({
     onChange(null);
   };
 
-  const ratioClass = {
-    square: "aspect-square",
-    video: "aspect-video",
-    wide: "aspect-[2/1]",
-  }[aspectRatio];
-
   return (
-    <div className={className}>
-      <label className="block text-sm font-medium text-primary-700 mb-1">
-        {label}
-      </label>
+    <div className="space-y-2">
+      <label className="label">University Logo</label>
+
       <div
-        onClick={() => !value && fileInputRef.current?.click()}
+        onClick={() => !isUploading && inputRef.current?.click()}
         className={twMerge(
-          "relative border-2 border-dashed border-primary-200 rounded-xl overflow-hidden hover:bg-primary-50 transition-colors group cursor-pointer",
-          ratioClass,
-          value ? "border-solid border-primary-100" : "",
+          "relative w-40 h-40 rounded-2xl border-2 border-dashed border-primary-200 bg-white flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:border-brand-400 hover:bg-brand-50 overflow-hidden group",
+          value && "border-solid border-primary-100 shadow-sm",
+          isUploading && "pointer-events-none",
         )}
       >
         <input
-          ref={fileInputRef}
+          ref={inputRef}
           type="file"
           accept="image/*"
-          onChange={handleUpload}
+          onChange={handleFileChange}
           className="hidden"
         />
 
-        {isUploading ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80">
-            <FiLoader className="size-6 text-brand-600 animate-spin" />
-          </div>
-        ) : value ? (
+        {value && !isUploading ? (
           <>
-            <img src={value} alt="Uploaded image" className="object-cover" />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+            <img
+              src={value}
+              alt="University logo"
+              className="w-full h-full object-contain p-3"
+            />
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  fileInputRef.current?.click();
+                  inputRef.current?.click();
                 }}
-                className="p-2 bg-white/20 hover:bg-white/40 rounded-lg text-white backdrop-blur-sm transition-colors"
-                title="Replace"
+                className="text-xs text-white font-medium bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-lg transition-colors"
               >
-                <FiUpload className="size-4" />
+                Replace
               </button>
               <button
                 type="button"
                 onClick={handleRemove}
-                className="p-2 bg-red-500/80 hover:bg-red-600 rounded-lg text-white backdrop-blur-sm transition-colors"
-                title="Remove"
+                className="text-xs text-white font-medium bg-red-500/70 hover:bg-red-600/80 backdrop-blur-sm px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
               >
-                <FiX className="size-4" />
+                <FiX className="size-3" /> Remove
               </button>
             </div>
           </>
+        ) : isUploading ? (
+          <div className="flex flex-col items-center gap-3 px-4 w-full">
+            <span className="text-xs font-semibold text-brand-600">
+              {progress}%
+            </span>
+            <div className="w-full h-1.5 bg-primary-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-brand-400 to-brand-600 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-primary-400">
-            <FiUpload className="size-8 mb-2" />
-            <span className="text-xs font-medium">Click to upload</span>
+          <div className="flex flex-col items-center gap-2 text-primary-400 group-hover:text-brand-500 transition-colors px-4 text-center">
+            <FiUploadCloud className="size-7" />
+            <span className="text-xs font-medium leading-tight">
+              Click to upload logo
+            </span>
+            <span className="text-[10px] text-primary-300">
+              PNG, SVG · max 5MB
+            </span>
           </div>
         )}
       </div>

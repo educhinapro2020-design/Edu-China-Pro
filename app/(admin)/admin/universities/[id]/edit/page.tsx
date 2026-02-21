@@ -6,6 +6,8 @@ import { universityRepository } from "@/lib/repositories/university.repo";
 import { University } from "@/lib/types/university";
 import { useParams } from "next/navigation";
 import { ProgressiveLoader } from "@/components/ui/ProgressiveLoader";
+import Link from "next/link";
+import { FiArrowLeft } from "react-icons/fi";
 
 export default function EditUniversityPage() {
   const params = useParams();
@@ -31,19 +33,30 @@ export default function EditUniversityPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex-1 flex items-center justify-center">
         <ProgressiveLoader isAdmin message="Loading university..." />
       </div>
     );
   }
 
   if (!university) {
-    return <div>University not found</div>;
+    return (
+      <div className="py-12 text-center text-primary-500">
+        University not found
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="max-w-6xl mx-auto">
+        <Link
+          href="/admin/universities"
+          className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
+        >
+          <FiArrowLeft className="size-4" />
+          Back to Universities
+        </Link>
         <h1 className="text-2xl font-bold text-primary-900 font-serif">
           Edit University
         </h1>

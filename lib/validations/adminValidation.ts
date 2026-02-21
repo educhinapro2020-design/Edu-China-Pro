@@ -82,8 +82,18 @@ export const programFormSchema = z.object({
   cover_image_url: z.string().optional().nullable(),
   is_self_funded: z.boolean().default(false),
   is_scholarship_program: z.boolean().default(false),
+  document_requirements: z.array(z.string()).optional().nullable(),
 });
 
 export type ProgramFormValues = z.infer<typeof programFormSchema>;
 
 export { slugify };
+
+export const cityFormSchema = z.object({
+  name_en: z.string().min(2, "City name is required"),
+  region: z.string().optional().nullable(),
+  country_id: z.uuid("Please select a country"),
+  slug: z.string().min(2, "Slug is required"),
+});
+
+export type CityFormValues = z.infer<typeof cityFormSchema>;

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/client";
 import { University, UniversityFilter } from "@/lib/types/university";
 import { UniversityInsert, UniversityUpdate } from "@/lib/types/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { ADMIN_ASSETS_BUCKET } from "../constants/admin";
 
 export const universityRepository = {
   async getUniversities(
@@ -61,7 +62,9 @@ export const universityRepository = {
     const supabase = client ?? createClient();
     let query = supabase
       .from("universities")
-      .select("*, city:cities(name_en, slug)", { count: "exact" });
+      .select("*, city:cities(name_en, slug), programs(count)", {
+        count: "exact",
+      });
 
     if (filter.search) {
       query = query.ilike("name_en", `%${filter.search}%`);
@@ -189,5 +192,27 @@ export const universityRepository = {
       console.error("Error deleting university:", error);
       throw error;
     }
+  },
+
+  async uploadLogo(
+    file: File,
+    folder: string,
+    client?: SupabaseClient,
+  ): Promise<string> {
+    const supabase = client ?? createClient();
+    const fileExt = file.name.split(".").pop();
+    const fileName = `universities/${folder}/logo-${Date.now()}.${fileExt}`;
+
+    const { error } = await supabase.storage
+      .from(ADMIN_ASSETS_BUCKET)
+      .upload(fileName, file, { upsert: true });
+
+    if (error) throw error;
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from(ADMIN_ASSETS_BUCKET).getPublicUrl(fileName);
+
+    return publicUrl;
   },
 };

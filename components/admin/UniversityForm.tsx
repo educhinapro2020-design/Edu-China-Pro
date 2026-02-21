@@ -3,16 +3,26 @@
 import { useRouter } from "next/navigation";
 import {
   useEffect,
+  useRef,
   useState,
   type ChangeEvent,
   type SyntheticEvent,
 } from "react";
-import { FiSave } from "react-icons/fi";
+import {
+  FiSave,
+  FiCheck,
+  FiRefreshCw,
+  FiSettings,
+  FiX,
+  FiPlus,
+  FiChevronDown,
+} from "react-icons/fi";
 import { universityRepository } from "@/lib/repositories/university.repo";
 import { University } from "@/lib/types/university";
 import {
   universityFormSchema,
   slugify,
+  cityFormSchema,
 } from "@/lib/validations/adminValidation";
 import {
   COUNTRY_SPECIFIC_LABELS,
@@ -21,13 +31,394 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { ImageUpload } from "@/components/admin/ImageUpload";
+import { City, Country } from "@/lib/types/university";
 import { referenceRepository } from "@/lib/repositories/reference.repo";
-import { City } from "@/lib/types/university";
+import { AnimatePresence, motion } from "framer-motion";
+import { twMerge } from "tailwind-merge";
+import ImageUpload from "./ImageUpload";
 
 interface UniversityFormProps {
   initialData?: University;
   isEditing?: boolean;
+}
+
+interface AddCityDialogProps {
+  initialSearch: string;
+  countries: Country[];
+  onCreated: (city: City) => void;
+  onClose: () => void;
+}
+
+interface CityComboboxProps {
+  value: string; // city_id UUID
+  onChange: (cityId: string) => void;
+  error?: string;
+}
+
+function AddCityDialog({
+  initialSearch,
+  countries,
+  onCreated,
+  onClose,
+}: AddCityDialogProps) {
+  const [form, setForm] = useState({
+    name_en: initialSearch,
+    region: "",
+    country_id: countries[0]?.id ?? "",
+    slug: slugify(initialSearch),
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => {
+      const next = { ...prev, [name]: value };
+      if (name === "name_en") next.slug = slugify(value);
+      return next;
+    });
+  };
+
+  const handleSubmit = async () => {
+    setErrors({});
+    const result = cityFormSchema.safeParse({
+      name_en: form.name_en,
+      region: form.region || null,
+      country_id: form.country_id,
+      slug: form.slug,
+    });
+
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        fieldErrors[issue.path.join(".")] = issue.message;
+      }
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const city = await referenceRepository.createCity(result.data);
+      onCreated(city);
+    } catch {
+      setErrors({ root: "Failed to create city. The slug may already exist." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl border border-primary-100 p-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="heading-4">Add New City</h3>
+            <p className="body-small text-primary-500 mt-0.5">
+              Available immediately after saving.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-xl hover:bg-primary-50 text-primary-400 hover:text-primary-700 transition-colors"
+          >
+            <FiX className="size-4" />
+          </button>
+        </div>
+
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <label className="label">City Name (EN)</label>
+            <Input
+              autoFocus
+              name="name_en"
+              value={form.name_en}
+              onChange={handleChange}
+              placeholder="e.g. Shanghai"
+            />
+            {errors.name_en && (
+              <p className="caption text-error">{errors.name_en}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="label">Region / Province</label>
+            <Input
+              name="region"
+              value={form.region}
+              onChange={handleChange}
+              placeholder="e.g. Shanghai Municipality"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="label">Country</label>
+            <Select
+              value={form.country_id}
+              onChange={(val) =>
+                setForm((prev) => ({ ...prev, country_id: val }))
+              }
+              options={countries.map((c) => ({
+                label: c.name_en,
+                value: c.id,
+              }))}
+              placeholder="Select country"
+            />
+            {errors.country_id && (
+              <p className="caption text-error">{errors.country_id}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="label">Slug</label>
+              <button
+                type="button"
+                onClick={() =>
+                  setForm((p) => ({ ...p, slug: slugify(p.name_en) }))
+                }
+                className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-800 transition-colors"
+              >
+                <FiRefreshCw className="size-3" /> Regenerate
+              </button>
+            </div>
+            <Input
+              name="slug"
+              value={form.slug}
+              onChange={handleChange}
+              placeholder="e.g. shanghai"
+              className="font-mono"
+            />
+            {errors.slug && <p className="caption text-error">{errors.slug}</p>}
+          </div>
+
+          {errors.root && (
+            <p className="caption text-error bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+              {errors.root}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-12 px-6 rounded-xl border border-primary-200 text-base text-primary-700 hover:bg-primary-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="h-12 px-6 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-base font-medium transition-colors disabled:opacity-60 flex items-center gap-2"
+          >
+            <FiPlus className="size-4" />
+            {isSubmitting ? "Saving..." : "Add City"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CitySelector({ value, onChange, error }: CityComboboxProps) {
+  const [cities, setCities] = useState<City[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [search, setSearch] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    referenceRepository.getCities().then(setCities);
+    referenceRepository.getCountries().then(setCountries);
+  }, []);
+
+  const selectedCity = cities.find((c) => c.id === value);
+
+  const filtered = search.trim()
+    ? cities.filter(
+        (c) =>
+          c.name_en.toLowerCase().includes(search.toLowerCase()) ||
+          (c.region ?? "").toLowerCase().includes(search.toLowerCase()),
+      )
+    : cities;
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+        setSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleOpen = () => {
+    setIsOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const handleSelect = (city: City) => {
+    onChange(city.id);
+    setSearch("");
+    setIsOpen(false);
+  };
+
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange("");
+    setSearch("");
+  };
+
+  const handleCityCreated = (city: City) => {
+    setCities((prev) =>
+      [...prev, city].sort((a, b) => a.name_en.localeCompare(b.name_en)),
+    );
+    onChange(city.id);
+    setShowAddDialog(false);
+    setSearch("");
+  };
+
+  return (
+    <>
+      <div className="relative" ref={containerRef}>
+        <button
+          type="button"
+          onClick={handleOpen}
+          className={twMerge(
+            "flex w-full items-center justify-between rounded-xl border border-primary-200 bg-white px-4 h-12 text-base text-left transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500",
+            isOpen && "border-brand-500 ring-4 ring-brand-500/10",
+            error && !isOpen && "border-error",
+          )}
+        >
+          {isOpen ? (
+            <input
+              ref={inputRef}
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+              placeholder="Type to search..."
+              className="flex-1 bg-transparent text-base text-primary-900 placeholder:text-primary-400 focus:outline-none"
+            />
+          ) : (
+            <span
+              className={twMerge(
+                "flex-1 truncate",
+                !selectedCity ? "text-primary-400" : "text-primary-900",
+              )}
+            >
+              {selectedCity ? selectedCity.name_en : "Select city..."}
+            </span>
+          )}
+
+          <div className="flex items-center gap-1.5 ml-2 shrink-0">
+            {value && !isOpen && (
+              <span
+                role="button"
+                onClick={handleClear}
+                className="p-0.5 rounded text-primary-400 hover:text-primary-700 transition-colors"
+              >
+                <FiX className="size-3.5" />
+              </span>
+            )}
+            <FiChevronDown
+              className={twMerge(
+                "size-4 text-primary-400 transition-transform duration-200",
+                isOpen && "rotate-180 text-brand-500",
+              )}
+            />
+          </div>
+        </button>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.95 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-primary-100 bg-white p-2 shadow-xl shadow-primary-900/10"
+            >
+              <ul className="max-h-60 overflow-y-auto">
+                {filtered.length === 0 && (
+                  <li className="p-3 text-center text-sm text-primary-400">
+                    No cities found
+                  </li>
+                )}
+                {filtered.map((city) => (
+                  <li key={city.id}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => handleSelect(city)}
+                      className={twMerge(
+                        "flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-base font-medium transition-colors text-left",
+                        city.id === value
+                          ? "bg-brand-50 text-brand-700"
+                          : "text-primary-600 hover:bg-primary-50 hover:text-primary-900",
+                      )}
+                    >
+                      <span>{city.name_en}</span>
+                      <span className="flex items-center gap-2">
+                        {city.region && (
+                          <span className="text-xs font-normal text-primary-400">
+                            {city.region}
+                          </span>
+                        )}
+                        {city.id === value && (
+                          <FiCheck className="size-4 text-brand-500" />
+                        )}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="border-t border-primary-100 mt-1 pt-1">
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setShowAddDialog(true);
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-4 py-2.5 text-base font-medium text-brand-600 hover:bg-brand-50 transition-colors text-left"
+                >
+                  <FiPlus className="size-4" />
+                  {search ? `Add "${search}"` : "Add new city"}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {error && <p className="caption text-error mt-1">{error}</p>}
+
+      {showAddDialog && (
+        <AddCityDialog
+          initialSearch={search}
+          countries={countries}
+          onCreated={handleCityCreated}
+          onClose={() => setShowAddDialog(false)}
+        />
+      )}
+    </>
+  );
 }
 
 export function UniversityForm({
@@ -35,11 +426,9 @@ export function UniversityForm({
   isEditing = false,
 }: UniversityFormProps) {
   const router = useRouter();
-  const [cities, setCities] = useState<City[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Form state
   const [form, setForm] = useState({
     name_en: initialData?.name_en ?? "",
     name_local: initialData?.name_local ?? "",
@@ -47,7 +436,7 @@ export function UniversityForm({
     city_id: initialData?.city_id ?? "",
     institution_type: initialData?.institution_type ?? "public",
     level: initialData?.level ?? "",
-    logo_url: initialData?.logo_url ?? "",
+    logo_url: initialData?.logo_url ?? null,
     cover_image_url: initialData?.cover_image_url ?? "",
     shanghai_rank: initialData?.shanghai_rank ?? "",
     shanghai_rank_year: initialData?.shanghai_rank_year ?? "",
@@ -75,17 +464,11 @@ export function UniversityForm({
     },
   });
 
-  // Auto-generate slug from name
   useEffect(() => {
     if (!isEditing && form.name_en) {
       setForm((prev) => ({ ...prev, slug: slugify(prev.name_en) }));
     }
   }, [form.name_en, isEditing]);
-
-  // Fetch cities
-  useEffect(() => {
-    referenceRepository.getCities().then(setCities);
-  }, []);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -108,11 +491,17 @@ export function UniversityForm({
     }));
   };
 
+  const handleGenerateSlug = () => {
+    const baseName = form.name_en || form.name_local;
+    if (baseName) {
+      setForm((prev) => ({ ...prev, slug: slugify(baseName) }));
+    }
+  };
+
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
     setErrors({});
 
-    // Build data for validation — coerce numeric strings
     const payload = {
       name_en: form.name_en,
       name_local: form.name_local || null,
@@ -121,7 +510,7 @@ export function UniversityForm({
       institution_type: form.institution_type as "public" | "private",
       level: form.level || null,
       logo_url: form.logo_url || null,
-      cover_image_url: form.cover_image_url || null,
+      cover_image_url: initialData?.cover_image_url || null,
       shanghai_rank: form.shanghai_rank ? Number(form.shanghai_rank) : null,
       shanghai_rank_year: form.shanghai_rank_year
         ? Number(form.shanghai_rank_year)
@@ -174,239 +563,290 @@ export function UniversityForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl">
-      <div className="bg-white p-6 rounded-2xl border border-primary-100 shadow-sm space-y-6">
-        <h2 className="text-lg font-semibold text-primary-900 font-serif border-b border-primary-50 pb-2">
-          Basic Information
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              University Name (EN)
-            </label>
-            <Input
-              name="name_en"
-              value={form.name_en}
-              onChange={handleChange}
-              placeholder="e.g. Peking University"
-            />
-            {errors.name_en && (
-              <p className="text-sm text-error">{errors.name_en}</p>
-            )}
+    <form onSubmit={handleSubmit} className="relative max-w-6xl mx-auto">
+      <div className="flex flex-col gap-8 pb-12">
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
+          <div>
+            <h2 className="heading-4">Basic Information</h2>
+            <p className="body-small text-primary-500 mt-1">
+              Core details and primary identifiers for the university.
+            </p>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Name (Local/Chinese)
-            </label>
-            <Input
-              name="name_local"
-              value={form.name_local}
-              onChange={handleChange}
-              placeholder="e.g. 北京大学"
-            />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="space-y-2.5">
+              <label className="label">University Name (EN)</label>
+              <Input
+                name="name_en"
+                value={form.name_en}
+                onChange={handleChange}
+                placeholder="e.g. Peking University"
+              />
+              {errors.name_en && (
+                <p className="caption text-error">{errors.name_en}</p>
+              )}
+            </div>
+            <div className="space-y-2.5">
+              <label className="label">Name (Local/Chinese)</label>
+              <Input
+                name="name_local"
+                value={form.name_local}
+                onChange={handleChange}
+                placeholder="e.g. 北京大学"
+              />
+            </div>
+            <div className="space-y-2.5 md:col-span-2 bg-primary-50/50 p-5 rounded-2xl border border-primary-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+                <div className="flex items-center gap-2">
+                  <FiSettings className="text-brand-600 size-4" />
+                  <label className="label mb-0">URL Slug</label>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateSlug}
+                  className="h-8 text-xs bg-white border-primary-200 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200"
+                >
+                  <FiRefreshCw className="mr-1.5 size-3" />
+                  Generate Slug
+                </Button>
+              </div>
+              <Input
+                name="slug"
+                value={form.slug}
+                onChange={handleChange}
+                placeholder="peking-university"
+                className="bg-white font-mono text-sm"
+              />
+              <p className="caption text-primary-500 mt-2">
+                This determines the web address for the university (e.g.,
+                educhinapro.com/universities/<strong>your-slug</strong>). It
+                must be unique, lowercase, and use hyphens instead of spaces. A
+                good slug improves SEO.
+              </p>
+              {errors.slug && (
+                <p className="caption text-error mt-1">{errors.slug}</p>
+              )}
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">Slug</label>
-            <Input
-              name="slug"
-              value={form.slug}
-              onChange={handleChange}
-              placeholder="peking-university"
-            />
-            {errors.slug && <p className="text-sm text-error">{errors.slug}</p>}
-          </div>
+            <div className="space-y-2.5 md:col-span-2">
+              <label className="label">Profile / Description</label>
+              <textarea
+                name="profile_text"
+                value={form.profile_text}
+                onChange={handleChange}
+                placeholder="Brief description of the university..."
+                rows={6}
+                className="flex w-full rounded-xl border border-primary-200 bg-white px-4 py-3 max-w-5xl mx-auto text-primary-900 placeholder:text-primary-400 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 resize-none"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">City</label>
-            <Select
-              value={form.city_id}
-              onChange={(val) => setForm((prev) => ({ ...prev, city_id: val }))}
-              options={cities.map((c) => ({
-                label: c.name_en,
-                value: c.id,
-              }))}
-              placeholder="Select City"
-            />
-            {errors.city_id && (
-              <p className="text-sm text-error">{errors.city_id}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">Type</label>
-            <Select
-              value={form.institution_type}
-              onChange={(val) =>
-                setForm((prev) => ({
-                  ...prev,
-                  institution_type: val as typeof prev.institution_type,
-                }))
-              }
-              options={INSTITUTION_TYPE_OPTIONS}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Level
-            </label>
-            <Input
-              name="level"
-              value={form.level}
-              onChange={handleChange}
-              placeholder="e.g. National Key University"
-            />
+            <div className="space-y-2.5 md:col-span-2">
+              <ImageUpload
+                universityId={initialData?.id}
+                value={form.logo_url}
+                onChange={(url) =>
+                  setForm((prev) => ({ ...prev, logo_url: url }))
+                }
+              />
+            </div>
+            <div className="space-y-2.5">
+              <label className="label">City</label>
+              <CitySelector
+                value={form.city_id}
+                onChange={(val) =>
+                  setForm((prev) => ({ ...prev, city_id: val }))
+                }
+                error={errors.city_id}
+              />
+            </div>
+            <div className="space-y-2.5">
+              <label className="label">Institution Type</label>
+              <Select
+                value={form.institution_type}
+                onChange={(val) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    institution_type: val as typeof prev.institution_type,
+                  }))
+                }
+                options={INSTITUTION_TYPE_OPTIONS}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-          <ImageUpload
-            label="Logo"
-            value={form.logo_url || null}
-            onChange={(url) =>
-              setForm((prev) => ({ ...prev, logo_url: url ?? "" }))
-            }
-            folder="universities/logos"
-          />
-          <ImageUpload
-            label="Cover Image"
-            value={form.cover_image_url || null}
-            onChange={(url) =>
-              setForm((prev) => ({ ...prev, cover_image_url: url ?? "" }))
-            }
-            folder="universities/covers"
-            aspectRatio="video"
-          />
-        </div>
-      </div>
-      <div className="bg-white p-6 rounded-2xl border border-primary-100 shadow-sm space-y-6">
-        <h2 className="text-lg font-semibold text-primary-900 font-serif border-b border-primary-50 pb-2">
-          Rankings &amp; Stats
-        </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-primary-500">
-              QS Rank
-            </label>
-            <Input
-              type="number"
-              name="qs_rank"
-              value={form.qs_rank}
-              onChange={handleChange}
-            />
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
+          <div>
+            <h2 className="heading-4">Rankings &amp; Stats</h2>
+            <p className="body-small text-primary-500 mt-1">
+              Global prestige and academic metrics.
+            </p>
           </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-primary-500">
-              QS Year
-            </label>
-            <Input
-              type="number"
-              name="qs_rank_year"
-              value={form.qs_rank_year}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-primary-500">
-              Shanghai Rank
-            </label>
-            <Input
-              type="number"
-              name="shanghai_rank"
-              value={form.shanghai_rank}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-primary-500">
-              Majors Count
-            </label>
-            <Input
-              type="number"
-              name="majors_count"
-              value={form.majors_count}
-              onChange={handleChange}
-            />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-2.5">
+              <label className="label">QS Rank</label>
+              <Input
+                type="number"
+                name="qs_rank"
+                value={form.qs_rank}
+                onChange={handleChange}
+                placeholder="e.g. 1"
+              />
+            </div>
+            <div className="space-y-2.5">
+              <label className="label">QS Year</label>
+              <Input
+                type="number"
+                name="qs_rank_year"
+                value={form.qs_rank_year}
+                onChange={handleChange}
+                placeholder={new Date().getFullYear().toString()}
+              />
+            </div>
+            <div className="space-y-2.5">
+              <label className="label">Shanghai Rank</label>
+              <Input
+                type="number"
+                name="shanghai_rank"
+                value={form.shanghai_rank}
+                onChange={handleChange}
+                placeholder="e.g. 1"
+              />
+            </div>
+            <div className="space-y-2.5">
+              <label className="label">Majors Count</label>
+              <Input
+                type="number"
+                name="majors_count"
+                value={form.majors_count}
+                onChange={handleChange}
+                placeholder="e.g. 120"
+              />
+            </div>
           </div>
         </div>
-      </div>
-      <div className="bg-white p-6 rounded-2xl border border-primary-100 shadow-sm space-y-6">
-        <h2 className="text-lg font-semibold text-primary-900 font-serif border-b border-primary-50 pb-2">
-          Features
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {COUNTRY_SPECIFIC_LABELS.map((label) => (
-            <label
-              key={label.key}
-              className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-                form.country_specific_data[
+
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-6">
+          <div>
+            <h2 className="heading-4">Features &amp; Recognition</h2>
+            <p className="body-small text-primary-500 mt-1">
+              Select applicable country-specific distinctions and availability.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {COUNTRY_SPECIFIC_LABELS.map((label) => {
+              const isSelected =
+                !!form.country_specific_data[
                   label.key as keyof typeof form.country_specific_data
-                ]
-                  ? "bg-brand-50 border-brand-200"
-                  : "bg-white border-primary-200 hover:bg-primary-50"
+                ];
+              return (
+                <label
+                  key={label.key}
+                  className={`relative flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group ${
+                    isSelected
+                      ? "bg-brand-50 border-brand-500 shadow-sm"
+                      : "bg-white border-primary-100 hover:border-brand-200 hover:bg-primary-50"
+                  }`}
+                >
+                  <div className="flex h-6 items-center">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) =>
+                        handleCountrySpecific(label.key, e.target.checked)
+                      }
+                      className="peer sr-only"
+                    />
+                    <div
+                      className={`flex size-5 items-center justify-center rounded border transition-colors ${
+                        isSelected
+                          ? "bg-brand-600 border-brand-600 text-white"
+                          : "border-primary-300 bg-white text-transparent group-hover:border-brand-400"
+                      }`}
+                    >
+                      <FiCheck className="size-3.5" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <span
+                      className={`block text-sm font-semibold transition-colors ${
+                        isSelected
+                          ? "text-brand-900"
+                          : "text-primary-700 group-hover:text-primary-900"
+                      }`}
+                    >
+                      {label.label}
+                    </span>
+                  </div>
+                </label>
+              );
+            })}
+
+            <label
+              className={`relative flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group ${
+                form.self_financed_available
+                  ? "bg-brand-50 border-brand-500 shadow-sm"
+                  : "bg-white border-primary-100 hover:border-brand-200 hover:bg-primary-50"
               }`}
             >
-              <input
-                type="checkbox"
-                checked={
-                  !!form.country_specific_data[
-                    label.key as keyof typeof form.country_specific_data
-                  ]
-                }
-                onChange={(e) =>
-                  handleCountrySpecific(label.key, e.target.checked)
-                }
-                className="size-4 rounded border-primary-300 text-brand-600 focus:ring-brand-500"
-              />
-              <span className="text-sm font-medium text-primary-700">
-                {label.label}
-              </span>
+              <div className="flex h-6 items-center">
+                <input
+                  type="checkbox"
+                  name="self_financed_available"
+                  checked={form.self_financed_available}
+                  onChange={handleChange}
+                  className="peer sr-only"
+                />
+                <div
+                  className={`flex size-5 items-center justify-center rounded border transition-colors ${
+                    form.self_financed_available
+                      ? "bg-brand-600 border-brand-600 text-white"
+                      : "border-primary-300 bg-white text-transparent group-hover:border-brand-400"
+                  }`}
+                >
+                  <FiCheck className="size-3.5" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <span
+                  className={`block text-sm font-semibold transition-colors ${
+                    form.self_financed_available
+                      ? "text-brand-900"
+                      : "text-primary-700 group-hover:text-primary-900"
+                  }`}
+                >
+                  Self-Financed Available
+                </span>
+              </div>
             </label>
-          ))}
-          <label
-            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
-              form.self_financed_available
-                ? "bg-brand-50 border-brand-200"
-                : "bg-white border-primary-200 hover:bg-primary-50"
-            }`}
-          >
-            <input
-              type="checkbox"
-              name="self_financed_available"
-              checked={form.self_financed_available}
-              onChange={handleChange}
-              className="size-4 rounded border-primary-300 text-brand-600 focus:ring-brand-500"
-            />
-            <span className="text-sm font-medium text-primary-700">
-              Self-Financed Available
-            </span>
-          </label>
+          </div>
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 md:left-64 p-4 bg-white border-t border-primary-100 flex items-center justify-end gap-3 z-30">
+
+      <div className="flex items-center justify-end gap-3 pt-6 border-t border-primary-100">
         <Button
           type="button"
           variant="outline"
+          size="sm"
           onClick={() => router.back()}
           disabled={isSubmitting}
+          className="rounded-xl px-6 border-primary-200 bg-white hover:bg-primary-50 transition-colors"
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting} className="gap-2">
-          {isSubmitting ? (
-            "Saving..."
-          ) : (
-            <>
-              <FiSave className="size-4" />
-              Save University
-            </>
-          )}
+        <Button
+          type="submit"
+          size="sm"
+          disabled={isSubmitting}
+          className="rounded-xl px-6 gap-2 bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition-all"
+        >
+          {isSubmitting ? "Saving..." : <>Save</>}
         </Button>
       </div>
-      <div className="h-16" /> {/* Spacer for fixed footer */}
     </form>
   );
 }
