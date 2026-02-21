@@ -110,7 +110,7 @@ export default function AdminApplicationDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[80vh]">
+      <div className="flex-1 flex items-center justify-center">
         <ProgressiveLoader message="Loading application…" isAdmin />
       </div>
     );

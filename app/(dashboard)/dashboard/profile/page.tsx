@@ -399,7 +399,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[95vh]">
+      <div className="flex-1 flex items-center justify-center">
         <ProgressiveLoader message="Loading your profile..." />
       </div>
     );
@@ -418,7 +418,7 @@ export default function ProfilePage() {
   >;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
           <Link href="/dashboard">

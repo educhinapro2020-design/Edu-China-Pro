@@ -17,9 +17,11 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-primary-50">
+    <div className="min-h-screen bg-primary-50 flex flex-col">
       <StudentNavbar user={user} />
-      <main className="container mx-auto px-4 py-8">{children}</main>
+      <main className="flex-1 container mx-auto px-4 py-8 flex flex-col">
+        {children}
+      </main>
     </div>
   );
 }

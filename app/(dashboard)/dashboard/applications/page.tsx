@@ -45,7 +45,7 @@ export default function ApplicationsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[80vh]">
+      <div className="flex-1 flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full size-10 border-t-2 border-b-2 border-brand-500"></div>
       </div>
     );

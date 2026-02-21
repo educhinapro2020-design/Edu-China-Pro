@@ -35,8 +35,8 @@ export default async function AdminLayout({
           avatar: profile.avatar_url,
         }}
       />
-      <main className="flex-1 min-h-screen min-w-0">
-        <div className="p-4 pt-18 md:p-8 ">{children}</div>
+      <main className="flex-1 min-h-screen min-w-0 flex flex-col">
+        <div className="flex-1 p-4 pt-18 md:p-8 flex flex-col">{children}</div>
       </main>
     </div>
   );

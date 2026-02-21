@@ -117,20 +117,29 @@ export default function AdminUniversitiesPage() {
         </span>
       ),
     },
+
     {
-      header: "Rank",
-      accessor: "qs_rank",
-      render: (row) => (
-        <div className="text-xs">
-          {row.qs_rank ? (
-            <span className="px-2 py-0.5 bg-primary-100 rounded text-primary-700 font-medium">
-              QS #{row.qs_rank}
+      header: "Programs",
+      accessor: "id",
+      render: (row) => {
+        const programsInfo = (row as any).programs;
+        const count =
+          programsInfo && programsInfo.length > 0 ? programsInfo[0].count : 0;
+        return (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-primary-500">
+              {count}
             </span>
-          ) : (
-            "—"
-          )}
-        </div>
-      ),
+            <Link
+              href={`/admin/universities/${row.id}/programs`}
+              className="px-3 py-1 flex items-center gap-2 cursor-pointer text-primary-600 hover:text-brand-600 hover:underline rounded-lg text-sm font-medium transition-colors"
+            >
+              <FiExternalLink />
+              Manage
+            </Link>
+          </div>
+        );
+      },
     },
   ];
 
@@ -143,6 +152,14 @@ export default function AdminUniversitiesPage() {
           </h1>
           <p className="text-primary-500">Manage university profiles</p>
         </div>
+        <Link
+          href="/admin/universities/new"
+          className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
+        >
+          <Button startIcon={<FiPlus />} size="sm">
+            Add University
+          </Button>
+        </Link>
       </div>
 
       <DataTable
@@ -155,22 +172,7 @@ export default function AdminUniversitiesPage() {
         onSearch={setSearch}
         searchPlaceholder="Search universities..."
         isLoading={isLoading}
-      />
-
-      <ConfirmModal
-        isOpen={!!deleteId}
-        onClose={() => setDeleteId(null)}
-        onConfirm={handleDelete}
-        title="Delete University"
-        message="Are you sure you want to delete this university? This action cannot be undone and will cascadingly delete all associated programs."
-        isLoading={isDeleting}
-      />
-    </div>
-  );
-}
-
-/*TODO: add actions
- {/*actions={(row) => (
+        actions={(row) => (
           <>
             <Link
               href={`/universities/${row.slug}`}
@@ -199,4 +201,16 @@ export default function AdminUniversitiesPage() {
             </button>
           </>
         )}
-        */
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Delete University"
+        message="Are you sure you want to delete this university? This action cannot be undone and will cascadingly delete all associated programs."
+        isLoading={isDeleting}
+      />
+    </div>
+  );
+}
