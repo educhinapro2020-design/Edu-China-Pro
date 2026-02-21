@@ -6,8 +6,9 @@ import {
   useState,
   type ChangeEvent,
   type SyntheticEvent,
+  useRef,
 } from "react";
-import { FiSave } from "react-icons/fi";
+import { FiSave, FiCheck, FiRefreshCw, FiSettings } from "react-icons/fi";
 import { programRepository } from "@/lib/repositories/program.repo";
 import { universityRepository } from "@/lib/repositories/university.repo";
 import { referenceRepository } from "@/lib/repositories/reference.repo";
@@ -19,10 +20,10 @@ import {
   INTAKE_SEASON_OPTIONS,
   TEACHING_LANGUAGE_OPTIONS,
 } from "@/lib/constants/admin";
+import { DOCUMENT_REGISTRY } from "@/lib/constants/documents";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { ImageUpload } from "@/components/admin/ImageUpload";
 
 interface ProgramFormProps {
   initialData?: Program;
@@ -39,13 +40,11 @@ export function ProgramForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Fetch dependencies
   useEffect(() => {
     universityRepository.getUniversities({ limit: 100 }).then(setUniversities);
     referenceRepository.getSubjectAreas().then(setSubjectAreas);
   }, []);
 
-  // Form state
   const [form, setForm] = useState({
     name_en: initialData?.name_en ?? "",
     name_local: initialData?.name_local ?? "",
@@ -75,14 +74,29 @@ export function ProgramForm({
     cover_image_url: initialData?.cover_image_url ?? "",
     is_self_funded: initialData?.is_self_funded ?? false,
     is_scholarship_program: initialData?.is_scholarship_program ?? false,
+    document_requirements:
+      initialData?.document_requirements ?? ([] as string[]),
   });
 
-  // Auto-generate slug
-  useEffect(() => {
-    if (!isEditing && form.name_en) {
-      setForm((prev) => ({ ...prev, slug: slugify(prev.name_en) }));
+  const handleDocumentChange = (docId: string, checked: boolean) => {
+    setForm((prev) => {
+      const current = prev.document_requirements || [];
+      if (checked) {
+        return { ...prev, document_requirements: [...current, docId] };
+      }
+      return {
+        ...prev,
+        document_requirements: current.filter((id) => id !== docId),
+      };
+    });
+  };
+
+  const handleGenerateSlug = () => {
+    const baseName = form.name_en || form.name_local;
+    if (baseName) {
+      setForm((prev) => ({ ...prev, slug: slugify(baseName) }));
     }
-  }, [form.name_en, isEditing]);
+  };
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -102,7 +116,6 @@ export function ProgramForm({
     e.preventDefault();
     setErrors({});
 
-    // Build payload with proper types
     const payload = {
       name_en: form.name_en,
       name_local: form.name_local || null,
@@ -140,6 +153,7 @@ export function ProgramForm({
       cover_image_url: form.cover_image_url || null,
       is_self_funded: form.is_self_funded,
       is_scholarship_program: form.is_scholarship_program,
+      document_requirements: form.document_requirements,
     };
 
     const result = programFormSchema.safeParse(payload);
@@ -170,251 +184,417 @@ export function ProgramForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl">
-      {/* Basic Info */}
-      <div className="bg-white p-6 rounded-2xl border border-primary-100 shadow-sm space-y-6">
-        <h2 className="text-lg font-semibold text-primary-900 font-serif border-b border-primary-50 pb-2">
-          Program Basics
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Program Name (EN)
-            </label>
-            <Input
-              name="name_en"
-              value={form.name_en}
-              onChange={handleChange}
-              placeholder="e.g. Computer Science"
-            />
-            {errors.name_en && (
-              <p className="text-sm text-error">{errors.name_en}</p>
-            )}
+    <form onSubmit={handleSubmit} className="relative max-w-6xl mx-auto">
+      <div className="flex flex-col gap-8 pb-12">
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
+          <div>
+            <h2 className="heading-4">Program Basics</h2>
+            <p className="body-small text-primary-500 mt-1">
+              Core academic details and categorical information.
+            </p>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">Slug</label>
-            <Input
-              name="slug"
-              value={form.slug}
-              onChange={handleChange}
-              placeholder="computer-science"
-            />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="space-y-2.5">
+              <label className="label">Program Name (EN)</label>
+              <Input
+                name="name_en"
+                value={form.name_en}
+                onChange={handleChange}
+                placeholder="e.g. Computer Science"
+              />
+              {errors.name_en && (
+                <p className="caption text-error">{errors.name_en}</p>
+              )}
+            </div>
+
+            <div className="space-y-2.5 md:col-span-2 bg-primary-50/50 p-5 rounded-2xl border border-primary-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+                <div className="flex items-center gap-2">
+                  <FiSettings className="text-brand-600 size-4" />
+                  <label className="label mb-0">URL Slug</label>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateSlug}
+                  className="h-8 text-xs bg-white border-primary-200 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200"
+                >
+                  <FiRefreshCw className="mr-1.5 size-3" />
+                  Generate Slug
+                </Button>
+              </div>
+              <Input
+                name="slug"
+                value={form.slug}
+                onChange={handleChange}
+                placeholder="computer-science"
+                className="bg-white font-mono text-sm"
+              />
+              <p className="caption text-primary-500 mt-2">
+                This determines the web address for the program. It must be
+                unique, lowercase, and use hyphens instead of spaces. A good
+                slug improves SEO.
+              </p>
+              {errors.slug && (
+                <p className="caption text-error mt-1">{errors.slug}</p>
+              )}
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="label">University</label>
+              <Select
+                value={form.university_id}
+                onChange={(val) =>
+                  setForm((prev) => ({ ...prev, university_id: val }))
+                }
+                options={universities.map((u) => ({
+                  label: u.name_en,
+                  value: u.id,
+                }))}
+                placeholder="Select University"
+              />
+              {errors.university_id && (
+                <p className="caption text-error">{errors.university_id}</p>
+              )}
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="label">Subject Area</label>
+              <Select
+                value={form.subject_area_id}
+                onChange={(val) =>
+                  setForm((prev) => ({ ...prev, subject_area_id: val }))
+                }
+                options={subjectAreas.map((s) => ({
+                  label: s.name_en,
+                  value: s.id,
+                }))}
+                placeholder="Select Subject"
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="label">Degree Level</label>
+              <Select
+                value={form.degree_level}
+                onChange={(val) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    degree_level: val as typeof prev.degree_level,
+                  }))
+                }
+                options={DEGREE_LEVEL_OPTIONS}
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="label">Teaching Language</label>
+              <Select
+                value={form.language}
+                onChange={(val) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    language: val as typeof prev.language,
+                  }))
+                }
+                options={TEACHING_LANGUAGE_OPTIONS}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              University
-            </label>
-            <Select
-              value={form.university_id}
-              onChange={(val) =>
-                setForm((prev) => ({ ...prev, university_id: val }))
-              }
-              options={universities.map((u) => ({
-                label: u.name_en,
-                value: u.id,
-              }))}
-              placeholder="Select University"
-            />
-            {errors.university_id && (
-              <p className="text-sm text-error">{errors.university_id}</p>
-            )}
+        </div>
+
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
+          <div>
+            <h2 className="heading-4">Intake &amp; Application</h2>
+            <p className="body-small text-primary-500 mt-1">
+              Admissions timeline and student eligibility.
+            </p>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Subject Area
-            </label>
-            <Select
-              value={form.subject_area_id}
-              onChange={(val) =>
-                setForm((prev) => ({ ...prev, subject_area_id: val }))
-              }
-              options={subjectAreas.map((s) => ({
-                label: s.name_en,
-                value: s.id,
-              }))}
-              placeholder="Select Subject"
-            />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2.5">
+              <label className="label">Intake Season</label>
+              <Select
+                value={form.intake_season}
+                onChange={(val) =>
+                  setForm((prev) => ({ ...prev, intake_season: val }))
+                }
+                options={INTAKE_SEASON_OPTIONS}
+                placeholder="Select Season"
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="label">Duration</label>
+              <Input
+                name="duration"
+                value={form.duration}
+                onChange={handleChange}
+                placeholder="e.g. 4 years"
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="label">Application Deadline</label>
+              <Input
+                type="date"
+                name="application_deadline"
+                value={form.application_deadline}
+                onChange={handleChange}
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Degree Level
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label
+              className={`relative flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group ${
+                form.accepts_minors
+                  ? "bg-brand-50 border-brand-500 shadow-sm"
+                  : "bg-white border-primary-100 hover:border-brand-200 hover:bg-primary-50"
+              }`}
+            >
+              <div className="flex h-6 items-center">
+                <input
+                  type="checkbox"
+                  name="accepts_minors"
+                  checked={form.accepts_minors}
+                  onChange={handleChange}
+                  className="peer sr-only"
+                />
+                <div
+                  className={`flex size-5 items-center justify-center rounded border transition-colors ${
+                    form.accepts_minors
+                      ? "bg-brand-600 border-brand-600 text-white"
+                      : "border-primary-300 bg-white text-transparent group-hover:border-brand-400"
+                  }`}
+                >
+                  <FiCheck className="size-3.5" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <span
+                  className={`block text-sm font-semibold transition-colors ${
+                    form.accepts_minors
+                      ? "text-brand-900"
+                      : "text-primary-700 group-hover:text-primary-900"
+                  }`}
+                >
+                  Accepts Minors (Under 18)
+                </span>
+              </div>
             </label>
-            <Select
-              value={form.degree_level}
-              onChange={(val) =>
-                setForm((prev) => ({
-                  ...prev,
-                  degree_level: val as typeof prev.degree_level,
-                }))
-              }
-              options={DEGREE_LEVEL_OPTIONS}
-            />
+
+            <label
+              className={`relative flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group ${
+                form.accepts_students_in_china
+                  ? "bg-brand-50 border-brand-500 shadow-sm"
+                  : "bg-white border-primary-100 hover:border-brand-200 hover:bg-primary-50"
+              }`}
+            >
+              <div className="flex h-6 items-center">
+                <input
+                  type="checkbox"
+                  name="accepts_students_in_china"
+                  checked={form.accepts_students_in_china}
+                  onChange={handleChange}
+                  className="peer sr-only"
+                />
+                <div
+                  className={`flex size-5 items-center justify-center rounded border transition-colors ${
+                    form.accepts_students_in_china
+                      ? "bg-brand-600 border-brand-600 text-white"
+                      : "border-primary-300 bg-white text-transparent group-hover:border-brand-400"
+                  }`}
+                >
+                  <FiCheck className="size-3.5" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <span
+                  className={`block text-sm font-semibold transition-colors ${
+                    form.accepts_students_in_china
+                      ? "text-brand-900"
+                      : "text-primary-700 group-hover:text-primary-900"
+                  }`}
+                >
+                  Accepts Students Currently in China
+                </span>
+              </div>
+            </label>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Teaching Language
-            </label>
-            <Select
-              value={form.language}
-              onChange={(val) =>
-                setForm((prev) => ({
-                  ...prev,
-                  language: val as typeof prev.language,
-                }))
-              }
-              options={TEACHING_LANGUAGE_OPTIONS}
-            />
+        </div>
+
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
+          <div>
+            <h2 className="heading-4">Tuition &amp; Scholarship</h2>
+            <p className="body-small text-primary-500 mt-1">
+              Financial requirements and funding options.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="space-y-2.5">
+              <label className="label">
+                Original Tuition ({form.tuition_currency})
+              </label>
+              <Input
+                type="number"
+                name="tuition_original"
+                value={form.tuition_original}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="label">Final Tuition (After Scholarship)</label>
+              <Input
+                type="number"
+                name="tuition_after_scholarship"
+                value={form.tuition_after_scholarship}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="label">Scholarship Type</label>
+              <Select
+                value={form.scholarship_type}
+                onChange={(val) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    scholarship_type: val as typeof prev.scholarship_type,
+                  }))
+                }
+                options={SCHOLARSHIP_TYPE_OPTIONS}
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="label">Scholarship Policy (Memo)</label>
+              <Input
+                type="textarea"
+                name="scholarship_memo"
+                value={form.scholarship_memo}
+                onChange={handleChange}
+                placeholder="Additional details about the scholarship..."
+                className="h-10"
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="label">Estimated Living Cost (Monthly)</label>
+              <div className="flex gap-2">
+                <Select
+                  value={form.estimated_living_currency}
+                  onChange={(val) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      estimated_living_currency: val as string,
+                    }))
+                  }
+                  options={[
+                    { label: "RMB", value: "RMB" },
+                    { label: "USD", value: "USD" },
+                  ]}
+                  className="w-24 shrink-0"
+                />
+                <Input
+                  type="number"
+                  name="estimated_living_cost"
+                  value={form.estimated_living_cost}
+                  onChange={handleChange}
+                  placeholder="e.g. 2000"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-6">
+          <div>
+            <h2 className="heading-4">Document Requirements</h2>
+            <p className="body-small text-primary-500 mt-1">
+              Select all documents typically required for this program&apos;s
+              application.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.values(DOCUMENT_REGISTRY).map((doc) => (
+              <label
+                key={doc.id}
+                className={`relative flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 group ${
+                  form.document_requirements?.includes(doc.id)
+                    ? "bg-brand-50 border-brand-500 shadow-sm"
+                    : "bg-white border-primary-100 hover:border-brand-200 hover:bg-primary-50"
+                }`}
+              >
+                <div className="flex h-5 items-center mt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={
+                      form.document_requirements?.includes(doc.id) || false
+                    }
+                    onChange={(e) =>
+                      handleDocumentChange(doc.id, e.target.checked)
+                    }
+                    className="peer sr-only"
+                  />
+                  <div
+                    className={`flex size-4 items-center justify-center rounded border transition-colors ${
+                      form.document_requirements?.includes(doc.id)
+                        ? "bg-brand-600 border-brand-600 text-white"
+                        : "border-primary-300 bg-white text-transparent group-hover:border-brand-400"
+                    }`}
+                  >
+                    <FiCheck className="size-3" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <span
+                    className={`block text-[13px] font-medium mb-0.5 transition-colors ${
+                      form.document_requirements?.includes(doc.id)
+                        ? "text-brand-900"
+                        : "text-primary-700 group-hover:text-primary-900"
+                    }`}
+                  >
+                    {doc.label}
+                  </span>
+                </div>
+              </label>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Intake & Application */}
-      <div className="bg-white p-6 rounded-2xl border border-primary-100 shadow-sm space-y-6">
-        <h2 className="text-lg font-semibold text-primary-900 font-serif border-b border-primary-50 pb-2">
-          Intake &amp; Deadlines
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Intake Season
-            </label>
-            <Select
-              value={form.intake_season}
-              onChange={(val) =>
-                setForm((prev) => ({ ...prev, intake_season: val }))
-              }
-              options={INTAKE_SEASON_OPTIONS}
-              placeholder="Select Season"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Duration
-            </label>
-            <Input
-              name="duration"
-              value={form.duration}
-              onChange={handleChange}
-              placeholder="e.g. 4 years"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Deadline
-            </label>
-            <Input
-              type="date"
-              name="application_deadline"
-              value={form.application_deadline}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        <div className="flex gap-6">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="accepts_minors"
-              checked={form.accepts_minors}
-              onChange={handleChange}
-              className="rounded border-primary-300 text-brand-600 focus:ring-brand-500"
-            />
-            <span className="text-sm text-primary-700">Accepts Minors</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="accepts_students_in_china"
-              checked={form.accepts_students_in_china}
-              onChange={handleChange}
-              className="rounded border-primary-300 text-brand-600 focus:ring-brand-500"
-            />
-            <span className="text-sm text-primary-700">
-              Accepts Students in China
-            </span>
-          </label>
-        </div>
-      </div>
-
-      {/* Tuition & Scholarship */}
-      <div className="bg-white p-6 rounded-2xl border border-primary-100 shadow-sm space-y-6">
-        <h2 className="text-lg font-semibold text-primary-900 font-serif border-b border-primary-50 pb-2">
-          Tuition &amp; Scholarship
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Final Tuition (After Scholarship)
-            </label>
-            <Input
-              type="number"
-              name="tuition_after_scholarship"
-              value={form.tuition_after_scholarship}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Original Tuition
-            </label>
-            <Input
-              type="number"
-              name="tuition_original"
-              value={form.tuition_original}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Scholarship Type
-            </label>
-            <Select
-              value={form.scholarship_type}
-              onChange={(val) =>
-                setForm((prev) => ({
-                  ...prev,
-                  scholarship_type: val as typeof prev.scholarship_type,
-                }))
-              }
-              options={SCHOLARSHIP_TYPE_OPTIONS}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-primary-700">
-              Scholarship Policy (Memo)
-            </label>
-            <Input
-              type="textarea"
-              name="scholarship_memo"
-              value={form.scholarship_memo}
-              onChange={handleChange}
-              className="h-10"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 md:left-64 p-4 bg-white border-t border-primary-100 flex items-center justify-end gap-3 z-30">
+      <div className="flex items-center justify-end gap-3 pt-6 border-t border-primary-100">
         <Button
           type="button"
           variant="outline"
+          size="sm"
           onClick={() => router.back()}
           disabled={isSubmitting}
+          className="rounded-xl px-6 border-primary-200 bg-white hover:bg-primary-50 transition-colors"
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting} className="gap-2">
+        <Button
+          type="submit"
+          size="sm"
+          disabled={isSubmitting}
+          className="rounded-xl px-6 gap-2 bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition-all"
+        >
           {isSubmitting ? (
             "Saving..."
           ) : (
             <>
-              <FiSave className="size-4" />
-              Save Program
+              <FiSave className="size-3.5" />
+              Save Changes
             </>
           )}
         </Button>
       </div>
-      <div className="h-16" />
     </form>
   );
 }

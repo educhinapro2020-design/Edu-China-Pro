@@ -6,6 +6,8 @@ import { programRepository } from "@/lib/repositories/program.repo";
 import { Program } from "@/lib/types/university";
 import { useParams } from "next/navigation";
 import { ProgressiveLoader } from "@/components/ui/ProgressiveLoader";
+import Link from "next/link";
+import { FiArrowLeft } from "react-icons/fi";
 
 export default function EditProgramPage() {
   const params = useParams();
@@ -14,10 +16,10 @@ export default function EditProgramPage() {
 
   useEffect(() => {
     async function fetchProgram() {
-      if (!params.id) return;
+      if (!params.programId) return;
       try {
         const data = await programRepository.getProgramById(
-          params.id as string,
+          params.programId as string,
         );
         setProgram(data);
       } catch (error) {
@@ -27,23 +29,34 @@ export default function EditProgramPage() {
       }
     }
     fetchProgram();
-  }, [params.id]);
+  }, [params.programId]);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex-1 flex items-center justify-center">
         <ProgressiveLoader message="Loading program..." isAdmin />
       </div>
     );
   }
 
   if (!program) {
-    return <div>Program not found</div>;
+    return (
+      <div className="py-12 text-center text-primary-500">
+        Program not found
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="max-w-6xl mx-auto">
+        <Link
+          href={`/admin/universities/${params.id}/programs`}
+          className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
+        >
+          <FiArrowLeft className="size-4" />
+          Back to Programs
+        </Link>
         <h1 className="text-2xl font-bold text-primary-900 font-serif">
           Edit Program
         </h1>

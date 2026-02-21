@@ -28,7 +28,7 @@ export function ProgramContent({ program }: ProgramContentProps) {
 
   return (
     <div className="bg-primary-50/30 py-6 md:py-16">
-      <div className="container mx-auto px-6 max-w-5xl space-y-12">
+      <div className="container mx-auto px-6 max-w-6xl space-y-12">
         <section className="bg-white rounded-2xl border border-primary-100 shadow-sm overflow-hidden">
           <div className="p-6 md:p-12">
             <div className="flex items-center gap-4 mb-8">

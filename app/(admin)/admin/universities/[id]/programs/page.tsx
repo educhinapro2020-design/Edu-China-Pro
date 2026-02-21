@@ -2,21 +2,28 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
   FiPlus,
   FiEdit2,
   FiTrash2,
-  FiMapPin,
   FiExternalLink,
   FiBookOpen,
+  FiArrowLeft,
 } from "react-icons/fi";
 import { programRepository } from "@/lib/repositories/program.repo";
-import { Program } from "@/lib/types/university";
+import { universityRepository } from "@/lib/repositories/university.repo";
+import { Program, University } from "@/lib/types/university";
 import { DataTable, Column } from "@/components/admin/DataTable";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
+import { ProgressiveLoader } from "@/components/ui/ProgressiveLoader";
 import { Button } from "@/components/ui/button";
 
-export default function AdminProgramsPage() {
+export default function NestedProgramsPage() {
+  const params = useParams();
+  const universityId = params.id as string;
+
+  const [university, setUniversity] = useState<University | null>(null);
   const [data, setData] = useState<Program[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -28,13 +35,24 @@ export default function AdminProgramsPage() {
   const PAGE_SIZE = 10;
 
   useEffect(() => {
+    async function fetchUni() {
+      if (universityId) {
+        const u = await universityRepository.getUniversityById(universityId);
+        setUniversity(u);
+      }
+    }
+    fetchUni();
+  }, [universityId]);
+
+  useEffect(() => {
     fetchPrograms();
-  }, [page, search]);
+  }, [page, search, universityId]);
 
   async function fetchPrograms() {
     setIsLoading(true);
     try {
       const result = await programRepository.getProgramsWithCount({
+        universityId,
         limit: PAGE_SIZE,
         offset: (page - 1) * PAGE_SIZE,
         search: search || undefined,
@@ -80,19 +98,10 @@ export default function AdminProgramsPage() {
               {row.name_en}
             </div>
             <div className="text-xs text-primary-500">
-              {(row as any).university?.name_en}
+              {row.degree_level.replace("_", " ")}
             </div>
           </div>
         </div>
-      ),
-    },
-    {
-      header: "Degree",
-      accessor: "degree_level",
-      render: (row) => (
-        <span className="capitalize text-xs font-medium bg-primary-100 text-primary-700 px-2 py-0.5 rounded">
-          {row.degree_level.replace("_", " ")}
-        </span>
       ),
     },
     {
@@ -106,21 +115,68 @@ export default function AdminProgramsPage() {
       header: "Language",
       accessor: "language",
       render: (row) => (
-        <span className="capitalize text-xs text-primary-500">
+        <span className="capitalize text-xs font-medium bg-primary-100 text-primary-700 px-2 py-0.5 rounded">
           {row.language.replace(/_/g, " ")}
+        </span>
+      ),
+    },
+    {
+      header: "Intake",
+      accessor: "intake_season",
+      render: (row) => (
+        <span className="capitalize text-xs text-primary-500">
+          {row.intake_season || "—"}
         </span>
       ),
     },
   ];
 
+  if (!university && isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <ProgressiveLoader isAdmin message="Loading programs..." />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-primary-900 font-serif">
-            Programs
-          </h1>
-          <p className="text-primary-500">Manage academic programs</p>
+      <div>
+        <Link
+          href="/admin/universities"
+          className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
+        >
+          <FiArrowLeft className="size-4" />
+          Back to Universities
+        </Link>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {university?.logo_url && (
+              <div className="relative size-12 rounded-full overflow-hidden border border-primary-200 shrink-0 bg-white">
+                <img
+                  src={university.logo_url}
+                  alt={university.name_en}
+                  className="w-full h-full object-contain p-1"
+                />
+              </div>
+            )}
+            <div>
+              <h1 className="text-2xl font-bold text-primary-900 font-serif">
+                {university ? `${university.name_en} Programs` : "Programs"}
+              </h1>
+              <p className="text-primary-500">
+                Manage academic programs for this university
+              </p>
+            </div>
+          </div>
+          <Link
+            href={`/admin/universities/${universityId}/programs/new`}
+            className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
+          >
+            <Button startIcon={<FiPlus />} size="sm">
+              Add Program
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -137,7 +193,7 @@ export default function AdminProgramsPage() {
         actions={(row) => (
           <>
             <Link
-              href={`/universities/${(row as any).university?.slug}/programs/${row.slug}`}
+              href={`/universities/${university?.slug}/programs/${row.slug}`}
               target="_blank"
               className="p-2 text-primary-400 hover:text-brand-600 transition-colors"
               title="View Public Page"
@@ -145,7 +201,7 @@ export default function AdminProgramsPage() {
               <FiExternalLink className="size-4" />
             </Link>
             <Link
-              href={`/admin/universities/${row.university_id}/programs/${row.id}/edit`}
+              href={`/admin/universities/${universityId}/programs/${row.id}/edit`}
               className="p-2 text-primary-400 hover:text-brand-600 transition-colors"
               title="Edit"
             >
