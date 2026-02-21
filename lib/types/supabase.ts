@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       application_messages: {
@@ -86,6 +111,64 @@ export type Database = {
           {
             foreignKeyName: "application_notes_author_id_fkey"
             columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_status_history: {
+        Row: {
+          application_id: string
+          changed_by: string
+          created_at: string
+          from_status: Database["public"]["Enums"]["application_status"] | null
+          id: string
+          note: string | null
+          reverted: boolean
+          reverted_by: string | null
+          to_status: Database["public"]["Enums"]["application_status"]
+        }
+        Insert: {
+          application_id: string
+          changed_by: string
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["application_status"] | null
+          id?: string
+          note?: string | null
+          reverted?: boolean
+          reverted_by?: string | null
+          to_status: Database["public"]["Enums"]["application_status"]
+        }
+        Update: {
+          application_id?: string
+          changed_by?: string
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["application_status"] | null
+          id?: string
+          note?: string | null
+          reverted?: boolean
+          reverted_by?: string | null
+          to_status?: Database["public"]["Enums"]["application_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_status_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_status_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_status_history_reverted_by_fkey"
+            columns: ["reverted_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -620,18 +703,35 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      undo_last_application_status: {
+        Args: { p_application_id: string }
+        Returns: undefined
+      }
+      update_application_status: {
+        Args: {
+          p_application_id: string
+          p_new_status: Database["public"]["Enums"]["application_status"]
+          p_note?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       application_status:
-        | "document_pending"
-        | "applied"
-        | "processing"
-        | "payment_pending"
-        | "payment_received"
+        | "draft"
+        | "submitted"
+        | "reviewing"
+        | "approved"
+        | "action_required"
+        | "application_fee_pending"
+        | "application_fee_paid"
+        | "applied_to_university"
         | "admission_success"
         | "admission_failure"
-        | "offer_letter_uploaded"
-        | "jw202_processing"
+        | "offer_letter"
+        | "ecp_fee_pending"
+        | "ecp_fee_paid"
+        | "jw_form_received"
         | "visa_docs_ready"
         | "visa_granted"
       degree_level:
@@ -775,18 +875,26 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       application_status: [
-        "document_pending",
-        "applied",
-        "processing",
-        "payment_pending",
-        "payment_received",
+        "draft",
+        "submitted",
+        "reviewing",
+        "approved",
+        "action_required",
+        "application_fee_pending",
+        "application_fee_paid",
+        "applied_to_university",
         "admission_success",
         "admission_failure",
-        "offer_letter_uploaded",
-        "jw202_processing",
+        "offer_letter",
+        "ecp_fee_pending",
+        "ecp_fee_paid",
+        "jw_form_received",
         "visa_docs_ready",
         "visa_granted",
       ],
