@@ -85,6 +85,7 @@ export type Database = {
           created_at: string
           id: string
           note: string
+          visibility: Database["public"]["Enums"]["note_visibility"]
         }
         Insert: {
           application_id: string
@@ -92,6 +93,7 @@ export type Database = {
           created_at?: string
           id?: string
           note: string
+          visibility?: Database["public"]["Enums"]["note_visibility"]
         }
         Update: {
           application_id?: string
@@ -99,6 +101,7 @@ export type Database = {
           created_at?: string
           id?: string
           note?: string
+          visibility?: Database["public"]["Enums"]["note_visibility"]
         }
         Relationships: [
           {
@@ -187,6 +190,7 @@ export type Database = {
           submitted_at: string | null
           university_id: string
           updated_at: string
+          user_downloads: Json | null
         }
         Insert: {
           counselor_id?: string | null
@@ -199,6 +203,7 @@ export type Database = {
           submitted_at?: string | null
           university_id: string
           updated_at?: string
+          user_downloads?: Json | null
         }
         Update: {
           counselor_id?: string | null
@@ -211,6 +216,7 @@ export type Database = {
           submitted_at?: string | null
           university_id?: string
           updated_at?: string
+          user_downloads?: Json | null
         }
         Relationships: [
           {
@@ -742,6 +748,7 @@ export type Database = {
         | "upgrade"
       institution_type: "public" | "private"
       intake_season: "spring" | "summer" | "autumn"
+      note_visibility: "public" | "private"
       scholarship_type:
         | "self_financed"
         | "type_a"
@@ -901,6 +908,7 @@ export const Constants = {
       degree_level: ["bachelor", "master", "doctoral", "non_degree", "upgrade"],
       institution_type: ["public", "private"],
       intake_season: ["spring", "summer", "autumn"],
+      note_visibility: ["public", "private"],
       scholarship_type: [
         "self_financed",
         "type_a",

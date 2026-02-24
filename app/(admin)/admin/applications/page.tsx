@@ -284,12 +284,12 @@ export default function AdminApplicationsPage() {
         {showRecent && (
           <div className="w-full">
             <div className="flex items-center gap-2 mb-3">
-              <FiClock className="size-4 text-primary-400" />
-              <h2 className="text-sm font-medium text-primary-700">
+              <FiClock className="size-4 text-brand-600" />
+              <h2 className="text-base font-medium text-brand-600">
                 Recently Updated
               </h2>
             </div>
-            <div className="flex flex-col gap-2.5 w-full">
+            <div className="flex flex-col gap-3 w-full">
               <AnimatePresence mode="popLayout">
                 {visibleRecent.map((app, index) => (
                   <motion.div
@@ -321,8 +321,8 @@ export default function AdminApplicationsPage() {
                               </span>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0 space-y-1">
-                            <p className="font-medium text-sm text-primary-900 line-clamp-2 group-hover:text-brand-600 transition-colors">
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <p className="font-medium text-[15px] text-primary-900 line-clamp-2 group-hover:text-brand-600 transition-colors">
                               {app.program?.name_en}
                             </p>
                             <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
@@ -341,7 +341,7 @@ export default function AdminApplicationsPage() {
                         </div>
                         <div className="flex items-center justify-end w-full sm:w-auto mt-1 sm:mt-0 shrink-0">
                           <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-medium uppercase tracking-wide truncate max-w-full ${getApplicationStatusColor(app.status)}`}
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-medium uppercase tracking-wide truncate max-w-full ${getApplicationStatusColor(app.status)}`}
                           >
                             {getApplicationStatusLabel(app.status)}
                           </span>
@@ -369,16 +369,16 @@ export default function AdminApplicationsPage() {
 
         <div className="w-full">
           <div className="flex items-center justify-between mb-4 w-full">
-            <h2 className="text-sm font-semibold text-primary-700 truncate pr-2">
+            <h2 className="text-base font-semibold text-brand-600 truncate pr-2">
               {statusFilter !== "all" ? activeStatusLabel : "All Applications"}
               {!loading && (
-                <span className="text-primary-400 font-normal ml-1.5 shrink-0">
+                <span className="text-primary-500 font-normal ml-1.5 shrink-0">
                   ({totalCount})
                 </span>
               )}
             </h2>
             {totalPages > 1 && (
-              <span className="text-xs text-primary-400 shrink-0">
+              <span className="text-xs text-primary-500 shrink-0">
                 Page {page} of {totalPages}
               </span>
             )}
@@ -436,7 +436,7 @@ export default function AdminApplicationsPage() {
                               </span>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0 space-y-1">
+                          <div className="flex-1 min-w-0 space-y-2">
                             <h3 className="text-sm font-semibold text-primary-900 line-clamp-2 sm:truncate group-hover:text-brand-600 transition-colors">
                               {app.program?.name_en}
                             </h3>
@@ -472,7 +472,7 @@ export default function AdminApplicationsPage() {
 
                           <div className="shrink-0">
                             <span
-                              className={`px-2.5 py-1 rounded-full text-[10px] font-medium uppercase tracking-wide block truncate max-w-[130px] sm:max-w-[160px] ${getApplicationStatusColor(app.status)}`}
+                              className={`px-2.5 py-1 rounded-full text-[11px] font-medium uppercase tracking-wide block truncate max-w-[130px] sm:max-w-[160px] ${getApplicationStatusColor(app.status)}`}
                             >
                               {getApplicationStatusLabel(app.status)}
                             </span>

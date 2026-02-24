@@ -936,7 +936,7 @@ export default function AdminApplicationDetailPage() {
                                 </p>
                                 {item.value ? (
                                   <p
-                                    className={`text-sm md:text-base font-medium text-primary-900 ${(item as any).capitalize ? "capitalize" : ""}`}
+                                    className={`text-sm md:text-[15px] font-medium text-primary-900 ${(item as any).capitalize ? "capitalize" : ""}`}
                                   >
                                     {item.value}
                                   </p>
@@ -962,7 +962,7 @@ export default function AdminApplicationDetailPage() {
                               <p className="text-[10px] uppercase tracking-widest text-primary-400 font-bold mb-2">
                                 Email
                               </p>
-                              <p className="text-base font-medium text-primary-900">
+                              <p className="text-sm md:text-[15px] font-medium text-primary-900">
                                 {studentEmail}
                               </p>
                             </div>
@@ -972,7 +972,7 @@ export default function AdminApplicationDetailPage() {
                                 Phone Number
                               </p>
                               {profile.phone_number ? (
-                                <p className="text-base font-medium text-primary-900">
+                                <p className="text-sm md:text-[15px] font-medium text-primary-900">
                                   {profile.phone_number}
                                 </p>
                               ) : (
@@ -990,7 +990,7 @@ export default function AdminApplicationDetailPage() {
                                 WhatsApp
                               </p>
                               {profile.whatsapp_number ? (
-                                <p className="text-base font-medium text-primary-900">
+                                <p className="text-sm md:text-[15px] font-medium text-primary-900">
                                   {profile.whatsapp_number}
                                 </p>
                               ) : (
@@ -1007,7 +1007,7 @@ export default function AdminApplicationDetailPage() {
                                 Home Address
                               </p>
                               {profile.address ? (
-                                <p className="text-base font-medium text-primary-900">
+                                <p className="text-sm md:text-[15px] font-medium text-primary-900">
                                   {profile.address}
                                   {profile.city ? `, ${profile.city}` : ""}
                                   {profile.zip_code
@@ -1058,7 +1058,7 @@ export default function AdminApplicationDetailPage() {
                                   {item.label}
                                 </p>
                                 {item.value ? (
-                                  <p className="text-base font-medium text-primary-900">
+                                  <p className="text-sm font-medium text-primary-900">
                                     {item.value}
                                   </p>
                                 ) : (
