@@ -3,7 +3,6 @@ import {
   StudentDocuments,
   StudentDocumentEntry,
 } from "@/lib/types/student";
-import Image from "next/image";
 import {
   FiMapPin,
   FiPhone,
@@ -12,9 +11,8 @@ import {
   FiCheckCircle,
   FiAlertCircle,
 } from "react-icons/fi";
-import React from "react";
+import React, { useRef, useCallback } from "react";
 import {
-  DOCUMENT_REGISTRY,
   DocumentKey,
   GeneralDocumentKey,
   EDUCATION_DOCUMENTS,
@@ -200,31 +198,34 @@ export const ProfileDocument = React.forwardRef<
     "recommendation_letter_2",
   ];
 
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const mergedRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      (printRef as React.RefObject<HTMLDivElement | null>).current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref)
+        (ref as React.RefObject<HTMLDivElement | null>).current = node;
+    },
+    [ref],
+  );
+
   return (
     <div
-      ref={ref}
+      ref={mergedRef}
       className="bg-white p-4 md:p-12 print:p-8 max-w-4xl mx-auto print:shadow-none print:max-w-none print:w-full font-sans text-primary-900"
       id="printable-profile"
     >
       <div className="flex flex-col md:flex-row justify-between items-start border-b border-primary-300 pb-6 mb-8 print:mb-6 print:pb-6 gap-4 md:gap-0">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-primary-900 tracking-tight uppercase">
+          <h1 className="text-xl md:text-2xl font-bold text-primary-900 tracking-tight uppercase">
             Student Profile
           </h1>
           <p className="text-primary-600 mt-1 text-sm">
             EduChinaPro Student Application Record
           </p>
         </div>
-        <div className="w-full md:w-auto flex flex-col justify-between md:justify-end md:items-end">
-          <div className="hidden print:block mb-2">
-            <Image
-              src="/images/logo/educhinapro-logo.svg"
-              alt="EduChinaPro"
-              width={40}
-              height={20}
-              className="ml-auto"
-            />
-          </div>
+        <div className="w-full md:w-auto flex flex-col justify-end md:justify-end md:items-end">
           <div className="font-bold text-lg md:text-xl brand-text print:hidden">
             EduChinaPro
           </div>
@@ -283,7 +284,7 @@ export const ProfileDocument = React.forwardRef<
           <h3 className="text-sm font-bold uppercase tracking-wider text-brand-600 border-b border-primary-100 pb-2 mb-4">
             Personal Information
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 print:grid-cols-3 gap-y-4 gap-x-8 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-y-4 gap-x-8 text-sm">
             <div>
               <p className="text-primary-500 text-xs mb-0.5">Nationality</p>
               <p className="font-medium">{profile.nationality || "N/A"}</p>

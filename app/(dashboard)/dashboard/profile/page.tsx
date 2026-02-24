@@ -265,10 +265,20 @@ function DocumentsTab({
                   {edu.level} Documents
                 </h3>
                 <p className="text-sm flex items-center gap-2 text-primary-600 mt-1 font-medium">
-                  <MdOutlineSchool className="size-4" /> {edu.schoolName}
+                  {edu.schoolName && (
+                    <>
+                      <MdOutlineSchool className="size-4" />{" "}
+                      <span>{edu.schoolName}</span>
+                    </>
+                  )}
                 </p>
                 <p className="text-sm flex items-center gap-2 text-primary-600 mt-1 font-medium">
-                  <FiBookOpen className="size-3" /> {edu.fieldOfStudy}
+                  {edu.fieldOfStudy && (
+                    <>
+                      <FiBookOpen className="size-3" />{" "}
+                      <span>{edu.fieldOfStudy}</span>
+                    </>
+                  )}
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -418,7 +428,7 @@ export default function ProfilePage() {
   >;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
           <Link href="/dashboard">
