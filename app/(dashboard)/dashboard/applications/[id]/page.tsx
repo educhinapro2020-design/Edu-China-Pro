@@ -28,6 +28,7 @@ import {
   FiX,
   FiArrowRight,
   FiInfo,
+  FiUser,
 } from "react-icons/fi";
 import { MdHistory, MdOutlineSchool, MdPayment } from "react-icons/md";
 import {
@@ -36,6 +37,7 @@ import {
   getDocumentStatusMeta,
 } from "@/lib/utils/application";
 import { GrNote } from "react-icons/gr";
+import { profileRepo } from "@/lib/repositories/profile.repo";
 
 type Tab = "overview" | "documents" | "history";
 
@@ -499,10 +501,15 @@ export default function ApplicationDetailPage({
     useState<Partial<StudentProfile> | null>(null);
   const [studentDocsMap, setStudentDocsMap] = useState<Record<string, any>>({});
 
-  // Modal state
   const [selectedAction, setSelectedAction] = useState<{
     type: PendingActionType;
     docKey?: DocumentKey;
+  } | null>(null);
+
+  const [assignedCounselor, setAssignedCounselor] = useState<{
+    full_name: string | null;
+    avatar_url: string | null;
+    description: string | null;
   } | null>(null);
 
   const profileChecklist = useMemo(
@@ -529,6 +536,12 @@ export default function ApplicationDetailPage({
         }
         const data = await applicationService.getApplicationById(id);
         setApplication(data);
+        if (data.counselor_id) {
+          const counselorProfile = await profileRepo.getProfile(
+            data.counselor_id,
+          );
+          if (counselorProfile) setAssignedCounselor(counselorProfile as any);
+        }
         const history = await applicationRepository.getStatusHistory(id);
         setStatusHistory(history);
         const fetchedNotes = await applicationRepository.getNotes(id);
@@ -682,6 +695,42 @@ export default function ApplicationDetailPage({
             </div>
 
             <div className="bg-white rounded-3xl border border-primary-100 shadow-sm overflow-hidden flex flex-col">
+              <div className="flex border-b border-primary-100 px-6 sm:px-8 pt-6 gap-8 overflow-x-auto scrollbar-none">
+                {(
+                  [
+                    {
+                      key: "overview" as Tab,
+                      label: "Overview",
+                      icon: FiFileText,
+                    },
+                    {
+                      key: "documents" as Tab,
+                      label: "Documents",
+                      icon: FiUploadCloud,
+                    },
+                    { key: "history" as Tab, label: "History", icon: FiClock },
+                  ] as const
+                ).map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`flex items-center gap-2 pb-4 text-sm font-semibold transition-all relative whitespace-nowrap border-b-2 ${
+                      activeTab === tab.key
+                        ? "text-brand-600 border-brand-600"
+                        : "text-primary-500 hover:text-primary-800 border-transparent hover:border-primary-300"
+                    }`}
+                  >
+                    <tab.icon
+                      className={`size-4 shrink-0 transition-colors ${
+                        activeTab === tab.key
+                          ? "text-brand-600"
+                          : "text-primary-400"
+                      }`}
+                    />
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+              </div>
               <AnimatePresence mode="wait">
                 {activeTab === "overview" && (
                   <motion.div
@@ -1011,6 +1060,96 @@ export default function ApplicationDetailPage({
                   </motion.div>
                 )}
 
+                {activeTab === "documents" && (
+                  <motion.div
+                    key="documents"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.15 }}
+                    className="p-6 sm:p-8 space-y-8"
+                  >
+                    <section>
+                      {totalDocs === 0 ? (
+                        <div className="bg-primary-50/50 rounded-2xl p-8 text-center border border-dashed border-primary-200">
+                          <FiFileText className="size-8 text-primary-300 mx-auto mb-3" />
+                          <p className="text-sm text-primary-500 font-medium">
+                            No documents required for this program.
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-5 mb-6">
+                            <div className="relative shrink-0">
+                              <svg
+                                className="size-16 -rotate-90"
+                                viewBox="0 0 36 36"
+                              >
+                                <circle
+                                  cx="18"
+                                  cy="18"
+                                  r="15.5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                  className="text-primary-100"
+                                />
+                                <circle
+                                  cx="18"
+                                  cy="18"
+                                  r="15.5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                  strokeLinecap="round"
+                                  strokeDasharray={`${Math.round(
+                                    (uploadedDocs / totalDocs) * 97.4,
+                                  )} 97.4`}
+                                  className={
+                                    uploadedDocs === totalDocs
+                                      ? "text-brand-500"
+                                      : "text-brand-400"
+                                  }
+                                />
+                              </svg>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-xs font-bold text-primary-900">
+                                  {uploadedDocs}/{totalDocs}
+                                </span>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-base font-bold text-primary-900">
+                                {uploadedDocs === totalDocs
+                                  ? "All documents submitted"
+                                  : `${totalDocs - uploadedDocs} document${
+                                      totalDocs - uploadedDocs === 1 ? "" : "s"
+                                    } pending`}
+                              </p>
+                              <p className="text-sm text-primary-500 font-medium mt-0.5">
+                                {uploadedDocs} of {totalDocs} required documents
+                                received
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-4">
+                            {requirements.map((docKey) => (
+                              <DocumentRow
+                                key={docKey}
+                                docKey={docKey}
+                                doc={appDocs[docKey]}
+                                uploading={uploading === docKey}
+                                onUpload={handleFileUpload}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </section>
+                  </motion.div>
+                )}
+
                 {activeTab === "history" && (
                   <motion.div
                     key="history"
@@ -1119,6 +1258,53 @@ export default function ApplicationDetailPage({
               <p className="text-sm font-medium text-white leading-relaxed">
                 {statusMeta.description}
               </p>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-primary-100 shadow-sm p-6 sm:p-8">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-primary-900 mb-5">
+                Your Counselor
+              </h3>
+              {!assignedCounselor ? (
+                <div className="flex flex-col items-center gap-2 py-6 text-center">
+                  <div className="size-12 rounded-full bg-primary-50 border border-dashed border-primary-200 flex items-center justify-center">
+                    <FiUser className="size-5 text-primary-300" />
+                  </div>
+                  <p className="text-sm font-medium text-primary-400">
+                    You will be assigned a counselor soon.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-start gap-4">
+                  <div className="size-12 rounded-full overflow-hidden border border-primary-100 bg-brand-100 flex items-center justify-center shrink-0">
+                    {assignedCounselor.avatar_url ? (
+                      <img
+                        src={assignedCounselor.avatar_url}
+                        alt={assignedCounselor.full_name ?? ""}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-brand-600">
+                        {assignedCounselor.full_name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-primary-900">
+                      {assignedCounselor.full_name}
+                    </p>
+                    {assignedCounselor.description && (
+                      <p className="text-xs text-primary-500 font-medium mt-1 leading-relaxed">
+                        {assignedCounselor.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="bg-white rounded-3xl border border-primary-100 shadow-sm p-6 sm:p-8">

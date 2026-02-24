@@ -17,12 +17,10 @@ export default async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          response = NextResponse.next({
-            request,
-          });
+          response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
@@ -49,8 +47,12 @@ export default async function middleware(request: NextRequest) {
       .select("role")
       .eq("id", user.id)
       .single();
+
     if (profile?.role === "admin") {
       return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    if (profile?.role === "counselor") {
+      return NextResponse.redirect(new URL("/counselor", request.url));
     }
   }
 
@@ -65,7 +67,31 @@ export default async function middleware(request: NextRequest) {
       .select("role")
       .eq("id", user.id)
       .single();
+
+    if (profile?.role === "counselor") {
+      return NextResponse.redirect(new URL("/counselor", request.url));
+    }
     if (profile?.role !== "admin") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  if (url.pathname.startsWith("/counselor")) {
+    if (!user) {
+      url.pathname = "/login";
+      url.searchParams.set("next", next);
+      return NextResponse.redirect(url);
+    }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role === "admin") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    if (profile?.role !== "counselor") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
@@ -81,7 +107,14 @@ export default async function middleware(request: NextRequest) {
         .select("role")
         .eq("id", user.id)
         .single();
-      const target = profile?.role === "admin" ? "/admin" : "/dashboard";
+
+      const target =
+        profile?.role === "admin"
+          ? "/admin"
+          : profile?.role === "counselor"
+            ? "/counselor"
+            : "/dashboard";
+
       return NextResponse.redirect(new URL(target, request.url));
     }
   }

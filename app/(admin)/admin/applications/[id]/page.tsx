@@ -20,6 +20,7 @@ import {
   FiEdit2,
   FiEdit,
   FiUploadCloud,
+  FiSearch,
 } from "react-icons/fi";
 import { MdHistory, MdOutlineSchool } from "react-icons/md";
 import { twMerge } from "tailwind-merge";
@@ -46,7 +47,6 @@ import {
   getApplicationStatusMeta,
   getDocumentStatusMeta,
   formatRelativeTime,
-  getStudentInitials,
 } from "@/lib/utils/application";
 import { ProfileDocument } from "@/components/shared/ProfileDocument";
 import { ProgressiveLoader } from "@/components/ui/ProgressiveLoader";
@@ -55,8 +55,18 @@ import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useReactToPrint } from "react-to-print";
 import { GrNote } from "react-icons/gr";
+import { profileRepo } from "@/lib/repositories/profile.repo";
 
 type Tab = "documents" | "form" | "profile" | "history";
+
+function useDebounce(value: string, delay: number) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}
 
 export default function AdminApplicationDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -99,6 +109,20 @@ export default function AdminApplicationDetailPage() {
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadDescription, setUploadDescription] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+
+  const [counselors, setCounselors] = useState<
+    { id: string; full_name: string | null; avatar_url: string | null }[]
+  >([]);
+  const [counselorSearch, setCounselorSearch] = useState("");
+  const [assignedCounselor, setAssignedCounselor] = useState<{
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null>(null);
+  const [showCounselorDropdown, setShowCounselorDropdown] = useState(false);
+  const [assigningCounselor, setAssigningCounselor] = useState(false);
+  const counselorSearchRef = useRef<HTMLDivElement>(null);
+  const debouncedCounselorSearch = useDebounce(counselorSearch, 300);
 
   const handleAdminUpload = async () => {
     if (!app || !profile || !uploadFile || !uploadTitle.trim()) return;
@@ -157,6 +181,38 @@ export default function AdminApplicationDetailPage() {
   }, [id]);
 
   useEffect(() => {
+    async function fetchCounselors() {
+      const result = await profileRepo.getUsers({
+        role: "counselor",
+        search: debouncedCounselorSearch,
+        pageSize: 10,
+      });
+      setCounselors(result.data);
+    }
+    fetchCounselors();
+  }, [debouncedCounselorSearch]);
+
+  useEffect(() => {
+    if (!app) return;
+    if (app.counselor_id && counselors.length > 0) {
+      const found = counselors.find((c) => c.id === app.counselor_id);
+      if (found) setAssignedCounselor(found);
+    }
+  }, [app, counselors]);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (
+        counselorSearchRef.current &&
+        !counselorSearchRef.current.contains(e.target as Node)
+      )
+        setShowCounselorDropdown(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  useEffect(() => {
     fetchData();
   }, [fetchData]);
 
@@ -205,7 +261,27 @@ export default function AdminApplicationDetailPage() {
     }
   };
 
-  const handleAddNote = async (e: React.FormEvent) => {
+  const handleAssignCounselor = async (counselor: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  }) => {
+    if (!app) return;
+    setAssigningCounselor(true);
+    try {
+      await applicationService.assignCounselor(app.id, counselor.id);
+      setAssignedCounselor(counselor);
+      setApp((prev) => (prev ? { ...prev, counselor_id: counselor.id } : prev));
+      setShowCounselorDropdown(false);
+      setCounselorSearch("");
+    } catch (err) {
+      console.error("Failed to assign counselor:", err);
+    } finally {
+      setAssigningCounselor(false);
+    }
+  };
+
+  const handleAddNote = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!app || !newNote.trim()) return;
     setAddingNote(true);
@@ -1090,7 +1166,7 @@ export default function AdminApplicationDetailPage() {
                                     <h4 className="font-semibold text-primary-900">
                                       {edu.schoolName}
                                     </h4>
-                                    <p className="text-sm font-medium text-primary-600 mt-0.5">
+                                    <p className="text-xs font-medium text-primary-600 mt-0.5">
                                       {edu.fieldOfStudy || "General Studies"} •{" "}
                                       <span className="text-primary-500">
                                         {edu.level}
@@ -1269,6 +1345,126 @@ export default function AdminApplicationDetailPage() {
                   <FiPrinter className="size-4.5" />
                   Print Application Form
                 </Button>
+              </div>
+
+              <div className="space-y-3 pt-6 border-t border-primary-100">
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-primary-900">
+                    Assign Counselor
+                  </h3>
+                  <p className="text-sm text-primary-500 font-medium mt-1 mb-3">
+                    Assign a counselor to manage this application.
+                  </p>
+                </div>
+
+                {assignedCounselor && (
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl">
+                    <div className="size-7 rounded-full bg-brand-100 overflow-hidden flex items-center justify-center shrink-0">
+                      {assignedCounselor.avatar_url ? (
+                        <img
+                          src={assignedCounselor.avatar_url}
+                          className="w-full h-full object-cover"
+                          alt=""
+                        />
+                      ) : (
+                        <span className="text-[10px] font-bold text-brand-600">
+                          {assignedCounselor.full_name
+                            ?.split(" ")
+                            .map((n) => n[0])
+                            .slice(0, 2)
+                            .join("")
+                            .toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-sm font-semibold text-brand-700 truncate">
+                      {assignedCounselor.full_name}
+                    </span>
+                  </div>
+                )}
+
+                <div className="relative" ref={counselorSearchRef}>
+                  <div className="relative">
+                    <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400 size-3.5 pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder={
+                        assignedCounselor
+                          ? "Change counselor..."
+                          : "Search counselor..."
+                      }
+                      value={counselorSearch}
+                      onChange={(e) => {
+                        setCounselorSearch(e.target.value);
+                        setShowCounselorDropdown(true);
+                      }}
+                      onFocus={() => setShowCounselorDropdown(true)}
+                      disabled={assigningCounselor}
+                      className="w-full pl-8 pr-3 py-2.5 rounded-xl border border-primary-200 bg-white text-sm text-primary-800 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all shadow-sm disabled:opacity-50"
+                    />
+                  </div>
+
+                  <AnimatePresence>
+                    {showCounselorDropdown && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0 }}
+                        className="absolute top-full mt-1.5 left-0 right-0 bg-white border border-primary-200 rounded-2xl shadow-lg py-1.5 z-30 max-h-52 overflow-y-auto"
+                      >
+                        {counselors.length === 0 ? (
+                          <p className="text-sm text-primary-400 text-center py-4 font-medium">
+                            No counselors found
+                          </p>
+                        ) : (
+                          counselors.map((c) => {
+                            const isCurrentlyAssigned =
+                              c.id === assignedCounselor?.id;
+                            return (
+                              <button
+                                key={c.id}
+                                type="button"
+                                onClick={() => handleAssignCounselor(c)}
+                                disabled={
+                                  isCurrentlyAssigned || assigningCounselor
+                                }
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                              >
+                                <div className="size-7 rounded-full bg-brand-100 border border-primary-100 overflow-hidden flex items-center justify-center shrink-0">
+                                  {c.avatar_url ? (
+                                    <img
+                                      src={c.avatar_url}
+                                      className="w-full h-full object-cover"
+                                      alt=""
+                                    />
+                                  ) : (
+                                    <span className="text-[10px] font-bold text-brand-600">
+                                      {c.full_name
+                                        ?.split(" ")
+                                        .map((n) => n[0])
+                                        .slice(0, 2)
+                                        .join("")
+                                        .toUpperCase()}
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-sm font-medium text-primary-800 truncate">
+                                  {c.full_name}
+                                </span>
+                                {isCurrentlyAssigned && (
+                                  <span className="ml-auto text-[10px] font-bold text-brand-600 uppercase tracking-wide shrink-0">
+                                    Assigned
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
 
               <div className="space-y-3 pt-6 border-t border-primary-100">
