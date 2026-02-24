@@ -25,19 +25,14 @@ import {
 } from "@/lib/utils/application";
 import { applicationRepository } from "@/lib/repositories/application.repo";
 
+import { APPLICATION_STATUSES } from "@/lib/types/application";
+
 const ALL_STATUSES: { value: ApplicationStatus | "all"; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "document_pending", label: "Document Pending" },
-  { value: "applied", label: "Applied" },
-  { value: "processing", label: "Processing" },
-  { value: "payment_pending", label: "Payment Pending" },
-  { value: "payment_received", label: "Payment Received" },
-  { value: "admission_success", label: "Admission Success" },
-  { value: "admission_failure", label: "Admission Failure" },
-  { value: "offer_letter_uploaded", label: "Offer Letter Uploaded" },
-  { value: "jw202_processing", label: "JW202 Processing" },
-  { value: "visa_docs_ready", label: "Visa Docs Ready" },
-  { value: "visa_granted", label: "Visa Granted" },
+  ...APPLICATION_STATUSES.map((status) => ({
+    value: status,
+    label: getApplicationStatusLabel(status),
+  })),
 ];
 
 const PAGE_SIZE = 20;
