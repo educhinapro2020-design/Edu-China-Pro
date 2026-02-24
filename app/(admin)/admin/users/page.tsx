@@ -7,27 +7,36 @@ import {
   FiSearch,
   FiChevronLeft,
   FiChevronRight,
-  FiChevronDown,
   FiFilter,
   FiX,
   FiUser,
+  FiChevronDown,
 } from "react-icons/fi";
-import { userRepository } from "@/lib/repositories/user.repo";
+import { profileRepo, Profile } from "@/lib/repositories/profile.repo";
 import { Database } from "@/lib/types/supabase";
 import { getStudentInitials } from "@/lib/utils/application";
-import { updateUserRole } from "@/lib/actions/user.actions";
 import { twMerge } from "tailwind-merge";
+import { Select } from "@/components/ui/select";
 
-type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 type UserRole = Database["public"]["Enums"]["user_role"];
 
 const PAGE_SIZE = 20;
 
-const ROLE_OPTIONS: { value: UserRole | "all"; label: string }[] = [
+const ROLE_FILTER_OPTIONS: { value: UserRole | "all"; label: string }[] = [
   { value: "all", label: "All Roles" },
   { value: "student", label: "Student" },
   { value: "counselor", label: "Counselor" },
   { value: "admin", label: "Admin" },
+];
+
+const ROLE_SELECT_OPTIONS: {
+  value: UserRole;
+  label: string;
+  disabled?: boolean;
+}[] = [
+  { value: "student", label: "Student" },
+  { value: "counselor", label: "Counselor" },
+  { value: "admin", label: "Admin", disabled: true },
 ];
 
 function useDebounce(value: string, delay: number) {
@@ -39,18 +48,24 @@ function useDebounce(value: string, delay: number) {
   return debounced;
 }
 
-function UserSkeleton() {
+function TableSkeleton() {
   return (
-    <div className="w-full bg-white rounded-xl p-4 border border-primary-100 shadow-sm animate-pulse">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3 w-full sm:w-1/2">
-          <div className="size-10 rounded-full bg-primary-100 shrink-0" />
-          <div className="space-y-2 flex-1 min-w-0">
-            <div className="h-4 bg-primary-100 rounded w-2/3" />
-            <div className="h-3 bg-primary-50 rounded w-1/2" />
+    <div className="w-full bg-white rounded-2xl border border-primary-100 shadow-sm overflow-hidden animate-pulse">
+      <div className="w-full h-10 bg-primary-50" />
+      <div className="divide-y divide-primary-50">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="flex items-center p-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="size-10 rounded-full bg-primary-100 shrink-0" />
+              <div className="h-4 w-32 bg-primary-100 rounded" />
+            </div>
+            <div className="hidden sm:block flex-1">
+              <div className="h-4 w-48 bg-primary-50 rounded" />
+            </div>
+            <div className="w-32 h-9 bg-primary-100 rounded-xl mx-4" />
+            <div className="hidden md:block w-24 h-4 bg-primary-50 rounded ml-auto" />
           </div>
-        </div>
-        <div className="h-8 w-32 bg-primary-100 rounded-lg shrink-0" />
+        ))}
       </div>
     </div>
   );
@@ -89,7 +104,7 @@ function UserAvatar({
 }
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<ProfileRow[]>([]);
+  const [users, setUsers] = useState<Profile[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -101,11 +116,10 @@ export default function AdminUsersPage() {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
 
-  // Role Action State
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
-    user: ProfileRow | null;
+    user: Profile | null;
     pendingRole: UserRole | null;
   }>({ isOpen: false, user: null, pendingRole: null });
 
@@ -113,7 +127,7 @@ export default function AdminUsersPage() {
     setLoading(true);
     try {
       const supabase = createClient();
-      const result = await userRepository.getUsers(
+      const result = await profileRepo.getUsers(
         {
           search: debouncedSearch,
           role: roleFilter,
@@ -151,12 +165,12 @@ export default function AdminUsersPage() {
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-  const handleRoleChange = (user: ProfileRow, newRole: UserRole) => {
+  const handleRoleChange = (user: Profile, newRole: string) => {
     if (user.role === newRole) return;
     setConfirmModal({
       isOpen: true,
       user,
-      pendingRole: newRole,
+      pendingRole: newRole as UserRole,
     });
   };
 
@@ -167,25 +181,22 @@ export default function AdminUsersPage() {
     setConfirmModal((prev) => ({ ...prev, isOpen: false }));
 
     try {
-      const result = await updateUserRole(
+      const supabase = createClient();
+      await profileRepo.updateProfile(
         confirmModal.user.id,
-        confirmModal.pendingRole,
+        { role: confirmModal.pendingRole },
+        supabase,
       );
-      if (result.success) {
-        // Optimistic update
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === confirmModal.user?.id
-              ? { ...u, role: confirmModal.pendingRole! }
-              : u,
-          ),
-        );
-      } else {
-        alert(result.error || "Failed to update role");
-      }
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === confirmModal.user?.id
+            ? { ...u, role: confirmModal.pendingRole! }
+            : u,
+        ),
+      );
     } catch (error) {
-      console.error(error);
-      alert("An unexpected error occurred.");
+      console.error("Failed to update user role:", error);
     } finally {
       setUpdatingUserId(null);
     }
@@ -193,9 +204,9 @@ export default function AdminUsersPage() {
 
   return (
     <div className="w-full max-w-full p-4 sm:p-6 pb-12 space-y-6">
-      <div className="w-full max-w-5xl mx-auto space-y-6">
+      <div className="w-full max-w-6xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-primary-900 font-serif">
+          <h1 className="text-xl sm:text-2xl font-bold text-primary-900 font-serif">
             User Management
           </h1>
           <p className="text-primary-500 mt-0.5 text-sm">
@@ -205,7 +216,6 @@ export default function AdminUsersPage() {
           </p>
         </div>
 
-        {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-3 w-full md:items-center">
           <div className="relative flex-1 min-w-0">
             <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-400 size-4 pointer-events-none" />
@@ -214,7 +224,7 @@ export default function AdminUsersPage() {
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-9 py-3 rounded-xl border border-primary-200 bg-white text-sm text-primary-800 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all shadow-sm"
+              className="w-full pl-10 pr-9 py-2.5 sm:py-3 rounded-xl border border-primary-200 bg-white text-sm text-primary-800 placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all shadow-sm"
             />
             {search && (
               <button
@@ -235,7 +245,7 @@ export default function AdminUsersPage() {
               type="button"
               onClick={() => setShowFilterDropdown(!showFilterDropdown)}
               className={twMerge(
-                "w-full sm:w-auto flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all shadow-sm h-[46px]",
+                "w-full sm:w-auto flex items-center justify-between gap-2 px-4 py-2.5 sm:h-[46px] rounded-xl border text-sm font-medium transition-all shadow-sm",
                 roleFilter !== "all"
                   ? "bg-brand-50 border-brand-200 text-brand-700"
                   : "bg-white border-primary-200 text-primary-700 hover:border-primary-300",
@@ -244,7 +254,10 @@ export default function AdminUsersPage() {
               <div className="flex items-center gap-2 min-w-0">
                 <FiFilter className="size-4 shrink-0" />
                 <span className="truncate max-w-[200px] sm:max-w-[140px]">
-                  {ROLE_OPTIONS.find((r) => r.value === roleFilter)?.label}
+                  {
+                    ROLE_FILTER_OPTIONS.find((r) => r.value === roleFilter)
+                      ?.label
+                  }
                 </span>
               </div>
               <FiChevronDown
@@ -263,7 +276,7 @@ export default function AdminUsersPage() {
                   transition={{ duration: 0.15 }}
                   className="absolute right-0 sm:left-auto sm:right-0 top-full mt-2 w-full sm:w-48 bg-white border border-primary-200 rounded-2xl shadow-lg py-2"
                 >
-                  {ROLE_OPTIONS.map((opt) => (
+                  {ROLE_FILTER_OPTIONS.map((opt) => (
                     <button
                       type="button"
                       key={opt.value}
@@ -287,14 +300,9 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-        {/* User List */}
         <div className="w-full">
           {loading ? (
-            <div className="flex flex-col gap-3 w-full">
-              {[...Array(5)].map((_, i) => (
-                <UserSkeleton key={i} />
-              ))}
-            </div>
+            <TableSkeleton />
           ) : users.length === 0 ? (
             <div className="bg-white w-full rounded-2xl p-10 text-center border border-primary-100 shadow-sm">
               <div className="mx-auto size-14 bg-primary-50 rounded-full flex items-center justify-center mb-3">
@@ -310,73 +318,90 @@ export default function AdminUsersPage() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-3 w-full">
-              <AnimatePresence mode="popLayout">
-                {users.map((user) => (
-                  <motion.div
-                    key={user.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.2 }}
-                    className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-xl border border-primary-100 shadow-sm min-w-0"
-                  >
-                    <div className="flex items-center gap-3 w-full sm:flex-1 min-w-0">
-                      <UserAvatar
-                        name={user.full_name || user.email}
-                        avatarUrl={user.avatar_url}
-                      />
-                      <div className="flex-1 min-w-0 space-y-0.5">
-                        <h3 className="text-sm font-semibold text-primary-900 truncate">
-                          {user.full_name || "Unknown User"}
-                        </h3>
-                        <p className="text-sm text-primary-500 truncate">
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-end w-full sm:w-auto shrink-0 relative">
-                      <select
-                        value={user.role}
-                        onChange={(e) =>
-                          handleRoleChange(user, e.target.value as UserRole)
-                        }
-                        disabled={
-                          updatingUserId === user.id || user.role === "admin"
-                        }
-                        className={twMerge(
-                          "appearance-none bg-primary-50 border border-primary-200 text-primary-800 text-sm font-medium rounded-lg px-3.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed pr-8",
-                          user.role === "counselor" &&
-                            "bg-brand-50 text-brand-700 border-brand-200",
-                          user.role === "admin" &&
-                            "bg-error/10 text-error border-error/20",
-                        )}
+            <div className="bg-white rounded-2xl border border-primary-100 shadow-sm overflow-hidden w-full">
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-left border-collapse min-w-[600px]">
+                  <thead>
+                    <tr className="border-b border-primary-100/60 bg-primary-50/50">
+                      <th className="px-5 py-3.5 text-xs font-semibold text-primary-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-5 py-3.5 text-xs font-semibold text-primary-500 uppercase tracking-wider hidden sm:table-cell">
+                        Email
+                      </th>
+                      <th className="px-5 py-3.5 text-xs font-semibold text-primary-500 uppercase tracking-wider">
+                        Role
+                      </th>
+                      <th className="px-5 py-3.5 text-xs font-semibold text-primary-500 uppercase tracking-wider text-right hidden md:table-cell">
+                        Joined Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-primary-50">
+                    {users.map((user) => (
+                      <tr
+                        key={user.id}
+                        className="hover:bg-primary-50/30 transition-colors"
                       >
-                        <option value="student">Student</option>
-                        <option value="counselor">Counselor</option>
-                        {user.role === "admin" && (
-                          <option value="admin" disabled>
-                            Admin
-                          </option>
-                        )}
-                      </select>
-                      <FiChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 text-primary-400 pointer-events-none" />
-
-                      {updatingUserId === user.id && (
-                        <div className="absolute right-full mr-3">
-                          <div className="w-3 h-3 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <UserAvatar
+                              name={user.full_name || user.email}
+                              avatarUrl={user.avatar_url}
+                            />
+                            <span className="text-sm font-semibold text-primary-900 truncate">
+                              {user.full_name || "Unknown User"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 hidden sm:table-cell">
+                          <p className="text-sm text-primary-500 truncate">
+                            {user.email}
+                          </p>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="relative flex items-center">
+                            <Select
+                              value={user.role}
+                              options={ROLE_SELECT_OPTIONS}
+                              onChange={(value) =>
+                                handleRoleChange(user, value)
+                              }
+                              disabled={
+                                updatingUserId === user.id ||
+                                user.role === "admin"
+                              }
+                              textClassName="text-sm"
+                              className="w-[140px]"
+                            />
+                            {updatingUserId === user.id && (
+                              <div className="absolute -left-6">
+                                <div className="w-3.5 h-3.5 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-right hidden md:table-cell">
+                          <span className="text-sm text-primary-600">
+                            {new Date(user.created_at).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              },
+                            )}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && !loading && (
           <div className="flex flex-wrap items-center justify-center gap-2 pt-4 pb-6 w-full">
             <button
@@ -422,10 +447,9 @@ export default function AdminUsersPage() {
         )}
       </div>
 
-      {/* Confirmation Modal */}
       <AnimatePresence>
         {confirmModal.isOpen && confirmModal.user && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -466,8 +490,8 @@ export default function AdminUsersPage() {
                 {confirmModal.pendingRole === "counselor" && (
                   <div className="mb-6 p-4 bg-warning/10 border border-warning/20 rounded-xl">
                     <p className="text-xs text-warning-800 font-medium">
-                      ⚠️ Counselors have access to the Admin Dashboard and can
-                      view and edit student applications.
+                      Counselors have access to the Admin Dashboard and can
+                      manage assigned applications.
                     </p>
                   </div>
                 )}
