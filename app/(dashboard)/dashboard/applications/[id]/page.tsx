@@ -524,6 +524,12 @@ export default function ApplicationDetailPage({
         const {
           data: { user },
         } = await supabase.auth.getUser();
+
+        const [data, userResult] = await Promise.all([
+          applicationService.getApplicationById(id),
+          user ? Promise.resolve(user) : Promise.resolve(null),
+        ]);
+
         if (user) {
           setUserId(user.id);
           const [profile, studentDocs] = await Promise.all([
@@ -534,18 +540,20 @@ export default function ApplicationDetailPage({
           if (studentDocs?.documents)
             setStudentDocsMap(studentDocs.documents as any);
         }
-        const data = await applicationService.getApplicationById(id);
+
         setApplication(data);
-        if (data.counselor_id) {
-          const counselorProfile = await profileRepo.getProfile(
-            data.counselor_id,
-          );
-          if (counselorProfile) setAssignedCounselor(counselorProfile as any);
-        }
-        const history = await applicationRepository.getStatusHistory(id);
+
+        const [history, fetchedNotes, counselorProfile] = await Promise.all([
+          applicationRepository.getStatusHistory(id),
+          applicationRepository.getNotes(id),
+          data.counselor_id
+            ? profileRepo.getProfile(data.counselor_id)
+            : Promise.resolve(null),
+        ]);
+
         setStatusHistory(history);
-        const fetchedNotes = await applicationRepository.getNotes(id);
         setNotes(fetchedNotes.filter((n) => n.visibility === "public"));
+        if (counselorProfile) setAssignedCounselor(counselorProfile as any);
       } catch (err) {
         console.error("Failed to fetch application:", err);
       } finally {
@@ -1298,7 +1306,7 @@ export default function ApplicationDetailPage({
                       {assignedCounselor.full_name}
                     </p>
                     {assignedCounselor.description && (
-                      <p className="text-xs text-primary-500 font-medium mt-1 leading-relaxed">
+                      <p className="text-[13px] text-primary-500 font-medium mt-1 line-clamp-4 leading-relaxed">
                         {assignedCounselor.description}
                       </p>
                     )}

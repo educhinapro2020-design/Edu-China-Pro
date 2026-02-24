@@ -181,6 +181,16 @@ export const applicationService = {
     if (error) throw error;
   },
 
+  async assignCounselor(applicationId: string, counselorId: string) {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("applications")
+      .update({ counselor_id: counselorId })
+      .eq("id", applicationId);
+
+    if (error) throw error;
+  },
+
   async uploadAdminDocument(
     applicationId: string,
     file: File,

@@ -324,6 +324,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          description: string | null
           email: string
           full_name: string | null
           id: string
@@ -333,6 +334,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          description?: string | null
           email: string
           full_name?: string | null
           id: string
@@ -342,6 +344,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          description?: string | null
           email?: string
           full_name?: string | null
           id?: string
@@ -700,6 +703,16 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       search_admin_applications: {
         Args: {
+          p_page?: number
+          p_page_size?: number
+          p_search?: string
+          p_status?: string
+        }
+        Returns: Json
+      }
+      search_counselor_applications: {
+        Args: {
+          p_counselor_id: string
           p_page?: number
           p_page_size?: number
           p_search?: string

@@ -189,6 +189,52 @@ export const applicationRepository = {
     };
   },
 
+  async searchCounselorApplications(
+    params: {
+      counselorId: string;
+      search?: string;
+      status?: ApplicationStatus | null;
+      page?: number;
+      pageSize?: number;
+    },
+    client?: SupabaseClient,
+  ) {
+    const supabase = client ?? createClient();
+    const { data, error } = await supabase.rpc(
+      "search_counselor_applications",
+      {
+        p_counselor_id: params.counselorId,
+        p_search: params.search || "",
+        p_status: (params.status as any) || null,
+        p_page: params.page || 1,
+        p_page_size: params.pageSize || 20,
+      },
+    );
+
+    if (error) throw error;
+    return data as {
+      data: Array<{
+        id: string;
+        status: ApplicationStatus;
+        created_at: string;
+        updated_at: string;
+        submitted_at: string | null;
+        student: {
+          full_name: string;
+          email: string;
+          avatar_url: string | null;
+        };
+        program: {
+          id: string;
+          name_en: string;
+          university: { id: string; name_en: string; logo_url: string | null };
+        };
+      }>;
+      total_count: number;
+      status_counts: Record<string, number>;
+    };
+  },
+
   async getNotes(applicationId: string, client?: SupabaseClient) {
     const supabase = client ?? createClient();
     const { data, error } = await supabase

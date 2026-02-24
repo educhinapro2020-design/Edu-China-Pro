@@ -16,6 +16,7 @@ import { twMerge } from "tailwind-merge";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { ADMIN_NAV_ITEMS } from "@/lib/constants/admin";
+import { RiUserSettingsLine } from "react-icons/ri";
 
 interface AdminSidebarProps {
   user: {
@@ -165,11 +166,13 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               animate={{
                 opacity: isCollapsed && !mobile ? 0 : 1,
                 width: isCollapsed && !mobile ? 0 : "auto",
-                marginLeft: isCollapsed && !mobile ? 0 : 12,
               }}
               transition={{ duration: 0.2 }}
-              className="overflow-hidden whitespace-nowrap min-w-0"
+              className="overflow-hidden whitespace-nowrap min-w-0 flex items-center gap-2"
             >
+              <div className="shrink-0 size-5 flex items-center justify-center">
+                <RiUserSettingsLine className="size-5 shrink-0" />
+              </div>
               <p className="text-sm font-semibold text-primary-900 truncate">
                 {user.name}
               </p>
