@@ -35,6 +35,7 @@ import {
 } from "@/lib/constants/documents";
 import { StudentDocumentEntry } from "@/lib/types/student";
 import { COUNTRIES } from "@/lib/constants/countries";
+import { ProfileChecklistModal } from "@/components/dashboard/ProfileChecklistModal";
 
 const GENDERS = [
   { label: "Male", value: "Male" },
@@ -1170,6 +1171,11 @@ export function WizardClient({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Show floating checklist when arriving with ?helper=true */}
+      {searchParams.get("helper") === "true" && (
+        <ProfileChecklistModal profile={formData} documents={documents} />
+      )}
     </div>
   );
 }

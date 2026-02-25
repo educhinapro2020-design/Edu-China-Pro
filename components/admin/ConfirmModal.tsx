@@ -9,10 +9,11 @@ interface ConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message?: string;
   confirmLabel?: string;
   isLoading?: boolean;
-  variant?: "danger" | "warning";
+  variant?: "danger" | "warning" | "default";
+  children?: React.ReactNode;
 }
 
 export function ConfirmModal({
@@ -24,6 +25,7 @@ export function ConfirmModal({
   confirmLabel = "Delete",
   isLoading = false,
   variant = "danger",
+  children,
 }: ConfirmModalProps) {
   return (
     <AnimatePresence>
@@ -45,24 +47,33 @@ export function ConfirmModal({
           >
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
               <div className="flex flex-col items-start gap-2">
-                <div
-                  className={twMerge(
-                    "size-10 rounded-xl flex items-center justify-center shrink-0",
-                    variant === "danger" ? "bg-red-50" : "bg-amber-50",
-                  )}
-                >
-                  <FiAlertTriangle
+                {variant !== "default" && (
+                  <div
                     className={twMerge(
-                      "size-5",
-                      variant === "danger" ? "text-red-600" : "text-amber-600",
+                      "size-10 rounded-xl flex items-center justify-center shrink-0",
+                      variant === "danger" ? "bg-red-50" : "bg-amber-50",
                     )}
-                  />
-                </div>
-                <div>
+                  >
+                    <FiAlertTriangle
+                      className={twMerge(
+                        "size-5",
+                        variant === "danger"
+                          ? "text-red-600"
+                          : "text-amber-600",
+                      )}
+                    />
+                  </div>
+                )}
+                <div className="w-full">
                   <h3 className="font-semibold text-primary-900 text-lg">
                     {title}
                   </h3>
-                  <p className="text-sm text-primary-500 mt-1">{message}</p>
+                  {message && (
+                    <p className="text-sm text-primary-500 font-medium mt-1">
+                      {message}
+                    </p>
+                  )}
+                  {children && <div className="mt-4 w-full">{children}</div>}
                 </div>
               </div>
               <div className="flex items-center justify-end gap-3 mt-6">
@@ -79,8 +90,8 @@ export function ConfirmModal({
                   className={twMerge(
                     "px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-colors cursor-pointer disabled:opacity-50",
                     variant === "danger"
-                      ? "bg-red-600 hover:bg-red-700"
-                      : "bg-amber-600 hover:bg-amber-700",
+                      ? "bg-error/90 hover:bg-error"
+                      : "bg-brand-600 hover:bg-brand-700",
                   )}
                 >
                   {isLoading ? "Processing..." : confirmLabel}

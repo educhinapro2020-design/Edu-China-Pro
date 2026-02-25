@@ -21,6 +21,46 @@ export const profileRepo = {
     return profile;
   },
 
+  async getUsers(
+    params: {
+      search?: string;
+      role?: Database["public"]["Enums"]["user_role"] | "all";
+      page?: number;
+      pageSize?: number;
+    },
+    client?: SupabaseClient<Database>,
+  ): Promise<{ data: Profile[]; total_count: number }> {
+    const supabase = client ?? createClient();
+    const { search = "", role = "all", page = 1, pageSize = 20 } = params;
+
+    let query = supabase.from("profiles").select("*", { count: "exact" });
+
+    if (role !== "all") {
+      query = query.eq("role", role);
+    }
+
+    if (search.trim()) {
+      query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+    }
+
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize - 1;
+
+    query = query.range(start, end).order("created_at", { ascending: false });
+
+    const { data, count, error } = await query;
+
+    if (error) {
+      console.error("Error fetching users:", error);
+      throw new Error("Failed to fetch users");
+    }
+
+    return {
+      data: data as Profile[],
+      total_count: count ?? 0,
+    };
+  },
+
   async getCurrentUser() {
     const supabase = createClient();
     const {

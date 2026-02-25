@@ -33,6 +33,7 @@ export default async function AdminLayout({
           name: profile.full_name || user.email || "Admin",
           email: user.email || "",
           avatar: profile.avatar_url,
+          role: profile.role,
         }}
       />
       <main className="flex-1 min-h-screen min-w-0 flex flex-col">

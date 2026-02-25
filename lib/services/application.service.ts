@@ -5,6 +5,7 @@ import {
   ApplicationNote,
   ApplicationStatus,
   ApplicationDocuments,
+  UserDownload,
 } from "@/lib/types/application";
 import { DocumentKey } from "@/lib/constants/documents";
 import { Json } from "@/lib/types/supabase";
@@ -34,6 +35,7 @@ export const applicationService = {
           url: existingDocs[key]!.url,
           status: "uploaded",
           uploaded_at: new Date().toISOString(),
+          file_name: existingDocs[key]!.url.split("/").pop() || "",
         };
       }
     });
@@ -42,7 +44,7 @@ export const applicationService = {
       student_id: studentId,
       program_id: programId,
       university_id: universityId,
-      status: "document_pending",
+      status: "draft",
       documents: initialAppDocs as unknown as Json,
     };
 
@@ -177,5 +179,58 @@ export const applicationService = {
     });
 
     if (error) throw error;
+  },
+
+  async assignCounselor(applicationId: string, counselorId: string) {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("applications")
+      .update({ counselor_id: counselorId })
+      .eq("id", applicationId);
+
+    if (error) throw error;
+  },
+
+  async uploadAdminDocument(
+    applicationId: string,
+    file: File,
+    userId: string,
+    title: string,
+    description: string,
+  ): Promise<string> {
+    const supabase = createClient();
+    const filePath = `${userId}/${applicationId}/admin_downloads/${Date.now()}-${file.name}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("documents")
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("documents").getPublicUrl(filePath);
+
+    const app = await applicationRepository.getApplicationById(applicationId);
+    if (!app) throw new Error("Application not found");
+
+    const currentDownloads =
+      (app.user_downloads as unknown as UserDownload[]) ?? [];
+    const newDownload: UserDownload = {
+      title,
+      description: description || undefined,
+      url: publicUrl,
+      file_name: file.name,
+      uploaded_at: new Date().toISOString(),
+    };
+
+    const updatedDownloads: UserDownload[] = [...currentDownloads, newDownload];
+
+    await applicationRepository.updateUserDownloads(
+      applicationId,
+      updatedDownloads,
+    );
+
+    return publicUrl;
   },
 };

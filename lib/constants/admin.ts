@@ -1,4 +1,11 @@
-import { FiLayout, FiBell, FiBook, FiBookOpen, FiFile } from "react-icons/fi";
+import {
+  FiLayout,
+  FiBell,
+  FiBook,
+  FiBookOpen,
+  FiFile,
+  FiUsers,
+} from "react-icons/fi";
 import { MdOutlineSchool } from "react-icons/md";
 import { IconType } from "react-icons";
 
@@ -13,6 +20,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { name: "Applications", href: "/admin/applications", icon: FiFile },
   { name: "Universities", href: "/admin/universities", icon: MdOutlineSchool },
   { name: "Programs", href: "/admin/programs", icon: FiBookOpen },
+  { name: "Users", href: "/admin/users", icon: FiUsers },
 ];
 
 export const DEGREE_LEVEL_OPTIONS = [

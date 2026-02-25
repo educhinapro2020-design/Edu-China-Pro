@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { twMerge } from "tailwind-merge";
 import { SOCIAL_LINKS, CONTACT_INFO } from "@/lib/constants/socials";
+import { FiArrowRight } from "react-icons/fi";
 
 const footerLinks = [
   {
     title: "Services",
     items: [
+      { label: "SmartScore™", href: "/#smart-score" },
       { label: "University Search", href: "/universities" },
       { label: "Program Search", href: "/programs" },
       { label: "Scholarship Guide", href: "/scholarships" },
@@ -18,7 +20,7 @@ const footerLinks = [
       { label: "About Us", href: "/about" },
       { label: "Our Team", href: "/team" },
       { label: "Success Stories", href: "/testimonials" },
-      { label: "Contact Us", href: "/contact" },
+      { label: "Contact Us", href: "#consultation" },
     ],
   },
   {
@@ -116,9 +118,6 @@ export function Footer() {
                     {CONTACT_INFO.email}
                   </a>
                   <br />
-                  <span className="text-primary-500 text-xs mt-1 block">
-                    Replies within 24h
-                  </span>
                 </span>
               </li>
               <li className="flex items-start gap-3">

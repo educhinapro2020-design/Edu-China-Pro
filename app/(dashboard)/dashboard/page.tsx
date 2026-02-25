@@ -89,13 +89,13 @@ export default async function DashboardPage() {
             <div className="grid gap-4">
               {applications.slice(0, 3).map((app) => (
                 <Link key={app.id} href={`/dashboard/applications/${app.id}`}>
-                  <div className="group bg-white rounded-xl p-4 border border-primary-100 hover:shadow-md transition-all duration-200 flex items-center gap-4">
-                    <div className="h-14 w-14 shrink-0 bg-primary-50 rounded-lg overflow-hidden border border-primary-100 flex items-center justify-center">
+                  <div className="group bg-white rounded-xl p-4 sm:p-5 border border-primary-100 hover:shadow-md transition-all duration-200 hover:border-primary-200 w-full overflow-hidden flex items-start sm:items-center gap-4">
+                    <div className="size-12 sm:size-14 shrink-0 bg-primary-50 rounded-lg overflow-hidden border border-primary-100 flex items-center justify-center">
                       {app.program?.university?.logo_url ? (
                         <img
                           src={app.program.university.logo_url}
                           alt={app.program.university.name_en}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain"
                         />
                       ) : (
                         <span className="text-xl font-bold text-primary-300">
@@ -104,28 +104,23 @@ export default async function DashboardPage() {
                       )}
                     </div>
 
-                    <div className="grow min-w-0">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-semibold text-primary-900 truncate group-hover:text-primary-600 transition-colors">
-                            {app.program?.name_en}
-                          </h4>
-                          <p className="text-sm text-primary-500 truncate">
-                            {app.program?.university?.name_en}
-                          </p>
-                        </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+                        <h4 className="text-sm sm:text-base font-semibold text-primary-900 group-hover:text-primary-600 transition-colors leading-snug line-clamp-2 break-words">
+                          {app.program?.name_en}
+                        </h4>
                         <span
-                          className={`
-                            px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wide whitespace-nowrap ml-2
-                            ${getApplicationStatusColor(app.status)}
-                          `}
+                          className={`self-start shrink-0 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wide whitespace-nowrap ${getApplicationStatusColor(app.status)}`}
                         >
                           {getApplicationStatusLabel(app.status)}
                         </span>
                       </div>
+                      <p className="text-sm font-medium text-primary-500 break-words">
+                        {app.program?.university?.name_en}
+                      </p>
                     </div>
 
-                    <FiChevronRight className="w-5 h-5 text-primary-300 group-hover:text-primary-600" />
+                    <FiChevronRight className="size-4 text-primary-300 group-hover:text-primary-600 transition-colors shrink-0 hidden sm:block" />
                   </div>
                 </Link>
               ))}

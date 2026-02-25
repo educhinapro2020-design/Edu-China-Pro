@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { FiList, FiCheckCircle, FiX, FiArrowRight } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { StudentProfile, StudentDocumentEntry } from "@/lib/types/student";
 import { DocumentKey } from "@/lib/constants/documents";
 import { getProfileChecklist } from "@/lib/utils/profile-checklist";
@@ -21,6 +21,7 @@ export function ProfileChecklistModal({
 }: ProfileChecklistModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { completed, missing } = useMemo(
     () => getProfileChecklist(profile, documents),
@@ -45,7 +46,11 @@ export function ProfileChecklistModal({
 
   const handleFix = (step: number, id: string) => {
     setIsOpen(false);
-    router.push(`/dashboard/profile/build?step=${step}&focus=${id}`);
+    const helperParam =
+      searchParams.get("helper") === "true" ? "&helper=true" : "";
+    router.push(
+      `/dashboard/profile/build?step=${step}&focus=${id}${helperParam}`,
+    );
   };
 
   if (missing.length === 0) return null;
@@ -197,7 +202,7 @@ export function ProfileChecklistModal({
                 )}
               </div>
 
-              <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+              <div className="absolute bottom-0 left-0 right-0 h-6 bg-linear-to-t from-white to-transparent pointer-events-none" />
             </motion.div>
           </>
         )}

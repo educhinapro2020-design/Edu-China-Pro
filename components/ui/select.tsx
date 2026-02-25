@@ -8,6 +8,7 @@ import { twMerge } from "tailwind-merge";
 export interface SelectOption {
   label: string;
   value: string;
+  disabled?: boolean;
 }
 
 export interface SelectProps {
@@ -99,12 +100,17 @@ export function Select({
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => handleSelect(option.value)}
+                  onClick={() => {
+                    if (!option.disabled) handleSelect(option.value);
+                  }}
+                  disabled={option.disabled}
                   className={twMerge(
                     "flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-base font-medium transition-colors cursor-pointer text-left",
                     value === option.value
                       ? "bg-brand-50 text-brand-700"
                       : "text-primary-600 hover:bg-primary-50 hover:text-primary-900",
+                    option.disabled &&
+                      "cursor-not-allowed opacity-50 hover:bg-transparent hover:text-primary-600",
                     textClassName,
                   )}
                 >

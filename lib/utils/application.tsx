@@ -1,71 +1,151 @@
 import { ApplicationStatus } from "@/lib/types/application";
 import { DocumentStatus } from "@/lib/types/student";
-import { FiCheckCircle, FiAlertCircle, FiXCircle } from "react-icons/fi";
+import {
+  FiCheckCircle,
+  FiAlertCircle,
+  FiXCircle,
+  FiAlertTriangle,
+} from "react-icons/fi";
 import React from "react";
+import { MdOutlineVerified } from "react-icons/md";
+
+type ApplicationStatusMeta = {
+  label: string;
+  color: string;
+  description: string;
+};
+
+const APPLICATION_STATUS_META: Record<string, ApplicationStatusMeta> = {
+  draft: {
+    label: "Draft",
+    color: "bg-primary-100 text-primary-700",
+    description:
+      "Your application has been created. Please ensure all required documents are uploaded before submission.",
+  },
+  submitted: {
+    label: "Submitted",
+    color: "bg-blue-100 text-blue-700",
+    description:
+      "Your application has been submitted and is awaiting review by our admissions team.",
+  },
+  reviewing: {
+    label: "Reviewing",
+    color: "bg-indigo-100 text-indigo-700",
+    description:
+      "Our team is carefully reviewing your application and documents.",
+  },
+  approved: {
+    label: "Approved",
+    color: "bg-green-100 text-green-700",
+    description:
+      "Your application has been approved internally and is ready to proceed to the next stage.",
+  },
+  action_required: {
+    label: "Action Required",
+    color: "bg-orange-100 text-orange-700",
+    description:
+      "We need additional information or corrections from you. Please check the messages tab for details.",
+  },
+  application_fee_pending: {
+    label: "Application Fee Pending",
+    color: "bg-yellow-100 text-yellow-700",
+    description:
+      "Please complete the university application fee payment to proceed. Contact your counselor for payment details.",
+  },
+  application_fee_paid: {
+    label: "Application Fee Paid",
+    color: "bg-sky-100 text-sky-700",
+    description:
+      "Your application fee has been received. We will now proceed to submit your application to the university.",
+  },
+  applied_to_university: {
+    label: "Applied to University",
+    color: "bg-violet-100 text-violet-700",
+    description:
+      "Your application has been officially submitted to the university and is under their review.",
+  },
+  admission_success: {
+    label: "Admission Successful",
+    color: "bg-green-100 text-green-800",
+    description:
+      "Congratulations! The university has accepted your application.",
+  },
+  admission_failure: {
+    label: "Admission Unsuccessful",
+    color: "bg-red-100 text-red-700",
+    description:
+      "Unfortunately, the university was unable to offer you admission at this time. Please contact your counselor to discuss next steps.",
+  },
+  offer_letter: {
+    label: "Offer Letter Issued",
+    color: "bg-fuchsia-100 text-fuchsia-700",
+    description:
+      "Your official offer letter has been uploaded. Please review it in the documents section.",
+  },
+  ecp_fee_pending: {
+    label: "ECP Service Fee Pending",
+    color: "bg-amber-100 text-amber-700",
+    description:
+      "Please complete the EduChinaPro service fee payment to continue with your visa processing. Contact your counselor for payment details.",
+  },
+  ecp_fee_paid: {
+    label: "ECP Service Fee Paid",
+    color: "bg-teal-100 text-teal-700",
+    description:
+      "Your EduChinaPro service fee has been received. We will now begin processing your JW form.",
+  },
+  jw_form_received: {
+    label: "JW Form Received",
+    color: "bg-cyan-100 text-cyan-700",
+    description:
+      "Your JW202 admission notice has been received from the university. Visa document preparation is underway.",
+  },
+  visa_docs_ready: {
+    label: "Visa Docs Ready",
+    color: "bg-purple-100 text-purple-700",
+    description:
+      "All your visa application documents are prepared and ready for submission to the embassy.",
+  },
+  visa_granted: {
+    label: "Visa Granted",
+    color: "bg-emerald-600 text-white",
+    description:
+      "Congratulations! Your student visa has been granted. You are ready to begin your journey to China.",
+  },
+};
 
 /**
- * Returns the Tailwind CSS classes for the status badge based on application status.
+ * Returns the full meta (label, color, description) for an application status.
  */
+export function getApplicationStatusMeta(
+  status: ApplicationStatus | string | null | undefined,
+): ApplicationStatusMeta {
+  if (!status) {
+    return {
+      label: "Unknown",
+      color: "bg-primary-100 text-primary-700",
+      description: "",
+    };
+  }
+  return (
+    APPLICATION_STATUS_META[status as string] ?? {
+      label: status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      color: "bg-primary-100 text-primary-700",
+      description: "",
+    }
+  );
+}
+
 export function getApplicationStatusColor(
   status: ApplicationStatus | string | null | undefined,
 ): string {
-  if (!status) return "bg-primary-100 text-primary-800";
-  switch (status) {
-    case "document_pending":
-      return "bg-yellow-100 text-yellow-800";
-    case "applied":
-      return "bg-blue-100 text-blue-800";
-    case "processing":
-      return "bg-indigo-100 text-indigo-800";
-    case "payment_pending":
-      return "bg-orange-100 text-orange-800";
-    case "payment_received":
-      return "bg-sky-100 text-sky-800 border-sky-200";
-    case "admission_success":
-      return "bg-green-100 text-green-800";
-    case "admission_failure":
-      return "bg-red-100 text-red-800";
-    case "offer_letter_uploaded":
-      return "bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200";
-    case "jw202_processing":
-      return "bg-purple-100 text-purple-800 border-purple-200";
-    case "visa_docs_ready":
-      return "bg-teal-100 text-teal-800 border-teal-200";
-    case "visa_granted":
-      return "bg-emerald-600 text-white";
-    default:
-      return "bg-primary-100 text-primary-800";
-  }
+  return getApplicationStatusMeta(status).color;
 }
 
-/**
- * Returns a human-readable label for the application status.
- */
 export function getApplicationStatusLabel(
   status: ApplicationStatus | string | null | undefined,
 ): string {
-  if (!status) return "Unknown";
-  const labels: Record<string, string> = {
-    document_pending: "Document Pending",
-    applied: "Applied",
-    processing: "Processing",
-    payment_pending: "Payment Pending",
-    payment_received: "Payment Received",
-    admission_success: "Admission Success",
-    admission_failure: "Admission Failure",
-    offer_letter_uploaded: "Offer Letter Uploaded",
-    jw202_processing: "JW202 Processing",
-    visa_docs_ready: "Visa Docs Ready",
-    visa_granted: "Visa Granted",
-  };
-  return (
-    labels[status as string] ||
-    status
-      .replace(/_/g, " ")
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
-  );
+  return getApplicationStatusMeta(status).label;
 }
 
 /**
@@ -87,7 +167,7 @@ export function formatRelativeTime(dateStr: string): string {
 }
 
 /**
- * Extracts initials from a student's full name.
+ * Extracts initials from a full name.
  */
 export function getStudentInitials(name: string): string {
   return name
@@ -99,64 +179,57 @@ export function getStudentInitials(name: string): string {
     .toUpperCase();
 }
 
-/**
- * Returns the icon component and color class for a document status.
- */
-export function getDocumentStatusInfo(
-  status: DocumentStatus | "missing" | null | undefined,
-): {
+type DocumentStatusMeta = {
+  label: string;
+  color: string;
   icon: React.ReactNode;
-  colorClass: string;
-} {
-  switch (status) {
-    case "verified":
-      return {
-        icon: <FiCheckCircle className="size-4" />,
-        colorClass: "text-success",
-      };
-    case "uploaded":
-      return {
-        icon: <FiCheckCircle className="size-4" />,
-        colorClass: "text-brand-500",
-      };
-    case "rejected":
-      return {
-        icon: <FiXCircle className="size-4" />,
-        colorClass: "text-red-500",
-      };
-    case "needs_correction":
-      return {
-        icon: <FiAlertCircle className="size-4" />,
-        colorClass: "text-orange-500",
-      };
-    case "missing":
-    default:
-      return {
-        icon: (
-          <div className="size-4 rounded-full border-2 border-primary-200" />
-        ),
-        colorClass: "text-primary-300",
-      };
-  }
-}
+  description: string;
+};
 
 /**
- * Returns the color class for the document status text/badge.
+ * Returns the full meta (label, color, icon, description) for a document status.
  */
-export function getDocumentStatusColor(
+export function getDocumentStatusMeta(
   status: DocumentStatus | "missing" | null | undefined,
-): string {
+): DocumentStatusMeta {
   switch (status) {
     case "verified":
-      return "text-success bg-success/10 border-success/20";
+      return {
+        label: "Verified",
+        color: "text-success bg-success/10 border-success/20",
+        icon: <MdOutlineVerified className="size-4" />,
+        description: "This document has been verified by our team.",
+      };
     case "uploaded":
-      return "text-brand-600 bg-brand-50 border-brand-100";
+      return {
+        label: "Uploaded",
+        color: "text-brand-600 bg-brand-50 border-brand-100",
+        icon: <FiCheckCircle className="size-4" />,
+        description: "Document uploaded and pending verification.",
+      };
     case "rejected":
-      return "text-red-700 bg-red-50 border-red-100";
+      return {
+        label: "Rejected",
+        color: "text-error bg-error/10 border-error/20",
+        icon: <FiXCircle className="size-4" />,
+        description:
+          "This document was rejected. Please upload a corrected version.",
+      };
     case "needs_correction":
-      return "text-orange-700 bg-orange-50 border-orange-100";
+      return {
+        label: "Needs Correction",
+        color: "text-warning bg-warning/10 border-warning/20",
+        icon: <FiAlertCircle className="size-4" />,
+        description:
+          "This document requires corrections. Check the messages tab for details.",
+      };
     case "missing":
     default:
-      return "text-primary-500 bg-primary-50 border-primary-100";
+      return {
+        label: "Missing",
+        color: "text-warning bg-warning/10 border-warning/20",
+        icon: <FiAlertTriangle className="size-4" />,
+        description: "This document has not been uploaded yet.",
+      };
   }
 }
