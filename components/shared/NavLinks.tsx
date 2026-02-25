@@ -39,7 +39,7 @@ export function NavLinks() {
             key={link.href}
             href={link.href}
             className={twMerge(
-              "font-medium flex items-center gap-2 transition-colors",
+              "font-semibold text-sm flex items-center gap-2 transition-colors",
               active
                 ? "text-brand-600"
                 : "text-primary-600 hover:text-brand-600",

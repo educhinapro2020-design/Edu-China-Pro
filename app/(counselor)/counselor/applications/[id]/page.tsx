@@ -330,7 +330,6 @@ export default function CounselorApplicationDetailPage() {
 
   return (
     <>
-      {/* Status change confirm */}
       <ConfirmModal
         isOpen={!!pendingStatus}
         onClose={() => {
@@ -359,7 +358,6 @@ export default function CounselorApplicationDetailPage() {
         </div>
       </ConfirmModal>
 
-      {/* Undo confirm */}
       <ConfirmModal
         isOpen={confirmUndo}
         onClose={() => setConfirmUndo(false)}
@@ -375,7 +373,6 @@ export default function CounselorApplicationDetailPage() {
         variant="warning"
       />
 
-      {/* Doc status modal */}
       {(() => {
         const dk = selectedDocKey;
         if (!dk) return null;
@@ -493,7 +490,6 @@ export default function CounselorApplicationDetailPage() {
         );
       })()}
 
-      {/* Add note modal */}
       {isAddingNote && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary-900/40 backdrop-blur-sm">
           <motion.div
@@ -586,9 +582,7 @@ export default function CounselorApplicationDetailPage() {
         </button>
 
         <div className="flex flex-col xl:flex-row gap-6 xl:gap-8 items-start">
-          {/* ── Left column ─────────────────────────────────────────────────── */}
           <div className="grow w-full xl:w-2/3 space-y-6 min-w-0">
-            {/* Header card */}
             <div className="bg-white rounded-3xl border border-primary-100 shadow-sm overflow-hidden relative">
               <div className="absolute top-0 inset-x-0 h-32 bg-linear-to-br from-brand-100/40 via-primary-50/50 to-white -z-10" />
               <div
@@ -641,7 +635,6 @@ export default function CounselorApplicationDetailPage() {
               </div>
             </div>
 
-            {/* Tabs */}
             <div className="bg-white rounded-3xl border min-h-[40vh] border-primary-100 shadow-sm overflow-hidden w-full min-w-0">
               <div className="flex border-b border-primary-100 px-6 sm:px-8 pt-6 gap-8 overflow-x-auto scrollbar-none">
                 {(
@@ -682,7 +675,6 @@ export default function CounselorApplicationDetailPage() {
               </div>
 
               <AnimatePresence mode="wait">
-                {/* Profile tab */}
                 {activeTab === "profile" && (
                   <motion.div
                     key="profile"
@@ -949,7 +941,6 @@ export default function CounselorApplicationDetailPage() {
                   </motion.div>
                 )}
 
-                {/* Documents tab */}
                 {activeTab === "documents" && (
                   <motion.div
                     key="documents"
@@ -1103,7 +1094,6 @@ export default function CounselorApplicationDetailPage() {
                   </motion.div>
                 )}
 
-                {/* Form tab */}
                 {activeTab === "form" && (
                   <motion.div
                     key="form"
@@ -1137,7 +1127,6 @@ export default function CounselorApplicationDetailPage() {
                   </motion.div>
                 )}
 
-                {/* History tab */}
                 {activeTab === "history" && (
                   <motion.div
                     key="history"
@@ -1238,9 +1227,7 @@ export default function CounselorApplicationDetailPage() {
             </div>
           </div>
 
-          {/* ── Right column ────────────────────────────────────────────────── */}
           <div className="w-full lg:w-1/3 shrink-0 flex flex-col gap-6 lg:sticky lg:top-8">
-            {/* Status control */}
             <div className="bg-white rounded-3xl border border-primary-100 shadow-sm p-6 sm:p-8 flex flex-col gap-6">
               <div className="space-y-3">
                 <div>
@@ -1287,7 +1274,6 @@ export default function CounselorApplicationDetailPage() {
               </div>
             </div>
 
-            {/* User downloads */}
             <div className="py-6 px-6 bg-white rounded-3xl border border-primary-100 shadow-sm overflow-hidden flex flex-col">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <h3 className="text-sm font-bold tracking-wide text-primary-900 uppercase">
@@ -1350,7 +1336,6 @@ export default function CounselorApplicationDetailPage() {
               </div>
             </div>
 
-            {/* Notes */}
             <div className="py-6 px-6 bg-white rounded-3xl border border-primary-100 shadow-sm overflow-hidden flex flex-col">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <h3 className="text-sm font-bold tracking-wide text-primary-900 uppercase flex items-center gap-2">
@@ -1416,7 +1401,6 @@ export default function CounselorApplicationDetailPage() {
         </div>
       </div>
 
-      {/* Upload modal */}
       <AnimatePresence>
         {showUploadModal && (
           <motion.div

@@ -13,7 +13,7 @@ export async function Navbar() {
   } = await supabase.auth.getUser();
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-primary-200 bg-white/80 backdrop-blur-md">
+    <nav className="sticky md:relative top-0 z-50 w-full border-b border-primary-200 bg-white/80 backdrop-blur-md">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         <Link
           href="/"
@@ -27,7 +27,7 @@ export async function Navbar() {
             className="size-12"
             priority
           />
-          <span className="font-serif font-bold text-2xl brand-text tracking-tight">
+          <span className="font-serif font-bold text-xl brand-text tracking-tight">
             EduChinaPro
           </span>
         </Link>

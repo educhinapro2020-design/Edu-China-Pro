@@ -105,6 +105,7 @@
   --background: #ffffff;
   --foreground: #0f172a;
   margin: 0;
+  scroll-behavior: smooth;
 }
 
 body {
