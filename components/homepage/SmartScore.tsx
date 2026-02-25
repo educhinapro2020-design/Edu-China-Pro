@@ -525,10 +525,13 @@ export function SmartScoreSection() {
                     </div>
 
                     <div className="px-8 py-5 flex flex-col sm:flex-row gap-2.5 shrink-0">
-                      <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-2xl transition-all shadow-sm shadow-brand-200">
+                      <a
+                        href="/#consultation"
+                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-2xl transition-all shadow-sm shadow-brand-200"
+                      >
                         <FiCalendar className="size-4" />
                         Book Free Counseling
-                      </button>
+                      </a>
                       <button
                         onClick={handleReset}
                         className="flex-1 py-3 border border-primary-200 hover:border-primary-300 text-primary-500 hover:text-primary-800 text-sm font-semibold rounded-2xl transition-all"
