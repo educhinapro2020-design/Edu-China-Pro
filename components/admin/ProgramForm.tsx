@@ -28,11 +28,13 @@ import { Select } from "@/components/ui/select";
 interface ProgramFormProps {
   initialData?: Program;
   isEditing?: boolean;
+  basePath?: string;
 }
 
 export function ProgramForm({
   initialData,
   isEditing = false,
+  basePath = "/admin",
 }: ProgramFormProps) {
   const router = useRouter();
   const [universities, setUniversities] = useState<University[]>([]);
@@ -174,7 +176,7 @@ export function ProgramForm({
       } else {
         await programRepository.createProgram(payload as any);
       }
-      router.push("/admin/programs");
+      router.push(`${basePath}/programs`);
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -184,7 +186,7 @@ export function ProgramForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative max-w-6xl mx-auto">
+    <form onSubmit={handleSubmit} className="relative max-w-6xl mx-auto pb-6">
       <div className="flex flex-col gap-8 pb-12">
         <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
           <div>

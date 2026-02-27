@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   FiPlus,
   FiEdit2,
@@ -16,7 +15,11 @@ import { DataTable, Column } from "@/components/admin/DataTable";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
 import { Button } from "@/components/ui/button";
 
-export default function AdminUniversitiesPage() {
+export function UniversitiesPage({
+  basePath = "/admin",
+}: {
+  basePath?: string;
+}) {
   const [data, setData] = useState<University[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -131,7 +134,7 @@ export default function AdminUniversitiesPage() {
               {count}
             </span>
             <Link
-              href={`/admin/universities/${row.id}/programs`}
+              href={`${basePath}/universities/${row.id}/programs`}
               className="px-3 py-1 flex items-center gap-2 cursor-pointer text-primary-600 hover:text-brand-600 hover:underline rounded-lg text-sm font-medium transition-colors"
             >
               <FiExternalLink />
@@ -153,7 +156,7 @@ export default function AdminUniversitiesPage() {
           <p className="text-primary-500">Manage university profiles</p>
         </div>
         <Link
-          href="/admin/universities/new"
+          href={`${basePath}/universities/new`}
           className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
         >
           <Button startIcon={<FiPlus />} size="sm">
@@ -183,7 +186,7 @@ export default function AdminUniversitiesPage() {
               <FiExternalLink className="size-4" />
             </Link>
             <Link
-              href={`/admin/universities/${row.id}/edit`}
+              href={`${basePath}/universities/${row.id}/edit`}
               className="p-2 text-primary-400 hover:text-brand-600 transition-colors"
               title="Edit"
             >
@@ -213,4 +216,8 @@ export default function AdminUniversitiesPage() {
       />
     </div>
   );
+}
+
+export default function AdminUniversitiesPage() {
+  return <UniversitiesPage basePath="/admin" />;
 }

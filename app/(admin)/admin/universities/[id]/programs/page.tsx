@@ -19,7 +19,11 @@ import { ConfirmModal } from "@/components/admin/ConfirmModal";
 import { ProgressiveLoader } from "@/components/ui/ProgressiveLoader";
 import { Button } from "@/components/ui/button";
 
-export default function NestedProgramsPage() {
+export function NestedProgramsPage({
+  basePath = "/admin",
+}: {
+  basePath?: string;
+}) {
   const params = useParams();
   const universityId = params.id as string;
 
@@ -143,7 +147,7 @@ export default function NestedProgramsPage() {
     <div className="space-y-6">
       <div>
         <Link
-          href="/admin/universities"
+          href={`${basePath}/universities`}
           className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
         >
           <FiArrowLeft className="size-4" />
@@ -170,7 +174,7 @@ export default function NestedProgramsPage() {
             </div>
           </div>
           <Link
-            href={`/admin/universities/${universityId}/programs/new`}
+            href={`${basePath}/universities/${universityId}/programs/new`}
             className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
           >
             <Button startIcon={<FiPlus />} size="sm">
@@ -201,7 +205,7 @@ export default function NestedProgramsPage() {
               <FiExternalLink className="size-4" />
             </Link>
             <Link
-              href={`/admin/universities/${universityId}/programs/${row.id}/edit`}
+              href={`${basePath}/universities/${universityId}/programs/${row.id}/edit`}
               className="p-2 text-primary-400 hover:text-brand-600 transition-colors"
               title="Edit"
             >
@@ -231,4 +235,8 @@ export default function NestedProgramsPage() {
       />
     </div>
   );
+}
+
+export default function AdminNestedProgramsPage() {
+  return <NestedProgramsPage basePath="/admin" />;
 }

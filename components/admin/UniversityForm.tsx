@@ -40,6 +40,7 @@ import ImageUpload from "./ImageUpload";
 interface UniversityFormProps {
   initialData?: University;
   isEditing?: boolean;
+  basePath?: string;
 }
 
 interface AddCityDialogProps {
@@ -424,6 +425,7 @@ function CitySelector({ value, onChange, error }: CityComboboxProps) {
 export function UniversityForm({
   initialData,
   isEditing = false,
+  basePath = "/admin",
 }: UniversityFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -553,7 +555,7 @@ export function UniversityForm({
       } else {
         await universityRepository.createUniversity(payload as any);
       }
-      router.push("/admin/universities");
+      router.push(`${basePath}/universities`);
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -563,7 +565,7 @@ export function UniversityForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative max-w-6xl mx-auto">
+    <form onSubmit={handleSubmit} className="relative max-w-6xl mx-auto pb-6">
       <div className="flex flex-col gap-8 pb-12">
         <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
           <div>

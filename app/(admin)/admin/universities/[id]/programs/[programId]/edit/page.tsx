@@ -9,7 +9,11 @@ import { ProgressiveLoader } from "@/components/ui/ProgressiveLoader";
 import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 
-export default function EditProgramPage() {
+export function ProgramEditPage({
+  basePath = "/admin",
+}: {
+  basePath?: string;
+}) {
   const params = useParams();
   const [program, setProgram] = useState<Program | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +55,7 @@ export default function EditProgramPage() {
     <div className="space-y-6">
       <div className="max-w-6xl mx-auto">
         <Link
-          href={`/admin/universities/${params.id}/programs`}
+          href={`${basePath}/universities/${params.id}/programs`}
           className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
         >
           <FiArrowLeft className="size-4" />
@@ -64,7 +68,11 @@ export default function EditProgramPage() {
           Editing <span>{program.name_en}</span>
         </p>
       </div>
-      <ProgramForm initialData={program} isEditing />
+      <ProgramForm initialData={program} isEditing basePath={basePath} />
     </div>
   );
+}
+
+export default function AdminEditProgramPage() {
+  return <ProgramEditPage basePath="/admin" />;
 }

@@ -6,14 +6,14 @@ import { Program } from "@/lib/types/university";
 import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 
-export default function NewProgramPage() {
+export function NewProgramPage({ basePath = "/admin" }: { basePath?: string }) {
   const params = useParams();
 
   return (
     <div className="space-y-6">
       <div className="max-w-6xl mx-auto">
         <Link
-          href={`/admin/universities/${params.id}/programs`}
+          href={`${basePath}/universities/${params.id}/programs`}
           className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
         >
           <FiArrowLeft className="size-4" />
@@ -24,7 +24,14 @@ export default function NewProgramPage() {
         </h1>
         <p className="text-primary-500">Create a new academic program</p>
       </div>
-      <ProgramForm initialData={{ university_id: params.id } as Program} />
+      <ProgramForm
+        initialData={{ university_id: params.id } as Program}
+        basePath={basePath}
+      />
     </div>
   );
+}
+
+export default function AdminNewProgramPage() {
+  return <NewProgramPage basePath="/admin" />;
 }

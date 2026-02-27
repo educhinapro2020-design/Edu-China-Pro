@@ -16,7 +16,11 @@ import { DataTable, Column } from "@/components/admin/DataTable";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
 import { Button } from "@/components/ui/button";
 
-export default function AdminProgramsPage() {
+export function ProgramsListPage({
+  basePath = "/admin",
+}: {
+  basePath?: string;
+}) {
   const [data, setData] = useState<Program[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -145,7 +149,7 @@ export default function AdminProgramsPage() {
               <FiExternalLink className="size-4" />
             </Link>
             <Link
-              href={`/admin/universities/${row.university_id}/programs/${row.id}/edit`}
+              href={`${basePath}/universities/${row.university_id}/programs/${row.id}/edit`}
               className="p-2 text-primary-400 hover:text-brand-600 transition-colors"
               title="Edit"
             >
@@ -175,4 +179,8 @@ export default function AdminProgramsPage() {
       />
     </div>
   );
+}
+
+export default function AdminProgramsPage() {
+  return <ProgramsListPage basePath="/admin" />;
 }

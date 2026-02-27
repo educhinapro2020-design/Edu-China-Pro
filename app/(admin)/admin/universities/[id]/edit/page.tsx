@@ -9,7 +9,11 @@ import { ProgressiveLoader } from "@/components/ui/ProgressiveLoader";
 import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 
-export default function EditUniversityPage() {
+export function UniversityEditPage({
+  basePath = "/admin",
+}: {
+  basePath?: string;
+}) {
   const params = useParams();
   const [university, setUniversity] = useState<University | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +55,7 @@ export default function EditUniversityPage() {
     <div className="space-y-6">
       <div className="max-w-6xl mx-auto">
         <Link
-          href="/admin/universities"
+          href={`${basePath}/universities`}
           className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-brand-600 transition-colors mb-4"
         >
           <FiArrowLeft className="size-4" />
@@ -64,7 +68,11 @@ export default function EditUniversityPage() {
           Editing <span>{university.name_en}</span>
         </p>
       </div>
-      <UniversityForm initialData={university} isEditing />
+      <UniversityForm initialData={university} isEditing basePath={basePath} />
     </div>
   );
+}
+
+export default function AdminEditUniversityPage() {
+  return <UniversityEditPage basePath="/admin" />;
 }
