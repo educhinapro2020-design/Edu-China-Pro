@@ -5,6 +5,7 @@ import {
   FiBookOpen,
   FiFile,
   FiUsers,
+  FiMessageCircle,
 } from "react-icons/fi";
 import { MdOutlineSchool } from "react-icons/md";
 import { IconType } from "react-icons";
@@ -18,6 +19,7 @@ export interface AdminNavItem {
 export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { name: "Dashboard", href: "/admin", icon: FiLayout },
   { name: "Applications", href: "/admin/applications", icon: FiFile },
+  { name: "Messages", href: "/admin/messages", icon: FiMessageCircle },
   { name: "Universities", href: "/admin/universities", icon: MdOutlineSchool },
   { name: "Programs", href: "/admin/programs", icon: FiBookOpen },
   { name: "Users", href: "/admin/users", icon: FiUsers },
