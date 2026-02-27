@@ -125,34 +125,6 @@ export const applicationService = {
     return publicUrl;
   },
 
-  async getMessages(applicationId: string) {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("application_messages")
-      .select(
-        `
-        *,
-        sender:profiles(full_name, avatar_url)
-      `,
-      )
-      .eq("application_id", applicationId)
-      .order("created_at", { ascending: true });
-
-    if (error) throw error;
-    return data as ApplicationMessage[];
-  },
-
-  async sendMessage(applicationId: string, message: string, senderId: string) {
-    const supabase = createClient();
-    const { error } = await supabase.from("application_messages").insert({
-      application_id: applicationId,
-      sender_id: senderId,
-      message,
-    });
-
-    if (error) throw error;
-  },
-
   async getNotes(applicationId: string) {
     const supabase = createClient();
     const { data, error } = await supabase
