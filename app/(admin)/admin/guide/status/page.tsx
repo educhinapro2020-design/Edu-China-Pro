@@ -1,105 +1,13 @@
 "use client";
 
-import React from "react";
 import { FiInfo, FiCheckCircle, FiChevronLeft } from "react-icons/fi";
 import { useRouter } from "next/navigation";
+import { APPLICATION_ADMIN_STATUSES } from "@/lib/types/application";
 import {
-  ApplicationStatus,
-  APPLICATION_STATUSES,
-} from "@/lib/types/application";
-import { getApplicationStatusMeta } from "@/lib/utils/application";
+  getApplicationStatusMeta,
+  ADMIN_GUIDANCE,
+} from "@/lib/utils/application";
 import { twMerge } from "tailwind-merge";
-
-const ADMIN_GUIDANCE: Record<
-  ApplicationStatus,
-  { title: string; action: string; next?: string }
-> = {
-  draft: {
-    title: "Student is preparing the application.",
-    action:
-      "Automatically set when a student starts an application. Admins rarely set this manually unless resetting a completely botched submission.",
-  },
-  submitted: {
-    title: "Student has submitted the application.",
-    action:
-      "Automatically set when the student clicks submit. Signals that the application is ready for your initial review.",
-    next: "Review the documents and move to 'Reviewing'.",
-  },
-  reviewing: {
-    title: "Counselor is actively reviewing.",
-    action:
-      "Set this when you begin checking the student's submitted documents and profile to let them know it's being processed.",
-    next: "If issues are found, set to 'Action Required'. Otherwise, set to 'Approved'.",
-  },
-  action_required: {
-    title: "Student needs to fix something.",
-    action:
-      "Set this when documents are rejected or profile information is missing. Always leave a private note and send a message explaining what needs to be fixed.",
-    next: "Returns to 'Reviewing' once the student re-submits.",
-  },
-  approved: {
-    title: "Internal review passed.",
-    action:
-      "Set this when all documents and profile details are verified and the application is internally approved by EduChinaPro.",
-    next: "Usually followed by 'Application Fee Pending'.",
-  },
-  application_fee_pending: {
-    title: "Requesting University App Fee.",
-    action:
-      "Set this to trigger the 'Application Fee Payment Required' alert on the student's dashboard.",
-  },
-  application_fee_paid: {
-    title: "University App Fee verified.",
-    action:
-      "Set this when you have received and verified the student's application fee payment.",
-    next: "Proceed to apply on the university portal and set to 'Applied to University'.",
-  },
-  applied_to_university: {
-    title: "Submitted to University Portal.",
-    action:
-      "Set this after you have officially submitted their application on the university's own admissions portal.",
-  },
-  admission_success: {
-    title: "University Accepted.",
-    action:
-      "Set this when the university confirms they have accepted the student.",
-  },
-  admission_failure: {
-    title: "University Rejected.",
-    action:
-      "Set this if the university denies the application. Be sure to follow up with the student regarding alternative options.",
-  },
-  offer_letter: {
-    title: "Offer Letter Issued.",
-    action:
-      "Set this when you receive the official Offer/Admission Letter from the university and upload it to their documents.",
-  },
-  ecp_fee_pending: {
-    title: "Requesting ECP Service Fee.",
-    action:
-      "Set this to trigger the 'EduChinaPro Service Fee Payment Required' alert on the student's dashboard.",
-  },
-  ecp_fee_paid: {
-    title: "ECP Service Fee verified.",
-    action:
-      "Set this when you have received and verified the student's EduChinaPro service fee payment.",
-  },
-  jw_form_received: {
-    title: "JW202 Form Received.",
-    action:
-      "Set this when the official JW202 visa form arrives from the university.",
-  },
-  visa_docs_ready: {
-    title: "Visa Documents Prepared.",
-    action:
-      "Set this when all documents required for the student's visa application are ready and sent to them.",
-  },
-  visa_granted: {
-    title: "Student got their Visa.",
-    action:
-      "Set this when the student successfully obtains their student visa from the embassy. The final successful state.",
-  },
-};
 
 export default function StatusGuidePage() {
   const router = useRouter();
@@ -154,9 +62,10 @@ export default function StatusGuidePage() {
           </div>
 
           <div className="divide-y divide-primary-100">
-            {APPLICATION_STATUSES.map((status, index) => {
+            {APPLICATION_ADMIN_STATUSES.map((status, index) => {
               const meta = getApplicationStatusMeta(status);
               const guidance = ADMIN_GUIDANCE[status];
+              if (!guidance) return null;
 
               return (
                 <div

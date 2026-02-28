@@ -880,6 +880,11 @@ export type Database = {
         | "jw_form_received"
         | "visa_docs_ready"
         | "visa_granted"
+        | "visa_rejected"
+        | "rejected"
+        | "dropped_off"
+        | "withdrawn"
+        | "closed"
       degree_level:
         | "bachelor"
         | "master"
@@ -1044,6 +1049,11 @@ export const Constants = {
         "jw_form_received",
         "visa_docs_ready",
         "visa_granted",
+        "visa_rejected",
+        "rejected",
+        "dropped_off",
+        "withdrawn",
+        "closed",
       ],
       degree_level: ["bachelor", "master", "doctoral", "non_degree", "upgrade"],
       institution_type: ["public", "private"],
