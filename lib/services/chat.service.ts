@@ -156,7 +156,6 @@ export const chatService = {
         onTyping();
       })
       .subscribe((status) => {
-        console.log("[typing] status:", status);
         if (status === "SUBSCRIBED") {
           activeTypingChannels.set(conversationId, channel);
         }

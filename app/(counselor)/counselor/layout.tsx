@@ -1,4 +1,5 @@
 import { CounselorSidebar } from "@/components/counselor/CounselorSidebar";
+import { NotificationBell } from "@/components/shared/NotificationBell";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -37,12 +38,12 @@ export default async function CounselorLayout({
           role: profile.role,
         }}
       />
-
-      <main className="flex-1 h-[calc(100vh-0px)] min-w-0 flex flex-col">
-        <div className="flex-1 p-4 pt-18 md:p-8 flex flex-col h-full">
-          {children}
-        </div>
-      </main>
+      <div className="h-10 absolute top-4 right-6 z-55">
+        <NotificationBell userId={user.id} />
+      </div>
+      <main className="flex-1 h-[calc(100vh-40px)] mt-10 min-w-0 flex flex-col">
+        <div className="flex-1 p-4 md:p-8 flex flex-col h-full">{children}</div>
+      </main>{" "}
     </div>
   );
 }

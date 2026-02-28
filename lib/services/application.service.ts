@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import {
   ApplicationInsert,
-  ApplicationMessage,
   ApplicationNote,
   ApplicationStatus,
   ApplicationDocuments,

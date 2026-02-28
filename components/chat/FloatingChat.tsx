@@ -63,7 +63,6 @@ export function FloatingChat({
     if (panelState === "open") setUnreadCount(0);
   }, [panelState]);
 
-  // Lock body scroll when open on mobile
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
     if (panelState === "open" && isMobile) {
@@ -76,7 +75,6 @@ export function FloatingChat({
     };
   }, [panelState]);
 
-  // Click outside to close
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -102,7 +100,6 @@ export function FloatingChat({
 
   return (
     <>
-      {/* Mobile backdrop blur — only when open */}
       {panelState === "open" && (
         <div
           className="md:hidden fixed inset-0 z-40 bg-white/30 backdrop-blur-sm"

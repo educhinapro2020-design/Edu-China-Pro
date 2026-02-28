@@ -426,6 +426,47 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -806,6 +847,16 @@ export type Database = {
     }
     Functions: {
       cleanup_inbox_events: { Args: never; Returns: undefined }
+      create_notification: {
+        Args: {
+          p_body: string
+          p_link?: string
+          p_title: string
+          p_type: Database["public"]["Enums"]["notification_type"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       get_admin_dashboard: { Args: { p_weeks?: number }; Returns: Json }
       get_total_unread_count: { Args: { p_user_id: string }; Returns: number }
       get_unread_count: {
@@ -894,6 +945,15 @@ export type Database = {
       institution_type: "public" | "private"
       intake_season: "spring" | "summer" | "autumn"
       note_visibility: "public" | "private"
+      notification_type:
+        | "new_student"
+        | "application_created"
+        | "application_submitted"
+        | "status_changed"
+        | "counselor_assigned"
+        | "document_status_changed"
+        | "admin_upload"
+        | "note_added"
       scholarship_type:
         | "self_financed"
         | "type_a"
@@ -1059,6 +1119,16 @@ export const Constants = {
       institution_type: ["public", "private"],
       intake_season: ["spring", "summer", "autumn"],
       note_visibility: ["public", "private"],
+      notification_type: [
+        "new_student",
+        "application_created",
+        "application_submitted",
+        "status_changed",
+        "counselor_assigned",
+        "document_status_changed",
+        "admin_upload",
+        "note_added",
+      ],
       scholarship_type: [
         "self_financed",
         "type_a",
