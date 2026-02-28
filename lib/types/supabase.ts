@@ -39,45 +39,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      application_messages: {
-        Row: {
-          application_id: string
-          created_at: string
-          id: string
-          message: string
-          sender_id: string
-        }
-        Insert: {
-          application_id: string
-          created_at?: string
-          id?: string
-          message: string
-          sender_id: string
-        }
-        Update: {
-          application_id?: string
-          created_at?: string
-          id?: string
-          message?: string
-          sender_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "application_messages_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "applications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "application_messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       application_notes: {
         Row: {
           application_id: string
@@ -290,6 +251,55 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          claimed_by_id: string | null
+          counselor_id: string | null
+          created_at: string
+          id: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          claimed_by_id?: string | null
+          counselor_id?: string | null
+          created_at?: string
+          id?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          claimed_by_id?: string | null
+          counselor_id?: string | null
+          created_at?: string
+          id?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_claimed_by_id_fkey"
+            columns: ["claimed_by_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_counselor_id_fkey"
+            columns: ["counselor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       countries: {
         Row: {
           created_at: string
@@ -319,6 +329,143 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      inbox_events: {
+        Row: {
+          created_at: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      message_reads: {
+        Row: {
+          id: string
+          message_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          is_system: boolean
+          sender_id: string
+          sender_role: Database["public"]["Enums"]["user_role"]
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          sender_id: string
+          sender_role: Database["public"]["Enums"]["user_role"]
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_system?: boolean
+          sender_id?: string
+          sender_role?: Database["public"]["Enums"]["user_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -699,8 +846,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_inbox_events: { Args: never; Returns: undefined }
+      create_notification: {
+        Args: {
+          p_body: string
+          p_link?: string
+          p_title: string
+          p_type: Database["public"]["Enums"]["notification_type"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       get_admin_dashboard: { Args: { p_weeks?: number }; Returns: Json }
+      get_total_unread_count: { Args: { p_user_id: string }; Returns: number }
+      get_unread_count: {
+        Args: { p_conversation_id: string; p_user_id: string }
+        Returns: number
+      }
+      get_unread_counts: {
+        Args: { p_conversation_ids: string[]; p_user_id: string }
+        Returns: {
+          conversation_id: string
+          unread_count: number
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
+      mark_messages_read: {
+        Args: { p_conversation_id: string; p_user_id: string }
+        Returns: undefined
+      }
       search_admin_applications: {
         Args: {
           p_page?: number
@@ -722,6 +896,10 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      student_has_counselor: {
+        Args: { counselor_id: string }
+        Returns: boolean
+      }
       undo_last_application_status: {
         Args: { p_application_id: string }
         Returns: undefined
@@ -753,6 +931,11 @@ export type Database = {
         | "jw_form_received"
         | "visa_docs_ready"
         | "visa_granted"
+        | "visa_rejected"
+        | "rejected"
+        | "dropped_off"
+        | "withdrawn"
+        | "closed"
       degree_level:
         | "bachelor"
         | "master"
@@ -762,6 +945,15 @@ export type Database = {
       institution_type: "public" | "private"
       intake_season: "spring" | "summer" | "autumn"
       note_visibility: "public" | "private"
+      notification_type:
+        | "new_student"
+        | "application_created"
+        | "application_submitted"
+        | "status_changed"
+        | "counselor_assigned"
+        | "document_status_changed"
+        | "admin_upload"
+        | "note_added"
       scholarship_type:
         | "self_financed"
         | "type_a"
@@ -917,11 +1109,26 @@ export const Constants = {
         "jw_form_received",
         "visa_docs_ready",
         "visa_granted",
+        "visa_rejected",
+        "rejected",
+        "dropped_off",
+        "withdrawn",
+        "closed",
       ],
       degree_level: ["bachelor", "master", "doctoral", "non_degree", "upgrade"],
       institution_type: ["public", "private"],
       intake_season: ["spring", "summer", "autumn"],
       note_visibility: ["public", "private"],
+      notification_type: [
+        "new_student",
+        "application_created",
+        "application_submitted",
+        "status_changed",
+        "counselor_assigned",
+        "document_status_changed",
+        "admin_upload",
+        "note_added",
+      ],
       scholarship_type: [
         "self_financed",
         "type_a",

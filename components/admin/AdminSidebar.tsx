@@ -16,10 +16,13 @@ import { twMerge } from "tailwind-merge";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { ADMIN_NAV_ITEMS } from "@/lib/constants/admin";
+import { chatService } from "@/lib/services/chat.service";
 import { RiUserSettingsLine } from "react-icons/ri";
+import { NotificationBell } from "../shared/NotificationBell";
 
 interface AdminSidebarProps {
   user: {
+    id: string;
     name: string;
     email: string;
     avatar: string | null;
@@ -32,6 +35,22 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    async function fetchUnread() {
+      const count = await chatService.getTotalUnreadCount(user.id);
+      setUnreadCount(count);
+    }
+
+    fetchUnread();
+    const unsubscribe = chatService.subscribeToConversations(
+      user.id,
+      fetchUnread,
+    );
+    return unsubscribe;
+  }, [user.id]);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -126,7 +145,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                   isCollapsed && !mobile ? "justify-center" : "",
                 )}
               >
-                <div className="shrink-0 size-5 flex items-center justify-center">
+                <div className="relative shrink-0 size-5 flex items-center justify-center">
                   <Icon
                     className={twMerge(
                       "size-5 transition-colors",
@@ -135,6 +154,12 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                         : "text-primary-400 group-hover:text-primary-600",
                     )}
                   />
+
+                  {item.href.includes("messages") && unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 size-4 rounded-full bg-brand-600 text-white text-[9px] font-bold flex items-center justify-center">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
                 </div>
 
                 <motion.span
@@ -149,35 +174,69 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 >
                   {item.name}
                 </motion.span>
+                {item.href.includes("messages") && unreadCount > 0 && (
+                  <>
+                    {!isCollapsed || mobile ? (
+                      <span className="ml-auto shrink-0 size-4.5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    ) : (
+                      <span className="absolute top-1 right-1 size-4 rounded-full bg-brand-600 text-white text-[9px] font-bold flex items-center justify-center">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
+                  </>
+                )}
               </Link>
             );
           })}
         </nav>
 
         <div className="px-2 py-3 border-t border-primary-100 shrink-0">
-          <div
+          <Link
+            href="/admin/profile"
+            onClick={() => setIsMobileOpen(false)}
+            title={isCollapsed && !mobile ? "My Profile" : undefined}
             className={twMerge(
-              "flex items-center px-3 py-2.5 mb-1 overflow-hidden",
+              "flex items-center px-3 py-2.5 mb-1 rounded-xl hover:bg-primary-50 transition-colors overflow-hidden group",
               isCollapsed && !mobile ? "justify-center" : "",
             )}
           >
+            <div className="shrink-0 size-8 rounded-full overflow-hidden border border-primary-100 bg-brand-100 flex items-center justify-center">
+              {user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-[11px] font-bold text-brand-600">
+                  {user.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </span>
+              )}
+            </div>
+
             <motion.div
               initial={false}
               animate={{
                 opacity: isCollapsed && !mobile ? 0 : 1,
                 width: isCollapsed && !mobile ? 0 : "auto",
+                marginLeft: isCollapsed && !mobile ? 0 : 10,
               }}
               transition={{ duration: 0.2 }}
-              className="overflow-hidden whitespace-nowrap min-w-0 flex items-center gap-2"
+              className="overflow-hidden whitespace-nowrap min-w-0"
             >
-              <div className="shrink-0 size-5 flex items-center justify-center">
-                <RiUserSettingsLine className="size-5 shrink-0" />
-              </div>
-              <p className="text-sm font-semibold text-primary-900 truncate">
+              <p className="text-sm font-semibold text-primary-900 truncate group-hover:text-brand-600 transition-colors">
                 {user.name}
               </p>
+              <p className="text-xs text-primary-400 truncate">{user.email}</p>
             </motion.div>
-          </div>
+          </Link>
 
           <button
             onClick={handleSignOut}

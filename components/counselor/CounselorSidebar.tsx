@@ -15,9 +15,11 @@ import { twMerge } from "tailwind-merge";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { COUNSELOR_NAV_ITEMS } from "@/lib/constants/counselor";
+import { chatService } from "@/lib/services/chat.service";
 
 interface CounselorSidebarProps {
   user: {
+    id: string;
     name: string;
     email: string;
     avatar: string | null;
@@ -30,6 +32,22 @@ export function CounselorSidebar({ user }: CounselorSidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    async function fetchUnread() {
+      const count = await chatService.getTotalUnreadCount(user.id);
+      setUnreadCount(count);
+    }
+
+    fetchUnread();
+    const unsubscribe = chatService.subscribeToConversations(
+      user.id,
+      fetchUnread,
+    );
+    return unsubscribe;
+  }, [user.id]);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -123,7 +141,7 @@ export function CounselorSidebar({ user }: CounselorSidebarProps) {
                 isCollapsed && !mobile ? "justify-center" : "",
               )}
             >
-              <div className="shrink-0 size-5 flex items-center justify-center">
+              <div className="relative shrink-0 size-5 flex items-center justify-center">
                 <Icon
                   className={twMerge(
                     "size-5 transition-colors",
@@ -132,6 +150,12 @@ export function CounselorSidebar({ user }: CounselorSidebarProps) {
                       : "text-primary-400 group-hover:text-primary-600",
                   )}
                 />
+
+                {item.href.includes("messages") && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 size-4 rounded-full bg-brand-600 text-white text-[9px] font-bold flex items-center justify-center">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </div>
               <motion.span
                 initial={false}

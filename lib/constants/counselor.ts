@@ -1,4 +1,5 @@
-import { FiFile, FiUser } from "react-icons/fi";
+import { FiFile, FiMessageCircle, FiUser, FiBookOpen } from "react-icons/fi";
+import { MdOutlineSchool } from "react-icons/md";
 import { IconType } from "react-icons";
 
 export interface CounselorNavItem {
@@ -9,5 +10,14 @@ export interface CounselorNavItem {
 
 export const COUNSELOR_NAV_ITEMS: CounselorNavItem[] = [
   { name: "Applications", href: "/counselor/applications", icon: FiFile },
+  { name: "Messages", href: "/counselor/messages", icon: FiMessageCircle },
+  {
+    name: "Universities",
+    href: "/counselor/universities",
+    icon: MdOutlineSchool,
+  },
+
+  { name: "Programs", href: "/counselor/programs", icon: FiBookOpen },
+
   { name: "My Profile", href: "/counselor/profile", icon: FiUser },
 ];

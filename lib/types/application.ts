@@ -66,15 +66,6 @@ export interface Application extends Omit<
   };
 }
 
-export type ApplicationMessageRow =
-  Database["public"]["Tables"]["application_messages"]["Row"];
-export interface ApplicationMessage extends ApplicationMessageRow {
-  sender?: {
-    full_name: string | null;
-    avatar_url: string | null;
-  };
-}
-
 export type ApplicationNoteRow =
   Database["public"]["Tables"]["application_notes"]["Row"];
 export interface ApplicationNote extends ApplicationNoteRow {
@@ -101,4 +92,13 @@ export const APPLICATION_STATUSES: ApplicationStatus[] = [
   "jw_form_received",
   "visa_docs_ready",
   "visa_granted",
+  "visa_rejected",
+];
+
+export const APPLICATION_ADMIN_STATUSES: ApplicationStatus[] = [
+  ...APPLICATION_STATUSES,
+  "rejected",
+  "dropped_off",
+  "withdrawn",
+  "closed",
 ];

@@ -28,7 +28,7 @@ import {
   Application,
   ApplicationStatus,
   ApplicationStatusHistory,
-  APPLICATION_STATUSES,
+  APPLICATION_ADMIN_STATUSES,
   ApplicationNote,
   NoteVisibility,
 } from "@/lib/types/application";
@@ -44,6 +44,7 @@ import {
   getApplicationStatusMeta,
   getDocumentStatusMeta,
   formatRelativeTime,
+  ADMIN_GUIDANCE,
 } from "@/lib/utils/application";
 import { ProfileDocument } from "@/components/shared/ProfileDocument";
 import { ProgressiveLoader } from "@/components/ui/ProgressiveLoader";
@@ -97,7 +98,6 @@ export default function CounselorApplicationDetailPage() {
   const [uploadDescription, setUploadDescription] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
 
-  // Get counselor id on mount
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -111,7 +111,6 @@ export default function CounselorApplicationDetailPage() {
     try {
       const application = await applicationRepository.getApplicationById(id);
 
-      // Guard: counselor may only view their assigned applications
       if (application.counselor_id !== counselorId) {
         setNotFound(true);
         return;
@@ -274,7 +273,6 @@ export default function CounselorApplicationDetailPage() {
     if (historySection) historySection.scrollIntoView({ behavior: "smooth" });
   };
 
-  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -283,7 +281,6 @@ export default function CounselorApplicationDetailPage() {
     );
   }
 
-  // ── Not found / not assigned ───────────────────────────────────────────────
   if (notFound || !app) {
     return (
       <div className="p-6 space-y-4">
@@ -337,12 +334,27 @@ export default function CounselorApplicationDetailPage() {
           setStatusNote("");
         }}
         onConfirm={handleStatusConfirm}
-        title={`Change Status to ${getApplicationStatusLabel(pendingStatus)}`}
+        title={`Change Application Status to ${getApplicationStatusLabel(pendingStatus)}`}
         confirmLabel="Confirm"
         isLoading={updatingStatus}
         variant="warning"
       >
         <div className="space-y-2 mt-2">
+          {pendingStatus && ADMIN_GUIDANCE[pendingStatus] && (
+            <div className="bg-brand-50 border border-brand-100 rounded-xl p-3 mb-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-brand-600 mb-1">
+                Counselor Note
+              </p>
+              <p className="text-sm text-brand-800 leading-relaxed">
+                {ADMIN_GUIDANCE[pendingStatus].action}
+              </p>
+              {ADMIN_GUIDANCE[pendingStatus].next && (
+                <p className="text-xs text-brand-600 font-medium mt-1.5">
+                  Next: {ADMIN_GUIDANCE[pendingStatus].next}
+                </p>
+              )}
+            </div>
+          )}
           <label className="text-sm flex flex-col gap-1 font-semibold text-primary-900">
             Add a Note (Optional)
             <span className="text-xs font-medium text-primary-500">
@@ -1243,7 +1255,7 @@ export default function CounselorApplicationDetailPage() {
                   onChange={(val) =>
                     handleStatusSelect(val as ApplicationStatus)
                   }
-                  options={APPLICATION_STATUSES.map((s) => ({
+                  options={APPLICATION_ADMIN_STATUSES.map((s) => ({
                     label: getApplicationStatusLabel(s),
                     value: s,
                   }))}
