@@ -5,7 +5,6 @@ import {
   ApplicationStatus,
   ApplicationStatusHistory,
   ApplicationNote,
-  ApplicationMessage,
   NoteVisibility,
   UserDownload,
 } from "@/lib/types/application";
@@ -272,43 +271,6 @@ export const applicationRepository = {
 
     if (error) throw error;
     return data as ApplicationNote;
-  },
-
-  async getMessages(applicationId: string, client?: SupabaseClient) {
-    const supabase = client ?? createClient();
-    const { data, error } = await supabase
-      .from("application_messages")
-      .select("*, sender:profiles!sender_id(full_name, avatar_url)")
-      .eq("application_id", applicationId)
-      .order("created_at", { ascending: true });
-
-    if (error) throw error;
-    return data as ApplicationMessage[];
-  },
-
-  async sendMessage(
-    applicationId: string,
-    message: string,
-    client?: SupabaseClient,
-  ) {
-    const supabase = client ?? createClient();
-
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) throw userError;
-    if (!userData.user) throw new Error("Not authenticated");
-
-    const { data, error } = await supabase
-      .from("application_messages")
-      .insert({
-        application_id: applicationId,
-        message,
-        sender_id: userData.user.id,
-      })
-      .select("*, sender:profiles!sender_id(full_name, avatar_url)")
-      .single();
-
-    if (error) throw error;
-    return data as ApplicationMessage;
   },
 
   async updateUserDownloads(
