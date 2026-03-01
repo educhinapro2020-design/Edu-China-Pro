@@ -29,6 +29,8 @@ import {
   FiArrowRight,
   FiInfo,
   FiUser,
+  FiExternalLink,
+  FiSend,
 } from "react-icons/fi";
 import { MdHistory, MdOutlineSchool, MdPayment } from "react-icons/md";
 import {
@@ -288,199 +290,6 @@ function DocumentRow({
 
 export type PendingActionType = "document" | "application_fee" | "ecp_fee";
 
-function ActionRequiredModal({
-  isOpen,
-  onClose,
-  actionType,
-  docKey,
-  doc,
-  uploading,
-  onUpload,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  actionType: PendingActionType | null;
-  docKey?: DocumentKey | null;
-  doc?: ApplicationDocument | undefined;
-  uploading: boolean;
-  onUpload: (key: DocumentKey, file: File) => void;
-}) {
-  if (!isOpen || !actionType) return null;
-
-  let title = "";
-  let description = "";
-  let icon = null;
-  let color = "";
-  let label = "";
-
-  if (actionType === "document" && docKey) {
-    const status = doc?.status ?? "missing";
-    const meta = getDocumentStatusMeta(status);
-    title = getDocumentLabel(docKey);
-    description = meta.description;
-    icon = meta.icon;
-    color = meta.color;
-    label = meta.label;
-  } else if (actionType === "application_fee") {
-    title = "Application Fee";
-    description = "Pay the application fee to proceed with the application.";
-    icon = <FiFileText className="size-5" />;
-    color = "bg-amber-100 text-amber-700 border-amber-200";
-    label = "Payment Required";
-  } else if (actionType === "ecp_fee") {
-    title = "EduChinaPro Service Fee";
-    description =
-      "Pay the EduChinaPro service fee to proceed with the application.";
-    icon = <FiFileText className="size-5" />;
-    color = "bg-amber-100 text-amber-700 border-amber-200";
-    label = "Payment Required";
-  }
-
-  const isVerified = doc?.status === "verified";
-
-  return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0 bg-primary-900/40 backdrop-blur-sm"
-        />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-primary-100"
-        >
-          <div className="flex items-center justify-end py-2 px-3">
-            <button
-              onClick={onClose}
-              className="p-2 text-primary-400 hover:text-primary-700 hover:bg-primary-50 rounded-full transition-colors"
-            >
-              <FiX className="size-5" />
-            </button>
-          </div>
-
-          <div className="px-5 py-2 space-y-6">
-            <div className="flex items-start gap-4">
-              <div
-                className={twMerge(
-                  "size-14 rounded-2xl flex items-center justify-center border shrink-0",
-                  color,
-                )}
-              >
-                {icon}
-              </div>
-              <div>
-                <h4 className="text-lg font-bold text-primary-900 leading-tight">
-                  {title}
-                </h4>
-                <div className="flex items-center gap-2 mt-2">
-                  <span
-                    className={twMerge(
-                      "text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg border",
-                      color,
-                    )}
-                  >
-                    {label}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-sm text-primary-600 leading-relaxed">
-              {description}
-            </p>
-
-            {doc?.feedback && actionType === "document" && (
-              <div
-                className={twMerge("p-4 rounded-xl border", "bg-opacity-40")}
-              >
-                <h5 className="text-xs font-bold uppercase tracking-wider mb-1 opacity-80">
-                  Feedback from Counselor
-                </h5>
-                <p
-                  className={twMerge(
-                    color,
-                    "text-sm bg-transparent font-medium leading-relaxed",
-                  )}
-                >
-                  {doc.feedback}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="p-5 sm:p-6 bg-primary-50/50 border-t border-primary-100 flex items-center justify-end gap-3">
-            {actionType === "document" ? (
-              <>
-                {doc?.url && (
-                  <a
-                    href={doc.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2.5 rounded-xl text-primary-700 font-bold bg-white border border-primary-200 hover:border-primary-300 hover:bg-primary-50 shadow-sm transition-all flex items-center gap-2"
-                  >
-                    <FiDownload className="size-4" />
-                    Download
-                  </a>
-                )}
-                {isVerified ? (
-                  <span className="px-4 py-2.5 rounded-xl text-sm font-bold text-success bg-success/10 border border-success/20 flex items-center gap-2">
-                    <div className="size-4 bg-success/20 rounded-full flex items-center justify-center">
-                      <div className="size-2 bg-success rounded-full" />
-                    </div>
-                    Verified
-                  </span>
-                ) : (
-                  <label
-                    className={twMerge(
-                      "cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all border shadow-sm",
-                      uploading
-                        ? "bg-primary-50 text-primary-400 border-primary-200"
-                        : "bg-brand-600 border-brand-500 text-white hover:bg-brand-700",
-                    )}
-                  >
-                    {uploading ? (
-                      <>
-                        <div className="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <FiUploadCloud className="size-4" />
-                        {doc ? "Replace File" : "Upload File"}
-                      </>
-                    )}
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      disabled={uploading}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file && docKey) {
-                          onUpload(docKey, file);
-                        }
-                      }}
-                    />
-                  </label>
-                )}
-              </>
-            ) : (
-              <button className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-sm transition-all border border-amber-600">
-                Pay Now
-              </button>
-            )}
-          </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
-  );
-}
-
 export default function ApplicationDetailPage({
   params,
 }: {
@@ -511,6 +320,11 @@ export default function ApplicationDetailPage({
     avatar_url: string | null;
     description: string | null;
   } | null>(null);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+  const [showProfileIncompleteModal, setShowProfileIncompleteModal] =
+    useState(false);
 
   const profileChecklist = useMemo(
     () => getProfileChecklist(studentProfile, studentDocsMap as any),
@@ -594,6 +408,44 @@ export default function ApplicationDetailPage({
     }
   };
 
+  const canSubmit =
+    application?.status === "draft" ||
+    application?.status === "action_required";
+
+  const profileComplete = profileChecklist.missing.length === 0;
+
+  const profileTotal =
+    profileChecklist.completed.length + profileChecklist.missing.length;
+  const profileCompleted = profileChecklist.completed.length;
+  const profileProgress =
+    profileTotal > 0
+      ? Math.round((profileCompleted / profileTotal) * 100)
+      : 100;
+
+  const handleSubmitClick = () => {
+    if (!profileComplete) {
+      setShowProfileIncompleteModal(true);
+    } else {
+      setShowSubmitConfirm(true);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!application || !profileComplete) return;
+    setSubmitting(true);
+    try {
+      await applicationRepository.updateStatus(application.id, "submitted");
+      setApplication((prev) =>
+        prev ? { ...prev, status: "submitted" } : prev,
+      );
+      setShowSubmitConfirm(false);
+    } catch (err) {
+      console.error("Failed to submit application:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
@@ -629,21 +481,6 @@ export default function ApplicationDetailPage({
 
   return (
     <>
-      <ActionRequiredModal
-        isOpen={selectedAction !== null}
-        onClose={() => setSelectedAction(null)}
-        actionType={selectedAction?.type ?? null}
-        docKey={selectedAction?.docKey}
-        doc={
-          selectedAction?.docKey ? appDocs[selectedAction.docKey] : undefined
-        }
-        uploading={
-          selectedAction?.type === "document" &&
-          selectedAction.docKey === uploading
-        }
-        onUpload={handleFileUpload}
-      />
-
       <div className="max-w-7xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8 pb-16">
         <Link
           href="/dashboard/applications"
@@ -677,10 +514,24 @@ export default function ApplicationDetailPage({
                       <MdOutlineSchool className="size-8 sm:size-10 text-primary-300" />
                     )}
                   </div>
-                  <div className="min-w-0 pt-1">
-                    <h1 className="text-xl sm:text-2xl font-semibold text-primary-900 leading-tight break-words line-clamp-3">
-                      {application.program?.name_en ?? "Unknown Program"}
-                    </h1>
+                  <div className="min-w-0 pt-1 flex-1">
+                    {application.program?.slug &&
+                    application.program?.university?.slug ? (
+                      <Link
+                        href={`/universities/${application.program.university.slug}/programs/${application.program.slug}`}
+                        target="_blank"
+                        className="group inline-flex items-start gap-1.5"
+                      >
+                        <h1 className="text-xl sm:text-2xl font-semibold text-primary-900 leading-tight break-words line-clamp-3 group-hover:underline underline-offset-2">
+                          {application.program?.name_en ?? "Unknown Program"}
+                        </h1>
+                        <FiExternalLink className="size-4 mt-1.5 shrink-0 text-primary-400 group-hover:text-brand-600 transition-colors sm:hidden" />
+                      </Link>
+                    ) : (
+                      <h1 className="text-xl sm:text-2xl font-semibold text-primary-900 leading-tight break-words line-clamp-3">
+                        {application.program?.name_en ?? "Unknown Program"}
+                      </h1>
+                    )}
                     <p className="text-sm sm:text-base text-primary-500 mt-1 break-words">
                       {application.program?.university?.name_en}
                     </p>
@@ -699,8 +550,188 @@ export default function ApplicationDetailPage({
                     </div>
                   </div>
                 </div>
+
+                {canSubmit && (
+                  <div className="flex justify-end">
+                    <button
+                      onClick={handleSubmitClick}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm border bg-brand-600 border-brand-500 text-white hover:bg-brand-700"
+                    >
+                      <FiSend className="size-4" />
+                      {application.status === "action_required"
+                        ? "Resubmit Application"
+                        : "Submit Application"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
+
+            <AnimatePresence>
+              {showProfileIncompleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setShowProfileIncompleteModal(false)}
+                    className="absolute inset-0 bg-primary-900/40 backdrop-blur-sm"
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                    className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-primary-100"
+                  >
+                    <div className="flex items-center justify-end py-2 px-3">
+                      <button
+                        onClick={() => setShowProfileIncompleteModal(false)}
+                        className="p-2 text-primary-400 hover:text-primary-700 hover:bg-primary-50 rounded-full transition-colors"
+                      >
+                        <FiX className="size-5" />
+                      </button>
+                    </div>
+
+                    <div className="px-6 pb-2 space-y-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-primary-900">
+                          Complete your profile first
+                        </h3>
+                        <p className="text-sm text-primary-500 mt-1.5 leading-relaxed">
+                          Your profile needs to be complete before you can
+                          submit your application.
+                        </p>
+                      </div>
+
+                      <Link
+                        href="/dashboard/profile/build?helper=true"
+                        onClick={() => setShowProfileIncompleteModal(false)}
+                        className="w-full flex items-center gap-4 p-4 rounded-xl border border-primary-100 bg-primary-50/50 hover:bg-brand-50 hover:border-brand-200 transition-all group"
+                      >
+                        <div className="relative shrink-0">
+                          <svg
+                            className="size-16 -rotate-90"
+                            viewBox="0 0 36 36"
+                          >
+                            <circle
+                              cx="18"
+                              cy="18"
+                              r="15.5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              className="text-primary-100"
+                            />
+                            <circle
+                              cx="18"
+                              cy="18"
+                              r="15.5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeDasharray={`${Math.round((profileProgress / 100) * 97.4)} 97.4`}
+                              className="text-brand-400"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-xs font-bold text-primary-900">
+                              {profileProgress}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-base font-bold text-primary-900 group-hover:text-brand-700 transition-colors">
+                            Complete your profile
+                          </p>
+                          <p className="text-sm text-primary-500 font-medium mt-0.5">
+                            {profileCompleted} of {profileTotal} profile items
+                            completed
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-primary-500 group-hover:text-brand-600 transition-colors shrink-0">
+                          <span className="text-sm font-semibold">Go</span>
+                          <FiArrowRight className="size-4" />
+                        </div>
+                      </Link>
+                    </div>
+
+                    <div className="px-6 py-4 mt-2 border-t border-primary-100 bg-primary-50/50 flex items-center justify-end">
+                      <button
+                        onClick={() => setShowProfileIncompleteModal(false)}
+                        className="px-4 py-2 text-sm font-semibold text-primary-600 hover:text-primary-900 transition-colors"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {showSubmitConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => !submitting && setShowSubmitConfirm(false)}
+                    className="absolute inset-0 bg-primary-900/40 backdrop-blur-sm"
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                    className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-primary-100"
+                  >
+                    <div className="p-6 sm:p-8 space-y-4">
+                      <div className="size-12 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center">
+                        <FiSend className="size-5 text-brand-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-primary-900">
+                          {application.status === "action_required"
+                            ? "Resubmit Application?"
+                            : "Submit Application?"}
+                        </h3>
+                        <p className="text-sm text-primary-500 mt-1.5 leading-relaxed">
+                          {application.status === "action_required"
+                            ? "Your application will be sent back to the team for review."
+                            : "Once submitted, your application will be reviewed by our team. Make sure everything is in order."}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="px-6 sm:px-8 py-4 border-t border-primary-100 bg-primary-50/50 flex items-center justify-end gap-3">
+                      <button
+                        onClick={() => setShowSubmitConfirm(false)}
+                        disabled={submitting}
+                        className="px-4 py-2 text-sm font-semibold text-primary-600 hover:text-primary-900 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 transition-all shadow-sm disabled:opacity-50"
+                      >
+                        {submitting ? (
+                          <>
+                            <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            <FiSend className="size-4" />
+                            Confirm
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
 
             <div className="bg-white rounded-3xl border border-primary-100 shadow-sm overflow-hidden flex flex-col">
               <div className="flex border-b border-primary-100 px-6 sm:px-8 pt-6 gap-8 overflow-x-auto scrollbar-none">
@@ -764,15 +795,6 @@ export default function ApplicationDetailPage({
                       });
                       const profileIncomplete =
                         profileChecklist.missing.length > 0;
-                      const profileTotal =
-                        profileChecklist.completed.length +
-                        profileChecklist.missing.length;
-                      const profileCompleted =
-                        profileChecklist.completed.length;
-                      const profileProgress =
-                        profileTotal > 0
-                          ? Math.round((profileCompleted / profileTotal) * 100)
-                          : 100;
 
                       const hasActions =
                         profileIncomplete ||

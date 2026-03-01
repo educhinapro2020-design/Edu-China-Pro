@@ -20,6 +20,7 @@ import {
   FiEdit,
   FiUploadCloud,
   FiSearch,
+  FiExternalLink,
 } from "react-icons/fi";
 import { MdHistory, MdOutlineSchool } from "react-icons/md";
 import { twMerge } from "tailwind-merge";
@@ -692,10 +693,23 @@ export default function AdminApplicationDetailPage() {
                       <MdOutlineSchool className="size-8 sm:size-10 text-primary-300" />
                     )}
                   </div>
-                  <div className="min-w-0 pt-1">
-                    <h1 className="text-xl sm:text-2xl font-semibold text-primary-900 leading-tight">
-                      {programName}
-                    </h1>
+                  <div className="min-w-0 pt-1 flex-1">
+                    {app.program?.slug && app.program?.university?.slug ? (
+                      <Link
+                        href={`/universities/${app.program.university.slug}/programs/${app.program.slug}`}
+                        target="_blank"
+                        className="group inline-flex items-start gap-1.5"
+                      >
+                        <h1 className="text-xl sm:text-2xl font-semibold text-primary-900 leading-tight group-hover:underline underline-offset-2">
+                          {programName}
+                        </h1>
+                        <FiExternalLink className="size-4 mt-1.5 shrink-0 text-primary-400 group-hover:text-brand-600 transition-colors sm:hidden" />
+                      </Link>
+                    ) : (
+                      <h1 className="text-xl sm:text-2xl font-semibold text-primary-900 leading-tight">
+                        {programName}
+                      </h1>
+                    )}
                     <p className="text-sm sm:text-base text-primary-500 mt-1">
                       {universityName}
                     </p>

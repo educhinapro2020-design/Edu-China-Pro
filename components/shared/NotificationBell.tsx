@@ -139,6 +139,14 @@ function ToastCard({
 }) {
   const router = useRouter();
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onDismiss(toast.toastId);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [toast.toastId, onDismiss]);
+
   const handleClick = () => {
     onRead(toast.id);
     onDismiss(toast.toastId);
