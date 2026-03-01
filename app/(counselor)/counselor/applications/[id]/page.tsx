@@ -343,24 +343,13 @@ export default function CounselorApplicationDetailPage() {
         <div className="space-y-2 mt-2">
           {pendingStatus && ADMIN_GUIDANCE[pendingStatus] && (
             <div className="bg-brand-50 border border-brand-100 rounded-xl p-3 mb-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-brand-600 mb-1">
-                Counselor Note
-              </p>
-              <p className="text-sm text-brand-800 leading-relaxed">
+              <p className="text-xs text-brand-600 leading-relaxed">
                 {ADMIN_GUIDANCE[pendingStatus].action}
               </p>
-              {ADMIN_GUIDANCE[pendingStatus].next && (
-                <p className="text-xs text-brand-600 font-medium mt-1.5">
-                  Next: {ADMIN_GUIDANCE[pendingStatus].next}
-                </p>
-              )}
             </div>
           )}
           <label className="text-sm flex flex-col gap-1 font-semibold text-primary-900">
             Add a Note (Optional)
-            <span className="text-xs font-medium text-primary-500">
-              This note will be visible to the student.
-            </span>
           </label>
           <textarea
             value={statusNote}

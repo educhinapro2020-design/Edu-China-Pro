@@ -6,6 +6,7 @@ import { chatService } from "@/lib/services/chat.service";
 import { MessageWithSender } from "@/lib/repositories/chat.repo";
 import { Database } from "@/lib/types/supabase";
 import { FiSend, FiLoader } from "react-icons/fi";
+import { div } from "framer-motion/client";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -18,22 +19,39 @@ interface ChatWindowProps {
 
 function MessageSkeleton({ isOwn }: { isOwn: boolean }) {
   return (
-    <div className={`flex gap-2.5 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+    <div
+      className={`flex gap-3 px-1 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
+    >
       {!isOwn && (
-        <div className="shrink-0 w-7 h-7 rounded-full bg-primary-100 animate-pulse" />
+        <div className="w-8 h-8 rounded-full bg-primary-100 animate-pulse shrink-0" />
       )}
+
       <div
-        className={`flex flex-col gap-1 max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}
+        className={`flex flex-col gap-2 max-w-[80%] ${
+          isOwn ? "items-end" : "items-start"
+        }`}
       >
         {!isOwn && (
-          <div className="w-20 h-3 bg-primary-100 rounded animate-pulse" />
+          <div className="h-3 w-24 bg-primary-100 rounded animate-pulse" />
         )}
-        <div
-          className={`px-3.5 py-2.5 rounded-2xl ${isOwn ? "bg-brand-100 rounded-tr-sm" : "bg-primary-50 border border-primary-100 rounded-tl-sm"}`}
-        >
-          <div className="w-48 h-4 bg-primary-100 rounded animate-pulse" />
-        </div>
-        <div className="w-8 h-2 bg-primary-100 rounded animate-pulse" />
+
+        {isOwn ? (
+          <div
+            className={`rounded-2xl px-4 py-3 space-y-2 bg-brand-100 rounded-tr-sm animate-pulse`}
+          >
+            <div className="h-3 w-10  rounded animate-pulse" />
+            <div className="h-3 w-0 rounded animate-pulse" />
+          </div>
+        ) : (
+          <div
+            className={`rounded-2xl px-4 py-3 space-y-2 bg-primary-50 border border-primary-100 rounded-tl-sm`}
+          >
+            <div className="h-3 w-56 bg-primary-100 rounded animate-pulse" />
+            <div className="h-3 w-40 bg-primary-100 rounded animate-pulse" />
+          </div>
+        )}
+
+        <div className="h-2 w-10 bg-primary-100 rounded animate-pulse" />
       </div>
     </div>
   );
@@ -185,6 +203,8 @@ export function ChatWindow({
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scroll-smooth">
         {loading ? (
           <div className="space-y-3">
+            <MessageSkeleton isOwn={false} />
+            <MessageSkeleton isOwn={true} />
             <MessageSkeleton isOwn={false} />
             <MessageSkeleton isOwn={true} />
             <MessageSkeleton isOwn={false} />
