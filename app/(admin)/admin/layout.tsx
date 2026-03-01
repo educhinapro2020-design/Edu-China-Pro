@@ -43,7 +43,7 @@ export default async function AdminLayout({
         <NotificationBell userId={user.id} />
         <Link
           href="/admin/profile"
-          className="shrink-0 size-9 rounded-full overflow-hidden border border-primary-100 bg-brand-100 flex items-center justify-center hover:ring-2 hover:ring-brand-300 transition-all"
+          className="hidden md:flex shrink-0 size-9 rounded-full overflow-hidden border border-primary-100 bg-brand-100 items-center justify-center ring-2 ring-brand-300 transition-all"
         >
           {profile.avatar_url ? (
             <img
@@ -64,7 +64,7 @@ export default async function AdminLayout({
         </Link>
       </div>
 
-      <main className="flex-1 h-[calc(100vh-40px)] mt-10 min-w-0 flex flex-col">
+      <main className="flex-1 min-h-[calc(100vh-40px)] mt-10 min-w-0 flex flex-col">
         <div className="flex-1 p-4 pt-18 md:p-8 flex flex-col h-full">
           {children}
         </div>

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   StudentProfile,
   StudentDocuments,
@@ -9,7 +11,9 @@ import {
   FiMail,
   FiEye,
   FiCheckCircle,
+  FiXCircle,
   FiAlertCircle,
+  FiClock,
 } from "react-icons/fi";
 import React, { useRef, useCallback } from "react";
 import {
@@ -19,7 +23,6 @@ import {
   getDocumentMeta,
   getEducationLevelKey,
 } from "@/lib/constants/documents";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface ProfileDocumentProps {
@@ -30,142 +33,103 @@ interface ProfileDocumentProps {
   docRequirements?: DocumentKey[];
 }
 
-const PassportCard = ({
-  profile,
-  document,
-  isVisible = true,
-}: {
-  profile: Partial<StudentProfile>;
-  document?: StudentDocumentEntry;
-  isVisible?: boolean;
-}) => {
-  const isUploaded =
-    document?.status === "uploaded" || document?.status === "verified";
+type DocEntry = {
+  key: string;
+  label: string;
+  status: "uploaded" | "verified" | "needs_correction" | "rejected" | "missing";
+  url?: string;
+  schoolName?: string;
+};
 
-  if (!isUploaded || !isVisible) return null;
+function getStatusMeta(status: DocEntry["status"]) {
+  switch (status) {
+    case "verified":
+      return {
+        icon: <FiCheckCircle className="size-4 text-emerald-600" />,
+        label: "Verified",
+        textColor: "text-emerald-700",
+        bg: "bg-emerald-50",
+        border: "border-emerald-100",
+      };
+    case "uploaded":
+      return {
+        icon: <FiCheckCircle className="size-4 text-brand-600" />,
+        label: "Uploaded",
+        textColor: "text-brand-700",
+        bg: "bg-brand-50",
+        border: "border-brand-100",
+      };
+    case "needs_correction":
+      return {
+        icon: <FiAlertCircle className="size-4 text-amber-600" />,
+        label: "Needs Correction",
+        textColor: "text-amber-700",
+        bg: "bg-amber-50",
+        border: "border-amber-100",
+      };
+    case "rejected":
+      return {
+        icon: <FiXCircle className="size-4 text-red-500" />,
+        label: "Rejected",
+        textColor: "text-red-600",
+        bg: "bg-red-50",
+        border: "border-red-100",
+      };
+    default:
+      return {
+        icon: <FiClock className="size-4 text-primary-400" />,
+        label: "Pending",
+        textColor: "text-primary-500",
+        bg: "bg-primary-50",
+        border: "border-primary-100",
+      };
+  }
+}
 
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "N/A";
-    try {
-      return new Date(dateString).toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    } catch {
-      return dateString;
-    }
-  };
+function DocumentRow({ entry }: { entry: DocEntry }) {
+  const meta = getStatusMeta(entry.status);
+  const isSubmitted =
+    entry.status === "uploaded" || entry.status === "verified";
 
   return (
-    <div className="bg-white border border-primary-200 rounded-xl overflow-hidden shadow-sm mb-6">
-      <div className="bg-primary-50/50 px-4 py-3 border-b border-primary-100 flex justify-between items-center">
-        <div>
-          <h5 className="font-bold text-primary-900 text-sm flex items-center gap-2">
-            Passport Details
-            {isUploaded && document?.url && (
-              <Link
-                href={document.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="rounded-full size-6 print:hidden bg-white hover:bg-primary-50 text-primary-700 border-primary-200"
-                >
-                  <FiEye className="size-3" />
-                </Button>
-              </Link>
-            )}
-          </h5>
-        </div>
-        {isUploaded ? (
-          <span className="text-success text-xs font-medium bg-white px-2 py-0.5 rounded-full border border-success/20 flex items-center gap-1">
-            <FiCheckCircle className="size-3" /> Uploaded
-          </span>
-        ) : (
-          <span className="text-primary-500 text-xs font-normal bg-white px-2 py-0.5 rounded-full border border-primary-200 flex items-center gap-1">
-            <FiAlertCircle className="size-3" /> Pending
-          </span>
+    <div className="flex items-center gap-3 px-4 sm:px-5 py-4 border-b border-primary-100 last:border-0">
+      <div className="shrink-0 size-9 rounded-lg bg-primary-50 border border-primary-100 flex items-center justify-center">
+        {meta.icon}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-primary-800 wrap-break-word leading-snug">
+          {entry.label}
+        </p>
+        {entry.schoolName && (
+          <p className="text-xs text-primary-400 mt-0.5 wrap-break-word font-medium">
+            {entry.schoolName}
+          </p>
         )}
       </div>
 
-      <div className="p-4 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4">
-        <div>
-          <p className="text-primary-500 text-xs mb-1 uppercase tracking-wider">
-            Passport Number
-          </p>
-          <p className="font-medium text-sm text-primary-900">
-            {profile.passport_number || "N/A"}
-          </p>
-        </div>
-        <div>
-          <p className="text-primary-500 text-xs mb-1 uppercase tracking-wider">
-            Expiry Date
-          </p>
-          <p className="font-medium text-sm text-primary-900">
-            {formatDate(profile.passport_expiry)}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const DocumentCard = ({
-  docKey,
-  document,
-}: {
-  docKey: DocumentKey;
-  document?: StudentDocumentEntry;
-}) => {
-  const registryEntry = getDocumentMeta(docKey);
-  if (!registryEntry) return null;
-
-  const isUploaded =
-    document?.status === "uploaded" || document?.status === "verified";
-
-  return (
-    <div className="bg-white rounded-lg p-3 border border-primary-200 flex items-center justify-between gap-4 shadow-xs">
-      <div className="flex items-center gap-3">
-        {isUploaded ? (
-          <div className="size-8 rounded-full bg-success/10 text-success flex items-center justify-center shrink-0">
-            <FiCheckCircle className="size-4" />
-          </div>
-        ) : (
-          <div className="size-8 rounded-full text-primary-300 flex items-center justify-center shrink-0">
-            <FiAlertCircle className="size-5" />
-          </div>
+      <div className="flex items-center gap-2 shrink-0 ml-auto">
+        <span
+          className={`text-[11px] font-semibold px-2 sm:px-2.5 py-1 rounded-full border whitespace-nowrap ${meta.bg} ${meta.border} ${meta.textColor}`}
+        >
+          {meta.label}
+        </span>
+        {isSubmitted && entry.url && (
+          <Link
+            href={entry.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="print:hidden"
+          >
+            <button className="p-1.5 rounded-lg text-primary-400 hover:text-brand-600 hover:bg-primary-50 transition-colors border border-transparent hover:border-primary-200">
+              <FiEye className="size-3.5" />
+            </button>
+          </Link>
         )}
-        <div className="flex flex-col">
-          <span className="font-semibold text-primary-900 text-sm leading-tight">
-            {registryEntry.label}
-          </span>
-          <span
-            className={`text-[10px] font-medium uppercase tracking-wider mt-0.5 ${
-              isUploaded ? "text-success" : "text-primary-400"
-            }`}
-          >
-            {isUploaded ? "Uploaded" : "Pending"}
-          </span>
-        </div>
       </div>
-
-      {isUploaded && document?.url && (
-        <Link href={document.url} target="_blank" rel="noopener noreferrer">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="rounded-full size-8 text-primary-500 hover:text-brand-600 hover:bg-primary-50"
-          >
-            <FiEye className="size-4" />
-          </Button>
-        </Link>
-      )}
     </div>
   );
-};
+}
 
 export const ProfileDocument = React.forwardRef<
   HTMLDivElement,
@@ -188,7 +152,7 @@ export const ProfileDocument = React.forwardRef<
 
   const photoUrl = docSource?.["photo"]?.url;
 
-  const otherDocs: GeneralDocumentKey[] = [
+  const otherDocKeys: GeneralDocumentKey[] = [
     "health_check",
     "police_clearance",
     "english_proficiency",
@@ -210,157 +174,285 @@ export const ProfileDocument = React.forwardRef<
     [ref],
   );
 
+  const passportRequired =
+    !docRequirements || docRequirements.includes("passport");
+  const allDocEntries: DocEntry[] = [];
+
+  if (passportRequired) {
+    const passportDoc = docSource?.["passport"];
+    const passportStatus =
+      (passportDoc?.status as DocEntry["status"]) ?? "missing";
+    if (passportStatus === "uploaded" || passportStatus === "verified") {
+      allDocEntries.push({
+        key: "passport",
+        label: "Passport",
+        status: passportStatus,
+        url: passportDoc?.url,
+      });
+    }
+  }
+
+  for (const edu of profile.education_history ?? []) {
+    const levelKey = getEducationLevelKey(edu.level);
+    if (!levelKey) continue;
+    for (const eduDoc of EDUCATION_DOCUMENTS[levelKey].documents) {
+      const isRequired =
+        !docRequirements || docRequirements.includes(eduDoc.id);
+      if (!isRequired) continue;
+      const doc = docSource?.[eduDoc.id];
+      const status = (doc?.status as DocEntry["status"]) ?? "missing";
+      if (status === "uploaded" || status === "verified") {
+        allDocEntries.push({
+          key: eduDoc.id,
+          label: eduDoc.label,
+          status,
+          url: doc?.url,
+          schoolName: edu.schoolName,
+        });
+      }
+    }
+  }
+
+  for (const key of otherDocKeys) {
+    const isRequired = !docRequirements || docRequirements.includes(key);
+    if (!isRequired) continue;
+    const doc = docSource?.[key];
+    const status = (doc?.status as DocEntry["status"]) ?? "missing";
+    if (status === "uploaded" || status === "verified") {
+      const meta = getDocumentMeta(key);
+      if (!meta) continue;
+      allDocEntries.push({ key, label: meta.label, status, url: doc?.url });
+    }
+  }
+
+  const totalRequired =
+    (passportRequired ? 1 : 0) +
+    (profile.education_history ?? []).reduce((acc, edu) => {
+      const levelKey = getEducationLevelKey(edu.level);
+      if (!levelKey) return acc;
+      return (
+        acc +
+        EDUCATION_DOCUMENTS[levelKey].documents.filter(
+          (d) => !docRequirements || docRequirements.includes(d.id),
+        ).length
+      );
+    }, 0) +
+    otherDocKeys.filter((k) => !docRequirements || docRequirements.includes(k))
+      .length;
+
+  const uploadedCount = allDocEntries.length;
+  const circumference = 97.4;
+  const progress =
+    totalRequired > 0 ? (uploadedCount / totalRequired) * circumference : 0;
+
   return (
     <div
       ref={mergedRef}
-      className="bg-white p-4 md:p-12 print:p-8 max-w-4xl mx-auto print:shadow-none print:max-w-none print:w-full font-sans text-primary-900"
+      className="bg-white p-4 py-8 md:p-12 print:p-8 max-w-4xl mx-auto print:shadow-none print:max-w-none print:w-full font-sans text-primary-900"
       id="printable-profile"
     >
-      <div className="flex flex-col md:flex-row justify-between items-start border-b border-primary-300 pb-6 mb-8 print:mb-6 print:pb-6 gap-4 md:gap-0">
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold text-primary-900 tracking-tight uppercase">
-            Student Profile
-          </h1>
-          <p className="text-primary-600 mt-1 text-sm">
-            EduChinaPro Student Application Record
-          </p>
-        </div>
-        <div className="w-full md:w-auto flex flex-col justify-end md:justify-end md:items-end">
-          <div className="font-bold text-lg md:text-xl brand-text print:hidden">
-            EduChinaPro
+      <div className="mb-10">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-2 md:gap-4 pb-4 border-b border-primary-100 mb-6">
+          <div>
+            <h1 className="text-xl font-bold text-primary-900 tracking-tight">
+              <span className="brand-text">EduChinaPro </span>
+              Application Record
+            </h1>
           </div>
-          <div className="text-xs text-primary-600 mt-1 hidden print:block">
-            Date:{" "}
-            {new Date().toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}
+          <div className="text-right shrink-0 self-end">
+            <p className="text-xs font-medium text-primary-400">
+              {new Date().toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <h2 className="text-2xl font-bold brand-text tracking-tight leading-none">
+              {profile.first_name} {profile.last_name}
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-3 text-sm text-primary-600">
+              {email && (
+                <span className="flex items-center gap-1.5">
+                  <FiMail className="size-3.5 text-primary-400" />
+                  {email}
+                </span>
+              )}
+              {profile.phone_number && (
+                <span className="flex items-center gap-1.5">
+                  <FiPhone className="size-3.5 text-primary-400" />
+                  {profile.phone_number}
+                </span>
+              )}
+
+              {profile.address && (
+                <span className="flex items-center gap-1.5">
+                  <FiMapPin className="size-3.5 text-primary-400" />
+                  {profile.address}
+                  {profile.city ? `, ${profile.city}` : ""}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="shrink-0">
+            {photoUrl ? (
+              <img
+                src={photoUrl}
+                alt="Student Photo"
+                className="size-24 object-cover border border-primary-200"
+              />
+            ) : (
+              <div className="size-24 bg-primary-50 border border-primary-200 flex items-center justify-center text-primary-300 text-[10px] text-center">
+                Photo Area
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 print:grid-cols-3">
-        <div className="md:col-span-2 print:col-span-2">
-          <h2 className="text-2xl font-bold mb-4 text-brand-600">
-            {profile.first_name} {profile.last_name}
-          </h2>
-
-          <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-2 text-primary-700">
-              <FiMail className="size-4 text-primary-500" />
-              <span>{email || "No email provided"}</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-700">
-              <FiPhone className="size-4 text-primary-500" />
-              <span>{profile.phone_number || "No phone provided"}</span>
-            </div>
-            <div className="flex items-start gap-2 text-primary-700">
-              <FiMapPin className="size-4 text-primary-500 mt-0.5" />
-              <span>
-                {profile.address}, {profile.city} {profile.zip_code}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="hidden md:block print:block justify-self-end">
-          {photoUrl ? (
-            <img
-              src={photoUrl}
-              alt="Student Photo"
-              className="size-32 object-cover border border-primary-200 bg-primary-50"
-            />
-          ) : (
-            <div className="size-32 bg-primary-50 border border-primary-200 flex items-center justify-center text-primary-300 text-xs text-center p-2">
-              Photo Area
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-8">
+      <div className="space-y-10">
         <section>
-          <h3 className="text-sm font-bold uppercase tracking-wider text-brand-600 border-b border-primary-100 pb-2 mb-4">
-            Personal Information
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-y-4 gap-x-8 text-sm">
-            <div>
-              <p className="text-primary-500 text-xs mb-0.5">Nationality</p>
-              <p className="font-medium">{profile.nationality || "N/A"}</p>
-            </div>
-            <div>
-              <p className="text-primary-500 text-xs mb-0.5">Gender</p>
-              <p className="font-medium text-primary-900 capitalize">
-                {profile.gender || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-primary-500 text-xs mb-0.5">Date of Birth</p>
-              <p className="font-medium">{formatDate(profile.date_of_birth)}</p>
-            </div>
-            <div>
-              <p className="text-primary-500 text-xs mb-0.5">Marital Status</p>
-              <p className="font-medium">{profile.marital_status || "N/A"}</p>
-            </div>
-            <div>
-              <p className="text-primary-500 text-xs mb-0.5">Religion</p>
-              <p className="font-medium">{profile.religion || "N/A"}</p>
-            </div>
-            <div>
-              <p className="text-primary-500 text-xs mb-0.5">Mother Tongue</p>
-              <p className="font-medium">{profile.mother_tongue || "N/A"}</p>
-            </div>
-            <div>
-              <p className="text-primary-500 text-xs mb-0.5">Visited China?</p>
-              <p className="font-medium">
-                {profile.has_visited_china ? "Yes" : "No"}
-              </p>
-            </div>
-            <div>
-              <p className="text-primary-500 text-xs mb-0.5">
-                Currently in China?
-              </p>
-              <p className="font-medium">
-                {profile.in_china_now ? "Yes" : "No"}
-              </p>
-            </div>
+          {(() => {
+            const profileFields = [
+              profile.nationality,
+              profile.gender,
+              profile.date_of_birth,
+              profile.marital_status,
+              profile.religion,
+              profile.mother_tongue,
+              profile.phone_number,
+              profile.address,
+              profile.passport_number,
+              profile.passport_expiry,
+            ];
+            const filled = profileFields.filter(Boolean).length;
+            const total = profileFields.length;
+            const pct = total > 0 ? (filled / total) * 97.4 : 0;
+            return (
+              <div className="flex flex-col gap-4 pb-2.5 mb-5">
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-600 flex-1">
+                  Personal Information
+                </h3>
+                <div className="flex items-center gap-3">
+                  <div className="relative shrink-0">
+                    <svg className="size-11 -rotate-90" viewBox="0 0 36 36">
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="15.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        className="text-primary-100"
+                      />
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="15.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeDasharray={`${Math.round(pct)} 97.4`}
+                        className="text-brand-500"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[9px] font-bold text-primary-900 leading-none">
+                        {filled}/{total}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-primary-800">
+                      {filled === total
+                        ? "Profile complete"
+                        : `${filled} of ${total} filled`}
+                    </p>
+                    <p className="text-[11px] text-primary-400 font-medium">
+                      fields completed
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+          <div className="grid grid-cols-2 gap-y-6 gap-x-10 text-sm">
+            {[
+              { label: "Nationality", value: profile.nationality },
+              { label: "Gender", value: profile.gender, capitalize: true },
+              {
+                label: "Date of Birth",
+                value: formatDate(profile.date_of_birth),
+              },
+              { label: "Marital Status", value: profile.marital_status },
+              { label: "Religion", value: profile.religion },
+              { label: "Mother Tongue", value: profile.mother_tongue },
+              {
+                label: "Visited China",
+                value: profile.has_visited_china ? "Yes" : "No",
+              },
+              {
+                label: "Currently in China",
+                value: profile.in_china_now ? "Yes" : "No",
+              },
+              { label: "Passport Number", value: profile.passport_number },
+              {
+                label: "Passport Expiry",
+                value: formatDate(profile.passport_expiry),
+              },
+            ].map((item) => (
+              <div key={item.label}>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary-400 mb-1.5">
+                  {item.label}
+                </p>
+                <p
+                  className={`font-semibold text-primary-900 ${(item as any).capitalize ? "capitalize" : ""}`}
+                >
+                  {item.value || "N/A"}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
 
         <section>
-          <h3 className="text-sm font-bold uppercase tracking-wider text-brand-600 border-b border-primary-100 pb-2 mb-4">
+          <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-600 border-b border-primary-100 pb-2.5 mb-5">
             Education History
           </h3>
           {!profile.education_history ||
           profile.education_history.length === 0 ? (
-            <p className="text-sm text-primary-500 italic">
+            <p className="text-sm text-primary-400 italic">
               No education history recorded.
             </p>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {profile.education_history.map((edu, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-1 md:grid-cols-4 print:grid-cols-4 gap-4 text-sm pb-4 border-b border-dashed border-primary-100 last:border-0 last:pb-0 break-inside-avoid"
+                  className="grid grid-cols-1 md:grid-cols-4 print:grid-cols-4 gap-4 text-sm pb-5 border-b border-dashed border-primary-100 last:border-0 last:pb-0 break-inside-avoid"
                 >
                   <div className="md:col-span-1 print:col-span-1">
-                    <p className="font-semibold text-primary-900">
-                      {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
+                    <p className="font-semibold text-primary-700 text-xs leading-relaxed">
+                      {formatDate(edu.startDate)} — {formatDate(edu.endDate)}
                     </p>
-                    <span className="inline-block px-2 py-0.5 bg-primary-50 text-primary-600 text-xs rounded mt-1 font-sans font-medium">
+                    <span className="inline-block px-2 py-0.5 bg-primary-50 text-primary-600 text-[11px] rounded mt-1.5 font-medium border border-primary-100">
                       {edu.level}
                     </span>
                   </div>
                   <div className="md:col-span-3 print:col-span-3">
-                    <h4 className="font-semibold text-lg text-primary-900">
+                    <h4 className="font-bold text-base text-primary-900 leading-snug">
                       {edu.schoolName}
                     </h4>
-                    <p className="text-primary-600 font-medium">
+                    <p className="text-primary-600 font-medium mt-0.5">
                       {edu.fieldOfStudy}
                     </p>
-                    <p className="text-primary-600 text-xs mt-1">
-                      GPA/Score: {edu.gpa}
+                    <p className="text-primary-400 text-xs mt-1 font-medium">
+                      GPA / Score: {edu.gpa}
                     </p>
                   </div>
                 </div>
@@ -370,154 +462,71 @@ export const ProfileDocument = React.forwardRef<
         </section>
 
         <section className="print:break-before-page print:py-8">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-brand-600 border-primary-100 pb-2 mb-4">
-            Documents
-          </h3>
-
-          <PassportCard
-            profile={profile}
-            document={docSource?.["passport"]}
-            isVisible={!docRequirements || docRequirements.includes("passport")}
-          />
-
-          {(profile.education_history || []).some((edu) => {
-            const levelKey = getEducationLevelKey(edu.level);
-            if (!levelKey) return false;
-            return EDUCATION_DOCUMENTS[levelKey].documents.some((eduDoc) => {
-              const isRequired =
-                !docRequirements || docRequirements.includes(eduDoc.id);
-              if (!isRequired) return false;
-              const doc = docSource?.[eduDoc.id];
-              return doc?.status === "uploaded" || doc?.status === "verified";
-            });
-          }) && (
-            <h4 className="text-xs font-bold text-primary-500 uppercase tracking-wider mb-3 mt-6">
-              Education Documents
-            </h4>
-          )}
-
-          <div className="space-y-6 mb-8">
-            {(profile.education_history || []).map((edu, idx) => {
-              const levelKey = getEducationLevelKey(edu.level);
-              if (!levelKey) return null;
-
-              const docsForLevel = EDUCATION_DOCUMENTS[levelKey].documents;
-
-              return (
-                <div
-                  key={idx}
-                  className="bg-white border border-primary-200 rounded-xl overflow-hidden break-inside-avoid shadow-xs"
-                >
-                  <div className="bg-primary-50/50 px-4 py-5 border-b border-primary-100 flex flex-col print:flex-row print:items-center md:flex-row md:items-center justify-between gap-3">
-                    <div className="space-y-1">
-                      <h5 className="font-semibold text-primary-900 text-base">
-                        {edu.schoolName}
-                      </h5>
-                      <p className="text-xs text-primary-500">
-                        {edu.level} • {edu.fieldOfStudy}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {docsForLevel
-                        .filter((eduDoc) => {
-                          const isRequired =
-                            !docRequirements ||
-                            docRequirements.includes(eduDoc.id);
-                          if (!isRequired) return false;
-                          const doc = docSource?.[eduDoc.id];
-                          return (
-                            doc?.status === "uploaded" ||
-                            doc?.status === "verified"
-                          );
-                        })
-                        .map((eduDoc) => {
-                          const doc = docSource?.[eduDoc.id];
-                          const isUploaded =
-                            doc?.status === "uploaded" ||
-                            doc?.status === "verified";
-
-                          return (
-                            <div
-                              key={eduDoc.id}
-                              className="flex items-center gap-1.5"
-                            >
-                              <div
-                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${
-                                  isUploaded
-                                    ? "bg-white border-success/20 text-success"
-                                    : "bg-white border-primary-300 text-primary-400"
-                                }`}
-                              >
-                                {isUploaded ? (
-                                  <FiCheckCircle className="size-3.5" />
-                                ) : null}
-                                <span className="font-medium">
-                                  {eduDoc.label}
-                                </span>
-                              </div>
-                              {isUploaded && doc?.url && (
-                                <Link
-                                  href={doc.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <div className="print:hidden rounded-full size-6 bg-white border border-primary-200 hover:bg-primary-50 text-primary-600 flex items-center justify-center transition-colors shadow-sm">
-                                    <FiEye className="size-3" />
-                                  </div>
-                                </Link>
-                              )}
-                            </div>
-                          );
-                        })}
-                    </div>
+          <div className="flex items-center gap-4 pb-3 mb-5">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-600 flex-1">
+              Documents
+            </h3>
+            {totalRequired > 0 && (
+              <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  <svg className="size-11 -rotate-90" viewBox="0 0 36 36">
+                    <circle
+                      cx="18"
+                      cy="18"
+                      r="15.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      className="text-primary-100"
+                    />
+                    <circle
+                      cx="18"
+                      cy="18"
+                      r="15.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeDasharray={`${Math.round(progress)} ${circumference}`}
+                      className="text-brand-500"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-[9px] font-bold text-primary-900 leading-none">
+                      {uploadedCount}/{totalRequired}
+                    </span>
                   </div>
                 </div>
-              );
-            })}
-            {(!profile.education_history ||
-              profile.education_history.length === 0) && (
-              <p className="text-sm text-primary-500 italic">
-                No education history found. Please add your education details
-                first.
-              </p>
+                <div>
+                  <p className="text-sm font-bold text-primary-800">
+                    {uploadedCount === totalRequired
+                      ? "All documents submitted"
+                      : `${uploadedCount} of ${totalRequired} submitted`}
+                  </p>
+                  <p className="text-[11px] text-primary-400 font-medium">
+                    documents uploaded
+                  </p>
+                </div>
+              </div>
             )}
           </div>
 
-          {otherDocs.some((key) => {
-            const isRequired =
-              !docRequirements || docRequirements.includes(key);
-            if (!isRequired) return false;
-            const doc = docSource?.[key];
-            return doc?.status === "uploaded" || doc?.status === "verified";
-          }) && (
-            <>
-              <h4 className="text-xs font-bold text-primary-500 uppercase tracking-wider mb-3">
-                Documents Checklist
-              </h4>
-              <p className="text-xs text-primary-500 mb-4">
-                All documents might not be required. Please refer to the program
-                details for more information.
-              </p>
-            </>
+          {allDocEntries.length === 0 ? (
+            <p className="text-sm text-primary-400 italic">
+              No documents submitted yet.
+            </p>
+          ) : (
+            <div className="border border-primary-200 rounded-xl overflow-hidden">
+              <div className="divide-y divide-primary-100">
+                {allDocEntries.map((entry) => (
+                  <DocumentRow
+                    key={`${entry.key}-${entry.schoolName ?? ""}`}
+                    entry={entry}
+                  />
+                ))}
+              </div>
+            </div>
           )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4">
-            {otherDocs
-              .filter((key) => {
-                const isRequired =
-                  !docRequirements || docRequirements.includes(key);
-                if (!isRequired) return false;
-                const doc = docSource?.[key];
-                return doc?.status === "uploaded" || doc?.status === "verified";
-              })
-              .map((key) => (
-                <DocumentCard
-                  key={key}
-                  docKey={key}
-                  document={docSource?.[key]}
-                />
-              ))}
-          </div>
         </section>
       </div>
     </div>

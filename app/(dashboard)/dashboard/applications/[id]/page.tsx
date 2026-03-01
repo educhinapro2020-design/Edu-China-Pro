@@ -187,7 +187,6 @@ function DocumentRow({
 }) {
   const status = doc?.status ?? "missing";
   const { icon, color, label } = getDocumentStatusMeta(status);
-  const isVerified = status === "verified";
 
   const rowColors = color
     .split(" ")
@@ -197,25 +196,27 @@ function DocumentRow({
   return (
     <div
       className={twMerge(
-        "w-full flex flex-col gap-3 p-5 rounded-2xl border transition-all",
+        "w-full flex flex-col gap-2 p-4 sm:p-5 rounded-2xl border transition-all",
         rowColors,
       )}
     >
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-start gap-3 min-w-0">
           <div
             className={twMerge(
-              "size-12 rounded-xl flex items-center justify-center border shrink-0",
+              "size-10 sm:size-12 rounded-xl flex items-center justify-center border shrink-0",
               color,
             )}
           >
             {icon}
           </div>
+
           <div className="min-w-0">
-            <h4 className="text-base font-medium text-primary-900 tracking-tight truncate">
+            <h4 className="text-sm sm:text-base font-medium text-primary-900 tracking-tight truncate">
               {getDocumentLabel(docKey)}
             </h4>
-            <div className="flex items-center gap-3 mt-1 flex-wrap">
+
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span
                 className={twMerge(
                   "text-[10px] font-medium uppercase tracking-widest px-2 py-0.5 rounded-lg border",
@@ -228,7 +229,7 @@ function DocumentRow({
           </div>
         </div>
 
-        <div className="shrink-0 flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
           {doc?.url && (
             <a
               href={doc.url}
@@ -237,50 +238,43 @@ function DocumentRow({
               title="Download"
               className="p-2 rounded-lg text-primary-400 hover:text-brand-600 hover:bg-brand-50 border border-transparent hover:border-brand-200 transition-all active:scale-95"
             >
-              <FiDownload className="size-4.5" />
+              <FiDownload className="size-4" />
             </a>
           )}
-          {isVerified ? null : (
-            <label
-              className={twMerge(
-                "cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all border",
-                uploading
-                  ? "bg-primary-50 text-primary-400 border-primary-200"
-                  : "bg-white border-primary-200 text-primary-700 hover:border-brand-400 hover:text-brand-700 hover:bg-brand-50 shadow-sm",
-              )}
-            >
-              {uploading ? (
-                <>
-                  <div className="size-3.5 border border-primary-400 border-t-transparent rounded-full animate-spin" />
-                  Uploading…
-                </>
-              ) : (
-                <>{doc ? "Replace" : "Upload"}</>
-              )}
-              <input
-                type="file"
-                className="hidden"
-                accept=".pdf,.jpg,.jpeg,.png"
-                disabled={uploading}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) onUpload(docKey, file);
-                }}
-              />
-            </label>
-          )}
+
+          <label
+            className={twMerge(
+              "cursor-pointer inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-sm font-bold transition-all border",
+              uploading
+                ? "bg-primary-50 text-primary-400 border-primary-200"
+                : "bg-white border-primary-200 text-primary-700 hover:border-brand-400 hover:text-brand-700 hover:bg-brand-50 shadow-sm",
+            )}
+          >
+            {uploading ? (
+              <>
+                <div className="size-3.5 border border-primary-400 border-t-transparent rounded-full animate-spin" />
+                Uploading…
+              </>
+            ) : (
+              <>{doc ? "Replace" : "Upload"}</>
+            )}
+
+            <input
+              type="file"
+              className="hidden"
+              accept=".pdf,.jpg,.jpeg,.png"
+              disabled={uploading}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onUpload(docKey, file);
+              }}
+            />
+          </label>
         </div>
       </div>
 
       {doc?.feedback && (
-        <div
-          className={twMerge(
-            "text-xs font-medium leading-relaxed px-3 flex-col gap-1",
-            color,
-            "bg-opacity-60",
-          )}
-        >
-          <span className="text-xs font-medium leading-relaxed px-3"></span>
+        <div className="text-xs text-primary-700 leading-relaxed rounded-xl px-3 py-2">
           {doc.feedback}
         </div>
       )}
@@ -473,15 +467,9 @@ export default function ApplicationDetailPage({
 
   const statusMeta = getApplicationStatusMeta(application.status);
 
-  const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
-    { key: "overview", label: "Overview", icon: FiFileText },
-    { key: "documents", label: "Documents", icon: FiUploadCloud },
-    { key: "history", label: "History", icon: FiClock },
-  ];
-
   return (
     <>
-      <div className="max-w-7xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-7xl mx-auto space-y-6 lg:px-8 pb-16 overflow-x-hidden">
         <Link
           href="/dashboard/applications"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-500 hover:text-primary-800 transition-colors mt-2"
@@ -491,7 +479,7 @@ export default function ApplicationDetailPage({
         </Link>
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-          <div className="grow w-full lg:w-2/3 space-y-6 min-w-0">
+          <div className="w-full lg:w-2/3 space-y-6 min-w-0 overflow-hidden">
             <div className="bg-white rounded-3xl border border-primary-100 shadow-sm overflow-hidden relative">
               <div className="absolute top-0 inset-x-0 h-32 bg-linear-to-br from-brand-100/40 via-primary-50/50 to-white -z-10" />
               <div
@@ -733,8 +721,15 @@ export default function ApplicationDetailPage({
               )}
             </AnimatePresence>
 
-            <div className="bg-white rounded-3xl border border-primary-100 shadow-sm overflow-hidden flex flex-col">
-              <div className="flex border-b border-primary-100 px-6 sm:px-8 pt-6 gap-8 overflow-x-auto scrollbar-none">
+            <div className="flex md:hidden rounded-2xl p-4 sm:p-5 bg-brand-600 border border-brand-200 items-center gap-4">
+              <FiInfo className="size-4.5 shrink-0 text-white" />
+              <p className="text-sm font-medium text-white leading-relaxed">
+                {statusMeta.description}
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-primary-100 shadow-sm overflow-hidden flex flex-col min-w-0">
+              <div className="flex border-b border-primary-100 px-6 sm:px-8 pt-6 gap-4 md:gap-8 overflow-x-auto scrollbar-none">
                 {(
                   [
                     {
@@ -778,7 +773,7 @@ export default function ApplicationDetailPage({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    className="divide-y divide-primary-50"
+                    className="divide-y divide-primary-50 min-w-0 overflow-hidden"
                   >
                     {(() => {
                       const isApplicationFeePending =
@@ -905,11 +900,12 @@ export default function ApplicationDetailPage({
                               const { icon, color, label } =
                                 getDocumentStatusMeta(status);
                               const isVerified = status === "verified";
+
                               return (
                                 <div
                                   key={k}
                                   className={twMerge(
-                                    "w-full flex items-center gap-3 p-4 rounded-xl border",
+                                    "w-full flex flex-col sm:flex-row sm:items-start gap-3 p-4 rounded-xl border",
                                     color
                                       .split(" ")
                                       .filter(
@@ -920,33 +916,39 @@ export default function ApplicationDetailPage({
                                       .join(" "),
                                   )}
                                 >
-                                  <div
-                                    className={twMerge(
-                                      "size-10 rounded-lg flex items-center justify-center border shrink-0",
-                                      color,
-                                    )}
-                                  >
-                                    {icon}
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <h4 className="text-sm font-semibold text-primary-900 truncate">
-                                      {getDocumentLabel(k)}
-                                    </h4>
-                                    <span
+                                  <div className="flex items-start gap-3 w-full">
+                                    <div
                                       className={twMerge(
-                                        "text-[10px] font-medium uppercase tracking-widest px-1.5 py-0.5 rounded-md border mt-1 inline-block",
+                                        "size-10 rounded-lg flex items-center justify-center border shrink-0",
                                         color,
                                       )}
                                     >
-                                      {label}
-                                    </span>
-                                    {doc?.feedback && (
-                                      <p className="text-xs text-primary-600 mt-1 leading-relaxed">
-                                        {doc.feedback}
-                                      </p>
-                                    )}
+                                      {icon}
+                                    </div>
+
+                                    <div className="min-w-0 flex-1">
+                                      <h4 className="text-sm font-semibold text-primary-900 truncate">
+                                        {getDocumentLabel(k)}
+                                      </h4>
+
+                                      <span
+                                        className={twMerge(
+                                          "text-[10px] font-medium uppercase tracking-widest px-1.5 py-0.5 rounded-md border mt-1 inline-block",
+                                          color,
+                                        )}
+                                      >
+                                        {label}
+                                      </span>
+
+                                      {doc?.feedback && (
+                                        <p className="text-xs text-primary-600 mt-1 leading-relaxed line-clamp-2">
+                                          {doc.feedback}
+                                        </p>
+                                      )}
+                                    </div>
                                   </div>
-                                  <div className="shrink-0 flex items-center gap-2">
+
+                                  <div className="flex items-center gap-2 mt-3 sm:mt-0 sm:ml-auto">
                                     {doc?.url && (
                                       <a
                                         href={doc.url}
@@ -957,22 +959,21 @@ export default function ApplicationDetailPage({
                                         <FiDownload className="size-4" />
                                       </a>
                                     )}
-                                    {!isVerified && (
-                                      <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold transition-all border bg-white border-primary-200 text-primary-700 hover:border-brand-400 hover:text-brand-700 hover:bg-brand-50 shadow-sm">
-                                        <FiUploadCloud className="size-3.5" />
-                                        {doc ? "Replace" : "Upload"}
-                                        <input
-                                          type="file"
-                                          className="hidden"
-                                          accept=".pdf,.jpg,.jpeg,.png"
-                                          disabled={uploading === k}
-                                          onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) handleFileUpload(k, file);
-                                          }}
-                                        />
-                                      </label>
-                                    )}
+
+                                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold transition-all border bg-white border-primary-200 text-primary-700 hover:border-brand-400 hover:text-brand-700 hover:bg-brand-50 shadow-sm">
+                                      <FiUploadCloud className="size-3.5" />
+                                      {doc ? "Replace" : "Upload"}
+                                      <input
+                                        type="file"
+                                        className="hidden"
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        disabled={uploading === k}
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) handleFileUpload(k, file);
+                                        }}
+                                      />
+                                    </label>
                                   </div>
                                 </div>
                               );
@@ -1097,7 +1098,7 @@ export default function ApplicationDetailPage({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    className="p-6 sm:p-8 space-y-8"
+                    className="p-6 sm:p-8 space-y-8 min-w-0 overflow-hidden"
                   >
                     <section>
                       {totalDocs === 0 ? (
@@ -1187,7 +1188,7 @@ export default function ApplicationDetailPage({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    className="p-6 sm:p-8 space-y-8"
+                    className="p-6 sm:p-8 space-y-8 min-w-0 overflow-hidden"
                   >
                     <section>
                       <h2 className="text-sm font-bold uppercase tracking-wider text-primary-900 mb-6">
@@ -1283,7 +1284,7 @@ export default function ApplicationDetailPage({
           </div>
 
           <div className="w-full lg:w-1/3 shrink-0 flex flex-col gap-6 lg:sticky lg:top-8">
-            <div className="rounded-2xl p-4 sm:p-5 bg-brand-600 border border-brand-200 flex items-center gap-4">
+            <div className="hidden md:flex rounded-2xl p-4 sm:p-5 bg-brand-600 border border-brand-200 items-center gap-4">
               <FiInfo className="size-4.5 shrink-0 text-white" />
               <p className="text-sm font-medium text-white leading-relaxed">
                 {statusMeta.description}
