@@ -18,6 +18,7 @@ import {
   FiCalendar,
   FiEdit,
   FiUploadCloud,
+  FiExternalLink,
 } from "react-icons/fi";
 import { MdHistory, MdOutlineSchool } from "react-icons/md";
 import { twMerge } from "tailwind-merge";
@@ -342,24 +343,13 @@ export default function CounselorApplicationDetailPage() {
         <div className="space-y-2 mt-2">
           {pendingStatus && ADMIN_GUIDANCE[pendingStatus] && (
             <div className="bg-brand-50 border border-brand-100 rounded-xl p-3 mb-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-brand-600 mb-1">
-                Counselor Note
-              </p>
-              <p className="text-sm text-brand-800 leading-relaxed">
+              <p className="text-xs text-brand-600 leading-relaxed">
                 {ADMIN_GUIDANCE[pendingStatus].action}
               </p>
-              {ADMIN_GUIDANCE[pendingStatus].next && (
-                <p className="text-xs text-brand-600 font-medium mt-1.5">
-                  Next: {ADMIN_GUIDANCE[pendingStatus].next}
-                </p>
-              )}
             </div>
           )}
           <label className="text-sm flex flex-col gap-1 font-semibold text-primary-900">
             Add a Note (Optional)
-            <span className="text-xs font-medium text-primary-500">
-              This note will be visible to the student.
-            </span>
           </label>
           <textarea
             value={statusNote}
@@ -583,7 +573,7 @@ export default function CounselorApplicationDetailPage() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-7xl mx-auto space-y-6 px-2 lg:px-8 pb-16">
         <button
           type="button"
           onClick={() => router.push("/counselor/applications")}
@@ -593,8 +583,8 @@ export default function CounselorApplicationDetailPage() {
           My Applications
         </button>
 
-        <div className="flex flex-col xl:flex-row gap-6 xl:gap-8 items-start">
-          <div className="grow w-full xl:w-2/3 space-y-6 min-w-0">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+          <div className="grow w-full lg:w-2/3 space-y-6 min-w-0">
             <div className="bg-white rounded-3xl border border-primary-100 shadow-sm overflow-hidden relative">
               <div className="absolute top-0 inset-x-0 h-32 bg-linear-to-br from-brand-100/40 via-primary-50/50 to-white -z-10" />
               <div
@@ -613,10 +603,24 @@ export default function CounselorApplicationDetailPage() {
                       <MdOutlineSchool className="size-8 sm:size-10 text-primary-300" />
                     )}
                   </div>
-                  <div className="min-w-0 pt-1">
-                    <h1 className="text-xl sm:text-2xl font-semibold text-primary-900 leading-tight">
-                      {programName}
-                    </h1>
+
+                  <div className="min-w-0 pt-1 flex-1">
+                    {app.program?.slug && app.program?.university?.slug ? (
+                      <Link
+                        href={`/universities/${app.program.university.slug}/programs/${app.program.slug}`}
+                        target="_blank"
+                        className="group inline-flex items-start gap-1.5"
+                      >
+                        <h1 className="text-xl sm:text-2xl font-semibold text-primary-900 leading-tight group-hover:underline underline-offset-2">
+                          {programName}
+                        </h1>
+                        <FiExternalLink className="size-4 mt-1.5 shrink-0 text-primary-400 group-hover:text-brand-600 transition-colors sm:hidden" />
+                      </Link>
+                    ) : (
+                      <h1 className="text-xl sm:text-2xl font-semibold text-primary-900 leading-tight">
+                        {programName}
+                      </h1>
+                    )}
                     <p className="text-sm sm:text-base text-primary-500 mt-1">
                       {universityName}
                     </p>
@@ -648,7 +652,7 @@ export default function CounselorApplicationDetailPage() {
             </div>
 
             <div className="bg-white rounded-3xl border min-h-[40vh] border-primary-100 shadow-sm overflow-hidden w-full min-w-0">
-              <div className="flex border-b border-primary-100 px-6 sm:px-8 pt-6 gap-8 overflow-x-auto scrollbar-none">
+              <div className="flex flex-wrap sm:flex-nowrap border-b border-primary-100 px-4 sm:px-8 pt-4 sm:pt-6 gap-x-6 gap-y-5 md:gap-x-8 md:gap-y-0">
                 {(
                   [
                     {
@@ -668,22 +672,37 @@ export default function CounselorApplicationDetailPage() {
                     },
                     { key: "history" as Tab, label: "History", icon: FiClock },
                   ] as const
-                ).map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`flex items-center gap-2 pb-4 text-sm font-semibold transition-all relative whitespace-nowrap border-b-2 ${
-                      activeTab === tab.key
-                        ? "text-brand-600 border-brand-600"
-                        : "text-primary-500 hover:text-primary-800 border-transparent hover:border-primary-300"
-                    }`}
-                  >
-                    <tab.icon
-                      className={`size-4 shrink-0 transition-colors ${activeTab === tab.key ? "text-brand-600" : "text-primary-400"}`}
-                    />
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
+                ).map((tab) => {
+                  const isActive = activeTab === tab.key;
+
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`
+                          flex items-center gap-x-3 gap-y-2 md:gap-x-2
+                          pb-4
+                        
+                          text-sm
+                          font-semibold
+                          transition-all
+                          border-b-2
+                          ${
+                            isActive
+                              ? "text-brand-600 border-brand-600"
+                              : "text-primary-500 hover:text-primary-800 border-transparent hover:border-primary-300"
+                          }
+        `}
+                    >
+                      <tab.icon
+                        className={`size-3.5 sm:size-4 shrink-0 ${
+                          isActive ? "text-brand-600" : "text-primary-400"
+                        }`}
+                      />
+                      <span className="whitespace-nowrap">{tab.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               <AnimatePresence mode="wait">
@@ -694,7 +713,7 @@ export default function CounselorApplicationDetailPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    className="p-6 sm:p-8 space-y-8"
+                    className="p-4 md:p-8 space-y-8"
                   >
                     {!profile ? (
                       <div className="p-10 text-center">
@@ -960,7 +979,7 @@ export default function CounselorApplicationDetailPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    className="p-6 sm:p-8 space-y-8"
+                    className="p-4 md:p-8 space-y-8"
                   >
                     {totalDocs === 0 ? (
                       <div className="bg-primary-50/50 rounded-2xl p-8 text-center border border-dashed border-primary-200">
@@ -1051,51 +1070,64 @@ export default function CounselorApplicationDetailPage() {
                               return (
                                 <div
                                   key={docKey}
-                                  className={`w-full flex items-center justify-between gap-4 p-5 rounded-2xl border transition-all ${rowColors}`}
+                                  className={twMerge(
+                                    "w-full flex flex-col gap-3 p-4 sm:p-5 rounded-2xl border transition-all",
+                                    rowColors,
+                                  )}
                                 >
-                                  <div className="flex items-center gap-4 min-w-0">
-                                    <div
-                                      className={`size-12 rounded-xl flex items-center justify-center border shrink-0 ${color}`}
-                                    >
-                                      {icon}
-                                    </div>
-                                    <div className="min-w-0">
-                                      <h4 className="text-base font-medium text-primary-900 tracking-tight truncate">
-                                        {getDocumentLabel(docKey)}
-                                      </h4>
-                                      <span
-                                        className={`text-[10px] font-medium uppercase tracking-widest px-2 py-0.5 rounded-lg border mt-1 inline-block ${color}`}
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 md:gap-4">
+                                    <div className="flex items-start gap-3 min-w-0">
+                                      <div
+                                        className={twMerge(
+                                          "size-10 sm:size-12 rounded-xl flex items-center justify-center border shrink-0",
+                                          color,
+                                        )}
                                       >
-                                        {doc?.status
-                                          ? doc.status.replace(/_/g, " ")
-                                          : "Missing"}
-                                      </span>
+                                        {icon}
+                                      </div>
+                                      <div className="min-w-0">
+                                        <h4 className="text-sm sm:text-base font-medium text-primary-900 tracking-tight truncate">
+                                          {getDocumentLabel(docKey)}
+                                        </h4>
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                          <span
+                                            className={twMerge(
+                                              "text-[10px] font-medium uppercase tracking-widest px-2 py-0.5 rounded-lg border",
+                                              color,
+                                            )}
+                                          >
+                                            {doc?.status
+                                              ? doc.status.replace(/_/g, " ")
+                                              : "Missing"}
+                                          </span>
+                                        </div>
+                                      </div>
                                     </div>
-                                  </div>
-                                  <div className="flex items-center gap-2 shrink-0">
-                                    <button
-                                      type="button"
-                                      title="Edit Status"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedDocKey(docKey);
-                                        setDocNewStatus(doc?.status ?? "");
-                                        setDocFeedback(doc?.feedback ?? "");
-                                      }}
-                                      className="p-2 rounded-lg text-primary-400 hover:text-brand-600 hover:bg-brand-50 border border-transparent hover:border-brand-200 transition-all"
-                                    >
-                                      <FiEdit className="size-4" />
-                                    </button>
-                                    {doc?.url && (
-                                      <Link
-                                        href={doc.url}
-                                        target="_blank"
-                                        title="Download"
+                                    <div className="flex justify-end items-center gap-2 sm:gap-3">
+                                      <button
+                                        type="button"
+                                        title="Edit Status"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSelectedDocKey(docKey);
+                                          setDocNewStatus(doc?.status ?? "");
+                                          setDocFeedback(doc?.feedback ?? "");
+                                        }}
                                         className="p-2 rounded-lg text-primary-400 hover:text-brand-600 hover:bg-brand-50 border border-transparent hover:border-brand-200 transition-all active:scale-95"
                                       >
-                                        <FiDownload className="size-4.5" />
-                                      </Link>
-                                    )}
+                                        <FiEdit className="size-4" />
+                                      </button>
+                                      {doc?.url && (
+                                        <Link
+                                          href={doc.url}
+                                          target="_blank"
+                                          title="Download"
+                                          className="p-2 rounded-lg text-primary-400 hover:text-brand-600 hover:bg-brand-50 border border-transparent hover:border-brand-200 transition-all active:scale-95"
+                                        >
+                                          <FiDownload className="size-4" />
+                                        </Link>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               );
@@ -1147,7 +1179,7 @@ export default function CounselorApplicationDetailPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    className="p-6 sm:p-8 space-y-8"
+                    className="p-4 md:p-8 space-y-8"
                   >
                     <h2 className="text-sm font-bold uppercase tracking-wider text-primary-900 mb-6">
                       Status History

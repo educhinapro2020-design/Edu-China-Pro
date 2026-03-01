@@ -139,6 +139,14 @@ function ToastCard({
 }) {
   const router = useRouter();
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onDismiss(toast.toastId);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [toast.toastId, onDismiss]);
+
   const handleClick = () => {
     onRead(toast.id);
     onDismiss(toast.toastId);
@@ -240,15 +248,18 @@ export function NotificationToasts(props: NotificationToastsProps) {
 function NotificationItem({
   notification,
   onRead,
+  onClose,
 }: {
   notification: NotificationRow;
   onRead: (id: string) => void;
+  onClose: () => void;
 }) {
   const router = useRouter();
   const isUnread = !notification.read_at;
 
   const handleClick = () => {
     if (isUnread) onRead(notification.id);
+    onClose();
     if (notification.link) router.push(notification.link);
   };
 
@@ -352,6 +363,7 @@ function NotificationDropdown({
   loading,
   markRead,
   markAllRead,
+  onClose,
 }: {
   position: NotificationBellPosition;
   open: boolean;
@@ -360,6 +372,7 @@ function NotificationDropdown({
   loading: boolean;
   markRead: (id: string) => void;
   markAllRead: () => void;
+  onClose: () => void;
 }) {
   return (
     <AnimatePresence>
@@ -416,6 +429,7 @@ function NotificationDropdown({
                     key={n.id}
                     notification={n}
                     onRead={markRead}
+                    onClose={onClose}
                   />
                 ))}
               </AnimatePresence>
@@ -503,6 +517,7 @@ export function NotificationBell({
           loading={loading}
           markRead={markRead}
           markAllRead={markAllRead}
+          onClose={() => setOpen(false)}
         />
       </div>
     </>
@@ -578,6 +593,7 @@ export function NotificationBellOnly({
         loading={loading}
         markRead={markRead}
         markAllRead={markAllRead}
+        onClose={() => setOpen(false)}
       />
     </div>
   );

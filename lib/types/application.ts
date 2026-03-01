@@ -46,10 +46,12 @@ export interface Application extends Omit<
   program?: {
     id: string;
     name_en: string;
+    slug: string;
     university: {
       id: string;
       name_en: string;
       logo_url: string | null;
+      slug: string;
     };
     document_requirements?: DocumentKey[];
     intake_season?: Database["public"]["Enums"]["intake_season"] | null;

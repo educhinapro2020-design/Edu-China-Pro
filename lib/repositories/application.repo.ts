@@ -50,7 +50,7 @@ export const applicationRepository = {
       .select(
         `
         *,
-        program:programs(id, name_en, document_requirements, intake_season, intake_year, duration, tuition_original, tuition_currency, tuition_per, university:universities(id, name_en, logo_url)),
+        program:programs(id, name_en, slug, document_requirements, intake_season, intake_year, duration, tuition_original, tuition_currency, tuition_per, university:universities(id, name_en, logo_url, slug)),
         student:profiles!applications_student_id_fkey(full_name, email, avatar_url)
       `,
       )

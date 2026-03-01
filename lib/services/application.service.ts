@@ -69,6 +69,20 @@ export const applicationService = {
     userId: string,
   ): Promise<string> {
     const supabase = createClient();
+
+    const app =
+      await applicationRepository.getApplicationWithDocuments(applicationId);
+    if (!app) throw new Error("Application not found");
+
+    const currentDocs = (app.documents as ApplicationDocuments) || {};
+    const oldDoc = currentDocs[key];
+    if (oldDoc?.url) {
+      const urlParts = oldDoc.url.split("/documents/");
+      if (urlParts[1]) {
+        await supabase.storage.from("documents").remove([urlParts[1]]);
+      }
+    }
+
     const filePath = `${userId}/${applicationId}/${key}-${Date.now()}.${file.name.split(".").pop()}`;
 
     const { error: uploadError } = await supabase.storage
@@ -81,12 +95,6 @@ export const applicationService = {
       data: { publicUrl },
     } = supabase.storage.from("documents").getPublicUrl(filePath);
 
-    const app =
-      await applicationRepository.getApplicationWithDocuments(applicationId);
-
-    if (!app) throw new Error("Application not found");
-
-    const currentDocs = (app.documents as ApplicationDocuments) || {};
     const newDocEntry = {
       url: publicUrl,
       status: "uploaded" as const,
@@ -102,24 +110,6 @@ export const applicationService = {
       applicationId,
       updatedDocs,
     );
-
-    const profileDocs = await studentDocumentsRepository.getDocuments(userId);
-
-    const currentProfileDocs = profileDocs?.documents || {};
-    const updatedProfileDocs = {
-      ...currentProfileDocs,
-      [key]: { ...newDocEntry, file_name: file.name },
-    };
-
-    const { error: profileUpdateError } = await supabase
-      .from("student_documents")
-      .upsert({
-        id: userId,
-        documents: updatedProfileDocs as unknown as Json,
-      });
-
-    if (profileUpdateError)
-      console.error("Failed to sync doc to profile", profileUpdateError);
 
     return publicUrl;
   },
