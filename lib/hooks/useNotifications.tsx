@@ -74,14 +74,14 @@ export function useNotifications(userId: string | null) {
     }
   }, [userId, fetchNotifications]);
 
+  const supabaseRef = useRef(createClient());
+
   useEffect(() => {
     if (!userId) return;
 
     fetchNotifications();
 
-    const supabase = createClient();
-
-    channelRef.current = supabase
+    channelRef.current = supabaseRef.current
       .channel(`notifications:${userId}`)
       .on(
         "postgres_changes",
@@ -100,9 +100,6 @@ export function useNotifications(userId: string | null) {
             const toastId = `toast-${newNotification.id}-${Date.now()}`;
             const toast: NotificationToast = { ...newNotification, toastId };
             setToasts((prev) => [toast, ...prev].slice(0, 5));
-            setTimeout(() => {
-              setToasts((prev) => prev.filter((t) => t.toastId !== toastId));
-            }, 5000);
           }
         },
       )
@@ -112,10 +109,10 @@ export function useNotifications(userId: string | null) {
 
     return () => {
       if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
+        supabaseRef.current.removeChannel(channelRef.current);
       }
     };
-  }, [userId, fetchNotifications]);
+  }, [userId]);
 
   return {
     notifications,
