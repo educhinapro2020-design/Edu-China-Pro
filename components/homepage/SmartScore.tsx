@@ -1,10 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { FiArrowRight, FiArrowLeft, FiCalendar } from "react-icons/fi";
+import {
+  FiArrowRight,
+  FiArrowLeft,
+  FiCalendar,
+  FiMail,
+  FiPhone,
+} from "react-icons/fi";
 import { twMerge } from "tailwind-merge";
 import { RiGraduationCapLine } from "react-icons/ri";
+import { sendInternalAlert } from "@/lib/actions/internal-alert";
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!;
 
 type FormData = {
   gpa: string;
@@ -13,6 +22,11 @@ type FormData = {
   scholarship: string;
   budget: string;
   chineseLevel: string;
+};
+
+type ContactInfo = {
+  email: string;
+  phone: string;
 };
 
 type ScoreResult = {
@@ -259,17 +273,56 @@ const INITIAL_FORM: FormData = {
   chineseLevel: "",
 };
 
-type Phase = "intro" | "questions" | "result";
+type Phase = "intro" | "questions" | "contact" | "result";
 
 export function SmartScoreSection() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [qIndex, setQIndex] = useState(0);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
+  const [contact, setContact] = useState<ContactInfo>({ email: "", phone: "" });
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [direction, setDirection] = useState(1);
+  const [sending, setSending] = useState(false);
+
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+  const turnstileToken = useRef<string | null>(null);
 
   const current = QUESTIONS[qIndex];
   const currentValue = form[current?.key];
+
+  const renderTurnstile = useCallback(() => {
+    if (
+      typeof window === "undefined" ||
+      !(window as any).turnstile ||
+      !turnstileRef.current
+    )
+      return;
+
+    if (turnstileWidgetId.current !== null) {
+      (window as any).turnstile.remove(turnstileWidgetId.current);
+      turnstileWidgetId.current = null;
+    }
+
+    turnstileWidgetId.current = (window as any).turnstile.render(
+      turnstileRef.current,
+      {
+        sitekey: TURNSTILE_SITE_KEY,
+        size: "invisible",
+        callback: (token: string) => {
+          turnstileToken.current = token;
+        },
+      },
+    );
+  }, []);
+
+  useEffect(() => {
+    if (phase === "contact") {
+      // Small delay to ensure DOM is ready
+      const t = setTimeout(renderTurnstile, 300);
+      return () => clearTimeout(t);
+    }
+  }, [phase, renderTurnstile]);
 
   const handleSelect = (val: string) => {
     const updated = { ...form, [current.key]: val };
@@ -280,7 +333,7 @@ export function SmartScoreSection() {
         setQIndex((i) => i + 1);
       } else {
         setResult(computeScore(updated));
-        setPhase("result");
+        setPhase("contact");
       }
     }, 180);
   };
@@ -294,12 +347,44 @@ export function SmartScoreSection() {
     }
   };
 
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!result) return;
+    setSending(true);
+
+    try {
+      const token = turnstileToken.current || "";
+      await sendInternalAlert(
+        {
+          type: "smartscore",
+          email: contact.email,
+          phone: contact.phone,
+          answers: form,
+          score: result.overall,
+          tier: result.tier,
+        },
+        token,
+      );
+    } catch (err) {
+      console.error("Failed to send alert:", err);
+    } finally {
+      setSending(false);
+      setPhase("result");
+    }
+  };
+
+  const handleSkipContact = () => {
+    setPhase("result");
+  };
+
   const handleReset = () => {
     setForm(INITIAL_FORM);
+    setContact({ email: "", phone: "" });
     setResult(null);
     setQIndex(0);
     setDirection(1);
     setPhase("intro");
+    turnstileToken.current = null;
   };
 
   const scoreColor = (s: number) =>
@@ -440,6 +525,75 @@ export function SmartScoreSection() {
                         {qIndex === 0 ? "Back" : "Previous"}
                       </button>
                     </div>
+                  </motion.div>
+                )}
+
+                {phase === "contact" && (
+                  <motion.div
+                    key="contact"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -16 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex flex-col flex-1 p-10 justify-center gap-6"
+                  >
+                    <div className="space-y-2 text-center">
+                      <h3 className="text-xl font-bold text-primary-900">
+                        Almost there!
+                      </h3>
+                      <p className="text-sm text-primary-500 leading-relaxed max-w-sm mx-auto">
+                        Fill in your details to get a free consultation.{" "}
+                        <span className="font-semibold">
+                          * This is not a signup.
+                        </span>
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleContactSubmit} className="space-y-4">
+                      <div className="relative">
+                        <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-400" />
+                        <input
+                          type="email"
+                          required
+                          placeholder="Your email address"
+                          value={contact.email}
+                          onChange={(e) =>
+                            setContact((c) => ({
+                              ...c,
+                              email: e.target.value,
+                            }))
+                          }
+                          className="w-full pl-11 pr-4 py-3.5 bg-primary-50 border border-primary-100 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-primary-300 text-primary-900 text-sm"
+                        />
+                      </div>
+                      <div className="relative">
+                        <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-400" />
+                        <input
+                          type="tel"
+                          required
+                          placeholder="Your phone number"
+                          value={contact.phone}
+                          onChange={(e) =>
+                            setContact((c) => ({
+                              ...c,
+                              phone: e.target.value,
+                            }))
+                          }
+                          className="w-full pl-11 pr-4 py-3.5 bg-primary-50 border border-primary-100 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-primary-300 text-primary-900 text-sm"
+                        />
+                      </div>
+
+                      <div ref={turnstileRef} />
+
+                      <button
+                        type="submit"
+                        disabled={sending}
+                        className="w-full flex items-center justify-center gap-2 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-2xl transition-all shadow-md shadow-brand-200 text-sm disabled:opacity-60"
+                      >
+                        {sending ? "Sending..." : "See My Results"}
+                        {!sending && <FiArrowRight className="size-4" />}
+                      </button>
+                    </form>
                   </motion.div>
                 )}
 
