@@ -215,4 +215,40 @@ export const universityRepository = {
 
     return publicUrl;
   },
+
+  async getFeaturedUniversities(
+    client?: SupabaseClient,
+  ): Promise<University[]> {
+    const supabase = client ?? createClient();
+    const { data, error } = await supabase
+      .from("universities")
+      .select("*, city:cities(name_en, slug)")
+      .eq("is_featured", true)
+      .order("featured_order", { ascending: true, nullsFirst: false });
+
+    if (error) {
+      console.error("Error fetching featured universities:", error);
+      return [];
+    }
+    return data as unknown as University[];
+  },
+
+  async updateFeatured(
+    id: string,
+    isFeatured: boolean,
+    order: number | null,
+    client?: SupabaseClient,
+  ): Promise<void> {
+    const supabase = client ?? createClient();
+    const { error } = await supabase
+      .from("universities")
+      .update({
+        is_featured: isFeatured,
+        featured_order: order,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+
+    if (error) throw error;
+  },
 };

@@ -9,12 +9,15 @@ import {
   FiMapPin,
   FiExternalLink,
   FiBookOpen,
+  FiStar,
 } from "react-icons/fi";
 import { programRepository } from "@/lib/repositories/program.repo";
 import { Program } from "@/lib/types/university";
 import { DataTable, Column } from "@/components/admin/DataTable";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
+import { twMerge } from "tailwind-merge";
 
 export function ProgramsListPage({
   basePath = "/admin",
@@ -28,6 +31,7 @@ export function ProgramsListPage({
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const PAGE_SIZE = 10;
 
@@ -51,6 +55,25 @@ export function ProgramsListPage({
       setIsLoading(false);
     }
   }
+
+  const handleToggleFeatured = async (row: Program) => {
+    setTogglingId(row.id);
+    try {
+      await programRepository.updateFeatured(row.id, !row.is_featured, null);
+      setData((prev) =>
+        prev.map((p) =>
+          p.id === row.id ? { ...p, is_featured: !p.is_featured } : p,
+        ),
+      );
+      toast.success(
+        row.is_featured ? "Removed from featured" : "Added to featured",
+      );
+    } catch {
+      toast.error("Failed to update featured status");
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -140,6 +163,29 @@ export function ProgramsListPage({
         isLoading={isLoading}
         actions={(row) => (
           <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleFeatured(row);
+              }}
+              disabled={togglingId === row.id}
+              className={twMerge(
+                "p-2 transition-colors cursor-pointer disabled:opacity-40",
+                row.is_featured
+                  ? "text-amber-400 hover:text-amber-500"
+                  : "text-primary-300 hover:text-amber-400",
+              )}
+              title={
+                row.is_featured ? "Remove from featured" : "Add to featured"
+              }
+            >
+              <FiStar
+                className={twMerge(
+                  "size-4",
+                  row.is_featured && "fill-amber-400",
+                )}
+              />
+            </button>
             <Link
               href={`/universities/${(row as any).university?.slug}/programs/${row.slug}`}
               target="_blank"

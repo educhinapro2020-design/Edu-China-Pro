@@ -205,6 +205,40 @@ export const programRepository = {
     return data as unknown as Program;
   },
 
+  async getFeaturedPrograms(client?: SupabaseClient): Promise<Program[]> {
+    const supabase = client ?? createClient();
+    const { data, error } = await supabase
+      .from("programs")
+      .select("*, university:universities(name_en, slug, logo_url)")
+      .eq("is_featured", true)
+      .order("featured_order", { ascending: true, nullsFirst: false });
+
+    if (error) {
+      console.error("Error fetching featured programs:", error);
+      return [];
+    }
+    return data as unknown as Program[];
+  },
+
+  async updateFeatured(
+    id: string,
+    isFeatured: boolean,
+    order: number | null,
+    client?: SupabaseClient,
+  ): Promise<void> {
+    const supabase = client ?? createClient();
+    const { error } = await supabase
+      .from("programs")
+      .update({
+        is_featured: isFeatured,
+        featured_order: order,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+
+    if (error) throw error;
+  },
+
   async deleteProgram(id: string, client?: SupabaseClient): Promise<void> {
     const supabase = client ?? createClient();
     const { error } = await supabase.from("programs").delete().eq("id", id);

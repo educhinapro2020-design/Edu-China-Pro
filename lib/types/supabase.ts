@@ -516,9 +516,11 @@ export type Database = {
           eligibility: Json | null
           estimated_living_cost: number | null
           estimated_living_currency: string | null
+          featured_order: number | null
           id: string
           intake_season: Database["public"]["Enums"]["intake_season"] | null
           intake_year: number | null
+          is_featured: boolean
           is_scholarship_program: boolean | null
           is_self_funded: boolean | null
           language: Database["public"]["Enums"]["teaching_language"]
@@ -554,9 +556,11 @@ export type Database = {
           eligibility?: Json | null
           estimated_living_cost?: number | null
           estimated_living_currency?: string | null
+          featured_order?: number | null
           id?: string
           intake_season?: Database["public"]["Enums"]["intake_season"] | null
           intake_year?: number | null
+          is_featured?: boolean
           is_scholarship_program?: boolean | null
           is_self_funded?: boolean | null
           language?: Database["public"]["Enums"]["teaching_language"]
@@ -592,9 +596,11 @@ export type Database = {
           eligibility?: Json | null
           estimated_living_cost?: number | null
           estimated_living_currency?: string | null
+          featured_order?: number | null
           id?: string
           intake_season?: Database["public"]["Enums"]["intake_season"] | null
           intake_year?: number | null
+          is_featured?: boolean
           is_scholarship_program?: boolean | null
           is_self_funded?: boolean | null
           language?: Database["public"]["Enums"]["teaching_language"]
@@ -760,8 +766,10 @@ export type Database = {
           country_specific_data: Json | null
           cover_image_url: string | null
           created_at: string
+          featured_order: number | null
           id: string
           institution_type: Database["public"]["Enums"]["institution_type"]
+          is_featured: boolean
           level: string | null
           logo_url: string | null
           majors_count: number | null
@@ -787,8 +795,10 @@ export type Database = {
           country_specific_data?: Json | null
           cover_image_url?: string | null
           created_at?: string
+          featured_order?: number | null
           id?: string
           institution_type?: Database["public"]["Enums"]["institution_type"]
+          is_featured?: boolean
           level?: string | null
           logo_url?: string | null
           majors_count?: number | null
@@ -814,8 +824,10 @@ export type Database = {
           country_specific_data?: Json | null
           cover_image_url?: string | null
           created_at?: string
+          featured_order?: number | null
           id?: string
           institution_type?: Database["public"]["Enums"]["institution_type"]
+          is_featured?: boolean
           level?: string | null
           logo_url?: string | null
           majors_count?: number | null

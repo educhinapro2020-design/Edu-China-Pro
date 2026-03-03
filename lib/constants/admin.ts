@@ -6,6 +6,7 @@ import {
   FiFile,
   FiUsers,
   FiMessageCircle,
+  FiStar,
 } from "react-icons/fi";
 import { MdOutlineSchool } from "react-icons/md";
 import { IconType } from "react-icons";
@@ -22,6 +23,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { name: "Messages", href: "/admin/messages", icon: FiMessageCircle },
   { name: "Universities", href: "/admin/universities", icon: MdOutlineSchool },
   { name: "Programs", href: "/admin/programs", icon: FiBookOpen },
+  { name: "Featured", href: "/admin/featured", icon: FiStar },
   { name: "Users", href: "/admin/users", icon: FiUsers },
 ];
 

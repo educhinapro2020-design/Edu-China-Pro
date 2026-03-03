@@ -16,9 +16,10 @@ import {
   FiX,
   FiPlus,
   FiChevronDown,
+  FiStar,
 } from "react-icons/fi";
 import { universityRepository } from "@/lib/repositories/university.repo";
-import { University } from "@/lib/types/university";
+import { University, UniversityAlbums } from "@/lib/types/university";
 import {
   universityFormSchema,
   slugify,
@@ -36,6 +37,8 @@ import { referenceRepository } from "@/lib/repositories/reference.repo";
 import { AnimatePresence, motion } from "framer-motion";
 import { twMerge } from "tailwind-merge";
 import ImageUpload from "./ImageUpload";
+import MultiImageUpload from "./MultiAssetsUpload";
+import { relocateFiles } from "@/lib/utils/storage";
 
 interface UniversityFormProps {
   initialData?: University;
@@ -430,6 +433,8 @@ export function UniversityForm({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const sessionId = useRef(crypto.randomUUID());
+  const uploadFolder = `universities/${initialData?.id ?? `temp/${sessionId.current}`}`;
 
   const [form, setForm] = useState({
     name_en: initialData?.name_en ?? "",
@@ -439,7 +444,7 @@ export function UniversityForm({
     institution_type: initialData?.institution_type ?? "public",
     level: initialData?.level ?? "",
     logo_url: initialData?.logo_url ?? null,
-    cover_image_url: initialData?.cover_image_url ?? "",
+    cover_image_url: initialData?.cover_image_url ?? null,
     shanghai_rank: initialData?.shanghai_rank ?? "",
     shanghai_rank_year: initialData?.shanghai_rank_year ?? "",
     qs_rank: initialData?.qs_rank ?? "",
@@ -452,6 +457,8 @@ export function UniversityForm({
     accommodation_single_room: initialData?.accommodation_single_room ?? "",
     accommodation_currency: initialData?.accommodation_currency ?? "RMB",
     self_financed_available: initialData?.self_financed_available ?? false,
+    is_featured: initialData?.is_featured ?? false,
+    albums: (initialData?.albums as UniversityAlbums) ?? [],
     country_specific_data: {
       is_985_project:
         initialData?.country_specific_data?.is_985_project ?? false,
@@ -531,7 +538,9 @@ export function UniversityForm({
         : null,
       accommodation_currency: form.accommodation_currency,
       self_financed_available: form.self_financed_available,
+      is_featured: form.is_featured,
       country_specific_data: form.country_specific_data,
+      albums: form.albums,
     };
 
     const result = universityFormSchema.safeParse(payload);
@@ -553,7 +562,41 @@ export function UniversityForm({
           payload as any,
         );
       } else {
-        await universityRepository.createUniversity(payload as any);
+        const created = await universityRepository.createUniversity(
+          payload as any,
+        );
+
+        const tempPrefix = `universities/temp/${sessionId.current}/`;
+        const realPrefix = `universities/${created.id}/`;
+
+        const allUrls = [
+          form.logo_url,
+          form.cover_image_url,
+          ...(Array.isArray(form.albums) ? form.albums : []),
+        ].filter(Boolean) as string[];
+
+        if (allUrls.length > 0) {
+          const relocated = await relocateFiles(
+            tempPrefix,
+            realPrefix,
+            allUrls,
+          );
+
+          const singleCount = [form.logo_url, form.cover_image_url].filter(
+            Boolean,
+          ).length;
+          const newLogoUrl = form.logo_url ? relocated[0] : null;
+          const newCoverUrl = form.cover_image_url
+            ? relocated[form.logo_url ? 1 : 0]
+            : null;
+          const newAlbums = relocated.slice(singleCount);
+
+          await universityRepository.updateUniversity(created.id, {
+            logo_url: newLogoUrl,
+            cover_image_url: newCoverUrl,
+            albums: newAlbums,
+          });
+        }
       }
       router.push(`${basePath}/universities`);
       router.refresh();
@@ -567,6 +610,43 @@ export function UniversityForm({
   return (
     <form onSubmit={handleSubmit} className="relative max-w-6xl mx-auto pb-6">
       <div className="flex flex-col gap-8 pb-12">
+        <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-primary-100 shadow-sm">
+          <div className="flex items-center gap-3">
+            <FiStar
+              className={twMerge(
+                "size-4",
+                form.is_featured
+                  ? "text-amber-400 fill-amber-400"
+                  : "text-primary-400",
+              )}
+            />
+            <div>
+              <p className="font-semibold text-primary-900">
+                Featured on Homepage
+              </p>
+              <p className="text-sm text-primary-400">
+                This university will appear in the featured section
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              setForm((prev) => ({ ...prev, is_featured: !prev.is_featured }))
+            }
+            className={twMerge(
+              "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+              form.is_featured ? "bg-amber-400" : "bg-primary-200",
+            )}
+          >
+            <span
+              className={twMerge(
+                "pointer-events-none inline-block size-5 rounded-full bg-white shadow-md transform transition duration-200 ease-in-out",
+                form.is_featured ? "translate-x-5" : "translate-x-0",
+              )}
+            />
+          </button>
+        </div>
         <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
           <div>
             <h2 className="heading-4">Basic Information</h2>
@@ -644,13 +724,44 @@ export function UniversityForm({
               />
             </div>
 
-            <div className="space-y-2.5 md:col-span-2">
+            <div className="space-y-2.5">
               <ImageUpload
-                universityId={initialData?.id}
+                uploadFolder={uploadFolder}
                 value={form.logo_url}
+                label="University Logo"
                 onChange={(url) =>
                   setForm((prev) => ({ ...prev, logo_url: url }))
                 }
+                onSync={async (url) => {
+                  if (initialData?.id) {
+                    await universityRepository.updateUniversity(
+                      initialData.id,
+                      {
+                        logo_url: url,
+                      },
+                    );
+                  }
+                }}
+              />
+            </div>
+            <div className="space-y-2.5">
+              <ImageUpload
+                uploadFolder={uploadFolder}
+                value={form.cover_image_url}
+                label="Cover Image"
+                onChange={(url) =>
+                  setForm((prev) => ({ ...prev, cover_image_url: url }))
+                }
+                onSync={async (url) => {
+                  if (initialData?.id) {
+                    await universityRepository.updateUniversity(
+                      initialData.id,
+                      {
+                        cover_image_url: url,
+                      },
+                    );
+                  }
+                }}
               />
             </div>
             <div className="space-y-2.5">
@@ -825,6 +936,28 @@ export function UniversityForm({
                 </span>
               </div>
             </label>
+          </div>
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
+            <div>
+              <h2 className="heading-4">Photo Album</h2>
+              <p className="body-small text-primary-500 mt-1">
+                Gallery images shown on the university page.
+              </p>
+            </div>
+            <MultiImageUpload
+              uploadFolder={uploadFolder}
+              value={form.albums}
+              onChange={(urls) =>
+                setForm((prev) => ({ ...prev, albums: urls }))
+              }
+              onSync={async (urls) => {
+                if (initialData?.id) {
+                  await universityRepository.updateUniversity(initialData.id, {
+                    albums: urls,
+                  });
+                }
+              }}
+            />
           </div>
         </div>
       </div>
