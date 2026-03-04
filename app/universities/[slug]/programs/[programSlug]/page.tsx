@@ -10,6 +10,7 @@ import ProgramCard from "@/components/ProgramCard";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { Metadata } from "next";
+import { SITE_URL, SITE_NAME } from "@/lib/constants/seo";
 
 interface PageProps {
   params: Promise<{ slug: string; programSlug: string }>;
@@ -24,10 +25,64 @@ export async function generateMetadata({
   if (!program) return { title: "Program Not Found" };
 
   const university = (program as any).university;
+  const uniName = university?.name_en || "Study in China";
+  const title = `${program.name_en} — ${uniName}`;
+  const description =
+    program.description?.slice(0, 160) ||
+    `Apply for ${program.name_en} at ${uniName}. Competitive tuition and scholarship opportunities available.`;
+  const url = `${SITE_URL}/universities/${slug}/programs/${programSlug}`;
 
   return {
-    title: `${program.name_en} - ${university?.name_en || "Study in China"}`,
-    description: `Apply for ${program.name_en} at ${university?.name_en}. Competitive tuition and scholarship opportunities available.`,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: SITE_NAME,
+      images: program.cover_image_url
+        ? [{ url: program.cover_image_url, width: 1200, height: 630 }]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: program.cover_image_url ? [program.cover_image_url] : undefined,
+    },
+  };
+}
+
+function buildJsonLd(program: any) {
+  const university = program.university;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: program.name_en,
+    url: `${SITE_URL}/universities/${university?.slug}/programs/${program.slug}`,
+    description:
+      program.description?.slice(0, 300) ||
+      `${program.name_en} at ${university?.name_en}.`,
+    provider: {
+      "@type": "EducationalOrganization",
+      name: university?.name_en,
+      url: `${SITE_URL}/universities/${university?.slug}`,
+    },
+    educationalLevel: program.degree_level?.replace(/_/g, " "),
+    inLanguage: program.language === "chinese" ? "zh" : "en",
+    ...(program.duration_years
+      ? { timeRequired: `P${program.duration_years}Y` }
+      : {}),
+    image: program.cover_image_url || undefined,
+    offers: program.tuition_fee_cny
+      ? {
+          "@type": "Offer",
+          price: program.tuition_fee_cny,
+          priceCurrency: "CNY",
+          category: "Tuition",
+        }
+      : undefined,
   };
 }
 
@@ -43,8 +98,14 @@ export default async function ProgramPage({ params }: PageProps) {
   const similarPrograms =
     await universityDataService.getSimilarPrograms(program);
 
+  const jsonLd = buildJsonLd(program);
+
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <main className="relative">

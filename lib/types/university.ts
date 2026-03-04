@@ -17,7 +17,7 @@ export interface UniversityAlbum {
   images: string[];
 }
 
-export type UniversityAlbums = Record<string, UniversityAlbum>;
+export type UniversityAlbums = string[];
 
 export interface ProgramEligibility {
   age_range?: { min: number; max: number } | null;

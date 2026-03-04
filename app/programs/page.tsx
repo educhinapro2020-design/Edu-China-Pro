@@ -4,6 +4,20 @@ import ProgramSearchInterface from "@/components/programs/ProgramSearchInterface
 import { Navbar } from "@/components/shared/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { Footer } from "@/components/shared/Footer";
+import { Metadata } from "next";
+import { SITE_URL } from "@/lib/constants/seo";
+
+export const metadata: Metadata = {
+  title: "Study Programs in China — Bachelor's, Master's & PhD",
+  description:
+    "Browse thousands of programs at Chinese universities. Filter by degree level, language, scholarship availability, and tuition to find the right fit.",
+  alternates: { canonical: `${SITE_URL}/programs` },
+  openGraph: {
+    title: "Study Programs in China — Bachelor's, Master's & PhD",
+    description: "Browse thousands of programs at Chinese universities.",
+    url: `${SITE_URL}/programs`,
+  },
+};
 
 interface ProgramsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

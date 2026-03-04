@@ -46,8 +46,7 @@ export default function SignupPage() {
         "student",
       );
 
-      router.refresh();
-      router.push("/onboarding");
+      router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         const errors: { [key: string]: string } = {};
@@ -220,7 +219,7 @@ export default function SignupPage() {
         <div className="relative z-10 w-full max-w-lg">
           <div className="relative aspect-[4/3] rounded-[32px] overflow-hidden shadow-2xl shadow-primary-900/10 mb-10 transform -rotate-1 hover:rotate-0 transition-all duration-700 ease-out border-4 border-white/50 backdrop-blur-sm">
             <img
-              src="/images/auth/university.png"
+              src="/images/auth/university.webp"
               alt="EduChina Pro University Campus"
               className="absolute inset-0 w-full h-full object-cover"
             />

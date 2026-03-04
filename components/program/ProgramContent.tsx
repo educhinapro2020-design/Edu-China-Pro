@@ -8,6 +8,8 @@ import {
 } from "react-icons/fi";
 import { ProgramRequirements } from "./ProgramRequirements";
 import { DocumentKey } from "@/lib/constants/documents";
+import { ImageGallery } from "../shared/ImageGallery";
+import { FaGoogleScholar } from "react-icons/fa6";
 
 interface ProgramContentProps {
   program: Program;
@@ -29,6 +31,27 @@ export function ProgramContent({ program }: ProgramContentProps) {
   return (
     <div className="bg-primary-50/30 py-6 md:py-16">
       <div className="container mx-auto px-6 max-w-6xl space-y-12">
+        {program.cover_image_url && (
+          <section>
+            <h2 className="heading-4 mb-6">Gallery</h2>
+            <ImageGallery
+              images={[
+                program.cover_image_url,
+                ...(program.detail_images || []),
+              ]}
+              title={program.name_en}
+            />
+          </section>
+        )}
+        {program.description && (
+          <section className="bg-white rounded-2xl border border-primary-100 shadow-sm p-6 md:p-12">
+            <h2 className="heading-4 mb-4">About This Program</h2>
+            <p className="text-primary-600 leading-relaxed text-base max-w-3xl">
+              {program.description}
+            </p>
+          </section>
+        )}
+
         <section className="bg-white rounded-2xl border border-primary-100 shadow-sm overflow-hidden">
           <div className="p-6 md:p-12">
             <div className="flex items-center gap-4 mb-8">
@@ -109,6 +132,32 @@ export function ProgramContent({ program }: ProgramContentProps) {
             )}
           </div>
         </section>
+
+        {program.scholarship_memo && !hasScholarship && (
+          <section className="bg-white rounded-2xl border border-primary-100 shadow-sm p-6 md:p-12">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-gold-50 flex items-center justify-center text-gold-600">
+                <FaGoogleScholar className="w-5 h-5" />
+              </div>
+              <h2 className="heading-4">Scholarship Information</h2>
+            </div>
+            <ul className="space-y-2 max-w-3xl">
+              {program.scholarship_memo
+                .split("\n")
+                .map((line) => line.replace(/^[•\-–—]\s*/, "").trim())
+                .filter(Boolean)
+                .map((line, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-3 text-primary-600 text-base leading-relaxed"
+                  >
+                    <span className="mt-2 size-1.5 rounded-full bg-brand-500 shrink-0" />
+                    {line}
+                  </li>
+                ))}
+            </ul>
+          </section>
+        )}
 
         {hasScholarship && (
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">

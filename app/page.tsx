@@ -12,110 +12,72 @@ import WhyChooseECP from "@/components/homepage/WhyChooseECP";
 import { HowItWorks } from "@/components/homepage/HowItWorks";
 import { ClosingCTA } from "@/components/homepage/ClosingCTA";
 import { ConsultationSection } from "@/components/homepage/ConsultationSection";
+import { FeaturedProgramsBento } from "@/components/homepage/FeaturedProgramsBento";
+import Hero from "@/components/homepage/Hero";
+import { Metadata } from "next";
+import {
+  SITE_URL,
+  SITE_NAME,
+  SITE_DESCRIPTION,
+  OG_IMAGE,
+} from "@/lib/constants/seo";
+
+export const metadata: Metadata = {
+  title: `${SITE_NAME} — Study in China from Nepal | Scholarships & Admissions`,
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    title: `${SITE_NAME} — Study in China from Nepal`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    images: [{ url: OG_IMAGE, width: 1200, height: 630 }],
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}/images/logo/educhinapro-logo.svg`,
+      description: SITE_DESCRIPTION,
+      sameAs: ["https://www.facebook.com/profile.php?id=61583342317872"],
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer service",
+        areaServed: "NP",
+        availableLanguage: ["English", "Nepali"],
+      },
+    },
+    {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/universities?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
 
 export default async function HomePage() {
   const data = await homepageDataService.getHomepageData();
 
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
-      <section className="relative flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-brand-50 via-white to-white px-6 py-20 md:py-24">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-30">
-          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-brand-200 blur-[120px]"></div>
-          <div className="absolute bottom-[10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-brand-100 blur-[100px]"></div>
-        </div>
+      <Hero />
 
-        <div className="max-w-6xl mx-auto md:text-center space-y-12">
-          <div className="space-y-8">
-            <h1 className="text-4xl md:text-6xl font-bold text-primary-900 tracking-tight max-w-4xl mx-auto leading-[1.1]">
-              Your Complete <span className="brand-text">Study-in-China</span>{" "}
-              Partner
-            </h1>
-            <p className="body-large max-w-2xl mx-auto text-primary-500">
-              Scholarships, Admissions, Visa, Settlement, China Support. Our
-              dual-country presence ensures smooth, reliable guidance at every
-              step of your journey.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <a
-              href="#smart-score"
-              className="w-full sm:w-auto px-8 py-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-lg shadow-brand-200 transition-all flex items-center justify-center gap-2"
-            >
-              Take the SmartScore™
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </a>
-            <a
-              href="#consultation"
-              className="w-full sm:w-auto px-8 py-4 border-2 border-brand-200 text-brand-700 hover:text-brand-800 text-center font-semibold rounded-xl hover:bg-brand-50 transition-all flex items-center justify-center gap-2"
-            >
-              Book Free Consultation
-            </a>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-4xl mx-auto">
-            {[
-              "Full Scholarship Strategy (CSC, BRI, Provincial)",
-              "Personalized Counseling & Career Guidance",
-              "Graduation-to-Graduation Support",
-            ].map((item) => (
-              <div key={item} className="flex items-start gap-3">
-                <div className="shrink-0 w-6 h-6 rounded-full bg-success/10 flex items-center justify-center mt-0.5">
-                  <svg
-                    className="w-4 h-4 text-success"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="3"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <p className="text-base md:text-sm font-medium text-primary-800">
-                  {item}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-20 w-full max-w-5xl">
-          <div className="glass-panel p-6 md:p-10 rounded-2xl grid grid-cols-2 sm:grid-cols-3 divide-x max-md:divide-none border-brand-100">
-            {[
-              { value: "100%", label: "China Specialized" },
-              { value: "5000+", label: "Programs" },
-              { value: "24/7", label: "Dual-Country Support" },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="py-6 sm:py-0 sm:px-10 text-center sm:text-left space-y-2"
-              >
-                <h3 className="heading-2 text-brand-900">{stat.value}</h3>
-                <p className="caption text-primary-500 uppercase tracking-widest font-bold">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <FeaturedProgramsBento programs={data.featuredPrograms} />
 
       <WhyChooseECP />
 

@@ -15,6 +15,7 @@ export interface HomepageData {
   featuredUniversities: University[];
   topUniversities: University[];
   popularPrograms: Program[];
+  featuredPrograms: Program[];
   subjectAreas: SubjectArea[];
 }
 
@@ -29,6 +30,7 @@ export const homepageDataService = {
       featuredUniversities,
       topUniversities,
       popularPrograms,
+      featuredPrograms,
       subjectAreas,
     ] = await Promise.all([
       supabase
@@ -54,6 +56,8 @@ export const homepageDataService = {
 
       programRepository.getPrograms({ limit: 8 }, supabase),
 
+      programRepository.getFeaturedPrograms(supabase),
+
       referenceRepository.getSubjectAreas(supabase),
     ]);
 
@@ -66,6 +70,7 @@ export const homepageDataService = {
       featuredUniversities,
       topUniversities,
       popularPrograms,
+      featuredPrograms,
       subjectAreas: subjectAreas.slice(0, 8),
     };
   },

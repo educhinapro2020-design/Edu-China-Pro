@@ -1,8 +1,5 @@
 import { Database } from "@/lib/types/supabase";
 
-type Row<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Row"];
-
 export type UniversityInsert =
   Database["public"]["Tables"]["universities"]["Insert"];
 export type UniversityUpdate =
@@ -39,26 +36,51 @@ export interface StatBreakdown {
   value: number;
 }
 
+export interface PipelineStatus extends StatBreakdown {
+  stage: "early" | "mid" | "urgent" | "late" | "success" | "terminal";
+  sort_order: number;
+}
+
+export interface CounselorLoad {
+  counselor_name: string;
+  active_count: number;
+}
+
+export interface RecentActivity {
+  id: string;
+  application_id: string;
+  status: string;
+  changed_at: string;
+  student_name: string | null;
+  student_email: string;
+}
+
+export interface MonthlyOps {
+  new_students: number;
+  new_applications: number;
+  counselor_load: CounselorLoad[];
+  recent_activity: RecentActivity[];
+}
+
 export interface AdminDashboardKPI {
   total_students: number;
   total_applications: number;
-  total_universities: number;
-  total_programs: number;
-  student_trend: number;
-  application_trend: number;
+  needs_action: number;
+  pending_review: number;
+  visa_granted: number;
+  unassigned: number;
+  students_this_month: number;
+  apps_this_month: number;
+  conversion_rate: number;
 }
 
 export interface AdminDashboardData {
   kpi: AdminDashboardKPI;
-  signup_trend: StatBreakdown[];
-  application_trend: StatBreakdown[];
+  apps_by_status: PipelineStatus[];
   apps_by_degree: StatBreakdown[];
   apps_by_subject: StatBreakdown[];
   apps_by_city: StatBreakdown[];
   apps_by_university: StatBreakdown[];
-  programs_by_degree: StatBreakdown[];
-  programs_by_language: StatBreakdown[];
-  programs_by_subject: StatBreakdown[];
-  universities_by_type: StatBreakdown[];
-  universities_by_city: StatBreakdown[];
+  apps_by_program: StatBreakdown[];
+  monthly_ops: MonthlyOps;
 }

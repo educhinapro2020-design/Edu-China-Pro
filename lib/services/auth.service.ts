@@ -53,6 +53,46 @@ export const authService = {
     return data;
   },
 
+  async verifyOtp(email: string, token: string) {
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "signup",
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async resendVerification(email: string) {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+
+    if (error) throw error;
+  },
+
+  async resetPasswordRequest(email: string) {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) throw error;
+  },
+
+  async updatePassword(newPassword: string) {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) throw error;
+  },
+
   async signOut() {
     const supabase = createClient();
     const { error } = await supabase.auth.signOut();

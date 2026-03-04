@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { twMerge } from "tailwind-merge";
 import { SOCIAL_LINKS, CONTACT_INFO } from "@/lib/constants/socials";
-import { FiArrowRight } from "react-icons/fi";
 
 const footerLinks = [
   {
@@ -10,25 +9,14 @@ const footerLinks = [
       { label: "SmartScore™", href: "/#smart-score" },
       { label: "University Search", href: "/universities" },
       { label: "Program Search", href: "/programs" },
-      { label: "Scholarship Guide", href: "/scholarships" },
-      { label: "Visa Support", href: "/visa-support" },
+      { label: "Book a Consultation", href: "/#consultation" },
     ],
   },
   {
     title: "Company",
     items: [
-      { label: "About Us", href: "/about" },
-      { label: "Our Team", href: "/team" },
-      { label: "Success Stories", href: "/testimonials" },
-      { label: "Contact Us", href: "#consultation" },
-    ],
-  },
-  {
-    title: "Legal",
-    items: [
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Cookie Policy", href: "/cookies" },
+      { label: "About Us", href: "/#why-choose-ecp" },
+      { label: "Contact Us", href: "/#consultation" },
     ],
   },
 ];
@@ -64,11 +52,11 @@ export function Footer() {
                     href={social.href}
                     title={social.label}
                     className={twMerge(
-                      "w-10 h-10 active:scale-95 rounded-full flex items-center justify-center text-white hover:text-white hover:bg-brand-600 transition-all duration-300 transform hover:-translate-y-1 bg-white/10",
+                      "size-8.5 active:scale-95 rounded-full flex items-center justify-center text-white hover:text-white transition-all duration-300 transform hover:-translate-y-1 bg-white/10",
                       social.color,
                     )}
                   >
-                    <social.icon className="w-5 h-5" />
+                    <social.icon className="size-4.5" />
                   </a>
                 ),
               )}
@@ -96,6 +84,32 @@ export function Footer() {
           ))}
 
           <div className="lg:col-span-1">
+            <h4 className="font-bold text-white mb-6 font-serif tracking-wide border-b border-white/20 pb-2 inline-block">
+              Presence
+            </h4>
+            <div className="space-y-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">
+                  Nepal
+                </p>
+                <p className="text-sm text-white">Old Baneshwor, Kathmandu</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">
+                  China
+                </p>
+                <p className="text-sm text-white">On-ground support</p>
+              </div>
+              <div className="pt-2">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">
+                  Specialization
+                </p>
+                <p className="text-sm text-white">100% China-focused</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-1">
             <h4 className="font-bold text-white mb-6 font-serif tracking-wide border-b border-white pb-2 inline-block">
               Contact
             </h4>
@@ -107,13 +121,13 @@ export function Footer() {
                   );
                   const Icon = emailLink?.icon || SOCIAL_LINKS[0].icon;
                   return (
-                    <Icon className="w-5 h-5 text-brand-500 mt-0.5 shrink-0" />
+                    <Icon className="w-5 h-5 text-white mt-0.5 shrink-0" />
                   );
                 })()}
                 <span className="text-sm">
                   <a
                     href={`mailto:${CONTACT_INFO.email}`}
-                    className="hover:text-brand-300 transition-colors active:scale-95 inline-block"
+                    className="hover:text-brand-400 transition-colors active:scale-95 inline-block"
                   >
                     {CONTACT_INFO.email}
                   </a>
@@ -127,7 +141,7 @@ export function Footer() {
                   );
                   const Icon = waLink?.icon || SOCIAL_LINKS[0].icon;
                   return (
-                    <Icon className="w-5 h-5 text-brand-500 mt-0.5 shrink-0" />
+                    <Icon className="w-5 h-5 text-white mt-0.5 shrink-0" />
                   );
                 })()}
                 <span className="text-sm">
@@ -135,7 +149,7 @@ export function Footer() {
                     href={
                       SOCIAL_LINKS.find((s) => s.label === "WhatsApp")?.href
                     }
-                    className="hover:text-brand-300 transition-colors active:scale-95 inline-block"
+                    className=" transition-colors active:scale-95 inline-block"
                   >
                     {CONTACT_INFO.displayWhatsapp}
                   </a>

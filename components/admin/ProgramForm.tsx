@@ -8,7 +8,13 @@ import {
   type SyntheticEvent,
   useRef,
 } from "react";
-import { FiSave, FiCheck, FiRefreshCw, FiSettings } from "react-icons/fi";
+import {
+  FiSave,
+  FiCheck,
+  FiRefreshCw,
+  FiSettings,
+  FiStar,
+} from "react-icons/fi";
 import { programRepository } from "@/lib/repositories/program.repo";
 import { universityRepository } from "@/lib/repositories/university.repo";
 import { referenceRepository } from "@/lib/repositories/reference.repo";
@@ -24,6 +30,10 @@ import { DOCUMENT_REGISTRY } from "@/lib/constants/documents";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import ImageUpload from "./ImageUpload";
+import MultiImageUpload from "./MultiAssetsUpload";
+import { twMerge } from "tailwind-merge";
+import { relocateFiles } from "@/lib/utils/storage";
 
 interface ProgramFormProps {
   initialData?: Program;
@@ -41,6 +51,8 @@ export function ProgramForm({
   const [subjectAreas, setSubjectAreas] = useState<SubjectArea[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const sessionId = useRef(crypto.randomUUID());
+  const uploadFolder = `programs/${initialData?.id ?? `temp/${sessionId.current}`}`;
 
   useEffect(() => {
     universityRepository.getUniversities({ limit: 100 }).then(setUniversities);
@@ -73,11 +85,14 @@ export function ProgramForm({
     scholarship_memo: initialData?.scholarship_memo ?? "",
     estimated_living_cost: initialData?.estimated_living_cost ?? "",
     estimated_living_currency: initialData?.estimated_living_currency ?? "RMB",
-    cover_image_url: initialData?.cover_image_url ?? "",
+    cover_image_url: initialData?.cover_image_url ?? null,
     is_self_funded: initialData?.is_self_funded ?? false,
     is_scholarship_program: initialData?.is_scholarship_program ?? false,
     document_requirements:
       initialData?.document_requirements ?? ([] as string[]),
+    is_featured: initialData?.is_featured ?? false,
+    description: initialData?.description ?? "",
+    detail_images: (initialData?.detail_images as string[]) ?? [],
   });
 
   const handleDocumentChange = (docId: string, checked: boolean) => {
@@ -156,6 +171,9 @@ export function ProgramForm({
       is_self_funded: form.is_self_funded,
       is_scholarship_program: form.is_scholarship_program,
       document_requirements: form.document_requirements,
+      is_featured: form.is_featured,
+      description: form.description || null,
+      detail_images: form.detail_images,
     };
 
     const result = programFormSchema.safeParse(payload);
@@ -174,7 +192,31 @@ export function ProgramForm({
       if (isEditing && initialData?.id) {
         await programRepository.updateProgram(initialData.id, payload as any);
       } else {
-        await programRepository.createProgram(payload as any);
+        const created = await programRepository.createProgram(payload as any);
+
+        const tempPrefix = `programs/temp/${sessionId.current}/`;
+        const realPrefix = `programs/${created.id}/`;
+
+        const allUrls = [
+          form.cover_image_url,
+          ...(Array.isArray(form.detail_images) ? form.detail_images : []),
+        ].filter(Boolean) as string[];
+
+        if (allUrls.length > 0) {
+          const relocated = await relocateFiles(
+            tempPrefix,
+            realPrefix,
+            allUrls,
+          );
+
+          const newCoverUrl = form.cover_image_url ? relocated[0] : null;
+          const newDetailImages = relocated.slice(form.cover_image_url ? 1 : 0);
+
+          await programRepository.updateProgram(created.id, {
+            cover_image_url: newCoverUrl,
+            detail_images: newDetailImages,
+          });
+        }
       }
       router.push(`${basePath}/programs`);
       router.refresh();
@@ -188,6 +230,43 @@ export function ProgramForm({
   return (
     <form onSubmit={handleSubmit} className="relative max-w-6xl mx-auto pb-6">
       <div className="flex flex-col gap-8 pb-12">
+        <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-primary-100 shadow-sm">
+          <div className="flex items-center gap-3">
+            <FiStar
+              className={twMerge(
+                "size-4",
+                form.is_featured
+                  ? "text-amber-400 fill-amber-400"
+                  : "text-primary-400",
+              )}
+            />
+            <div>
+              <p className="font-semibold text-primary-900">
+                Featured on Homepage
+              </p>
+              <p className="text-sm text-primary-400">
+                This program will appear in the featured section
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              setForm((prev) => ({ ...prev, is_featured: !prev.is_featured }))
+            }
+            className={twMerge(
+              "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+              form.is_featured ? "bg-amber-400" : "bg-primary-200",
+            )}
+          >
+            <span
+              className={twMerge(
+                "pointer-events-none inline-block size-5 rounded-full bg-white shadow-md transform transition duration-200 ease-in-out",
+                form.is_featured ? "translate-x-5" : "translate-x-0",
+              )}
+            />
+          </button>
+        </div>
         <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
           <div>
             <h2 className="heading-4">Program Basics</h2>
@@ -208,6 +287,18 @@ export function ProgramForm({
               {errors.name_en && (
                 <p className="caption text-error">{errors.name_en}</p>
               )}
+            </div>
+
+            <div className="space-y-2.5 md:col-span-2">
+              <label className="label">Description</label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                placeholder="Brief description of the program..."
+                rows={4}
+                className="flex w-full rounded-xl border border-primary-200 bg-white px-4 py-3 text-primary-900 placeholder:text-primary-400 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 resize-none"
+              />
             </div>
 
             <div className="space-y-2.5 md:col-span-2 bg-primary-50/50 p-5 rounded-2xl border border-primary-100">
@@ -567,6 +658,52 @@ export function ProgramForm({
               </label>
             ))}
           </div>
+        </div>
+        <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
+          <div>
+            <h2 className="heading-4">Program Cover Image</h2>
+            <p className="body-small text-primary-500 mt-1">
+              Main image shown in program listings.
+            </p>
+          </div>
+          <ImageUpload
+            uploadFolder={uploadFolder}
+            value={form.cover_image_url}
+            label="Program Cover Image"
+            onChange={(url) =>
+              setForm((prev) => ({ ...prev, cover_image_url: url }))
+            }
+            onSync={async (url) => {
+              if (initialData?.id) {
+                await programRepository.updateProgram(initialData.id, {
+                  cover_image_url: url,
+                });
+              }
+            }}
+          />
+
+          <hr className="border-primary-100" />
+
+          <div>
+            <h2 className="heading-4">Program Images</h2>
+            <p className="body-small text-primary-500 mt-1">
+              Detail images shown on the program page.
+            </p>
+          </div>
+          <MultiImageUpload
+            uploadFolder={uploadFolder}
+            value={form.detail_images}
+            onChange={(urls) =>
+              setForm((prev) => ({ ...prev, detail_images: urls }))
+            }
+            onSync={async (urls) => {
+              if (initialData?.id) {
+                await programRepository.updateProgram(initialData.id, {
+                  detail_images: urls,
+                });
+              }
+            }}
+          />
         </div>
       </div>
 
