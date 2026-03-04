@@ -46,8 +46,7 @@ export default function SignupPage() {
         "student",
       );
 
-      router.refresh();
-      router.push("/onboarding");
+      router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         const errors: { [key: string]: string } = {};

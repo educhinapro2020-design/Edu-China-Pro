@@ -37,7 +37,17 @@ function LoginPageContent() {
     try {
       loginSchema.parse(formData);
 
-      await authService.signInWithPassword(formData.email, formData.password);
+      const { user } = await authService.signInWithPassword(
+        formData.email,
+        formData.password,
+      );
+      if (user && !user.email_confirmed_at) {
+        router.push(
+          `/verify-email?email=${encodeURIComponent(formData.email)}`,
+        );
+        return;
+      }
+
       router.refresh();
       router.push("/dashboard");
     } catch (error: any) {
