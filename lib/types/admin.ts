@@ -1,8 +1,5 @@
 import { Database } from "@/lib/types/supabase";
 
-type Row<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Row"];
-
 export type UniversityInsert =
   Database["public"]["Tables"]["universities"]["Insert"];
 export type UniversityUpdate =
@@ -49,16 +46,20 @@ export interface CounselorLoad {
   active_count: number;
 }
 
-export interface StatusMovement {
+export interface RecentActivity {
+  id: string;
+  application_id: string;
   status: string;
-  count: number;
+  changed_at: string;
+  student_name: string | null;
+  student_email: string;
 }
 
 export interface MonthlyOps {
   new_students: number;
   new_applications: number;
   counselor_load: CounselorLoad[];
-  status_movements: StatusMovement[];
+  recent_activity: RecentActivity[];
 }
 
 export interface AdminDashboardKPI {
