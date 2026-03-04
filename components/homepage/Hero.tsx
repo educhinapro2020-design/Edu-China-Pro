@@ -54,7 +54,7 @@ export default function Hero() {
           <div className="lg:col-span-6 relative hidden md:block">
             <div className="relative z-10 aspect-[2/5] md:aspect-square max-w-lg mx-auto lg:ml-auto overflow-hidden rounded-[3rem] shadow-2xl border-10 border-brand-50">
               <Image
-                src="/images/marketing/why-choose-educhinapro.png"
+                src="/images/marketing/why-choose-educhinapro.webp"
                 alt="Graduate"
                 fill
                 className="object-cover"

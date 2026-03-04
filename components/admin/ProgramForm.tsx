@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import {
   useEffect,
   useState,
@@ -32,6 +33,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import ImageUpload from "./ImageUpload";
 import MultiImageUpload from "./MultiAssetsUpload";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { twMerge } from "tailwind-merge";
 import { relocateFiles } from "@/lib/utils/storage";
 
@@ -82,7 +84,6 @@ export function ProgramForm({
     scholarship_type: initialData?.scholarship_type ?? "self_financed",
     scholarship_duration: initialData?.scholarship_duration ?? "",
     scholarship_policy_html: initialData?.scholarship_policy_html ?? "",
-    scholarship_memo: initialData?.scholarship_memo ?? "",
     estimated_living_cost: initialData?.estimated_living_cost ?? "",
     estimated_living_currency: initialData?.estimated_living_currency ?? "RMB",
     cover_image_url: initialData?.cover_image_url ?? null,
@@ -162,7 +163,6 @@ export function ProgramForm({
       scholarship_type: form.scholarship_type as any,
       scholarship_duration: form.scholarship_duration || null,
       scholarship_policy_html: form.scholarship_policy_html || null,
-      scholarship_memo: form.scholarship_memo || null,
       estimated_living_cost: form.estimated_living_cost
         ? Number(form.estimated_living_cost)
         : null,
@@ -218,10 +218,11 @@ export function ProgramForm({
           });
         }
       }
-      router.push(`${basePath}/programs`);
       router.refresh();
+      toast.success(isEditing ? "Program updated!" : "Program created!");
     } catch (error) {
       console.error(error);
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -565,18 +566,6 @@ export function ProgramForm({
             </div>
 
             <div className="space-y-2.5">
-              <label className="label">Scholarship Policy (Memo)</label>
-              <Input
-                type="textarea"
-                name="scholarship_memo"
-                value={form.scholarship_memo}
-                onChange={handleChange}
-                placeholder="Additional details about the scholarship..."
-                className="h-10"
-              />
-            </div>
-
-            <div className="space-y-2.5">
               <label className="label">Estimated Living Cost (Monthly)</label>
               <div className="flex gap-2">
                 <Select
@@ -601,6 +590,24 @@ export function ProgramForm({
                   placeholder="e.g. 2000"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2.5 md:col-span-2">
+              <label className="label">Scholarship Policy (Rich Text)</label>
+              <p className="caption text-primary-500 -mt-1 mb-2">
+                Detailed scholarship information with formatting. Use headings,
+                bold, and lists to structure the content.
+              </p>
+              <RichTextEditor
+                value={form.scholarship_policy_html}
+                onChange={(html) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    scholarship_policy_html: html,
+                  }))
+                }
+                placeholder="Enter detailed scholarship policy information..."
+              />
             </div>
           </div>
         </div>

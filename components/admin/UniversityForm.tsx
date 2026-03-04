@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import {
   useEffect,
   useRef,
@@ -598,10 +599,11 @@ export function UniversityForm({
           });
         }
       }
-      router.push(`${basePath}/universities`);
       router.refresh();
+      toast.success(isEditing ? "University updated!" : "University created!");
     } catch (error) {
       console.error(error);
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

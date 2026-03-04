@@ -6,28 +6,40 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiArrowRight,
-  FiGlobe,
   FiChevronLeft,
   FiChevronRight,
+  FiAward,
 } from "react-icons/fi";
-import { FaCalendar } from "react-icons/fa";
 import { CiCalendar } from "react-icons/ci";
+import { FaCalendar } from "react-icons/fa";
 import { Program } from "@/lib/types/university";
 import { getTuition } from "@/lib/utils/program";
 import { twMerge } from "tailwind-merge";
 
 interface FeaturedProgramsProps {
   programs: Program[];
+  title?: React.ReactNode;
+  hideHeader?: boolean;
 }
 
-export function FeaturedProgramsBento({ programs }: FeaturedProgramsProps) {
+export function FeaturedProgramsBento({
+  programs,
+  title,
+  hideHeader = false,
+}: FeaturedProgramsProps) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
 
   const current = programs[index];
   const university = (current as any).university;
-  const { displayAmt, originalAmt, currency, hasScholarship } =
-    getTuition(current);
+  const {
+    displayAmt,
+    originalAmt,
+    currency,
+    hasScholarship,
+    savings,
+    tuitionPer,
+  } = getTuition(current);
 
   const go = (dir: number) => {
     setDirection(dir);
@@ -37,26 +49,33 @@ export function FeaturedProgramsBento({ programs }: FeaturedProgramsProps) {
   if (!programs.length) return null;
 
   return (
-    <section className="py-24 bg-white">
+    <section className={twMerge("py-24 bg-white", hideHeader && "py-12")}>
       <div className="container mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-baseline mb-12 gap-4">
-          <div className="space-y-3">
-            <h2 className="heading-1 !leading-tight">
-              Featured{" "}
-              <span className="text-gold-600 font-serif">Programs</span>
-            </h2>
-            <p className="body-large text-primary-500">
-              Hand-selected scholarship programs at China's top institutions.
-            </p>
+        {!hideHeader && (
+          <div className="flex flex-col md:flex-row justify-between items-baseline mb-12 gap-4">
+            <div className="space-y-3">
+              <h2 className="heading-1 !leading-tight">
+                {title || (
+                  <>
+                    Featured{" "}
+                    <span className="text-gold-600 font-serif">
+                      Scholarships
+                    </span>
+                  </>
+                )}
+              </h2>
+              <p className="body-large text-primary-500">
+                Hand-selected scholarship programs at China's top institutions.
+              </p>
+            </div>
+            <Link
+              href="/scholarships"
+              className="hidden md:flex items-center gap-2 text-gold-600 font-semibold text-sm hover:text-gold-700 transition-all group"
+            >
+              View All
+            </Link>
           </div>
-          <Link
-            href="/programs"
-            className="hidden md:flex items-center gap-2 text-brand-600 font-medium text-sm hover:text-brand-700 transition-all group"
-          >
-            Browse all programs
-            <FiArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
+        )}
 
         <div className="relative group/card md:px-8">
           <button
@@ -86,7 +105,7 @@ export function FeaturedProgramsBento({ programs }: FeaturedProgramsProps) {
           </button>
 
           <div
-            className="relative rounded-xl overflow-hidden shadow-2xl shadow-primary-900/20"
+            className="relative rounded-lg overflow-hidden shadow-2xl shadow-primary-900/20"
             style={{ minHeight: "70vh" }}
           >
             <AnimatePresence>
@@ -194,10 +213,29 @@ export function FeaturedProgramsBento({ programs }: FeaturedProgramsProps) {
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-end"
                 >
-                  <div className="md:col-span-7">
+                  <div className="md:col-span-7 space-y-2">
+                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gold-600 text-white shadow-lg w-fit">
+                      <FiAward className="size-4" />
+                      Scholarship Available
+                    </span>
                     <h3 className="text-4xl md:text-6xl capitalize font-serif font-bold text-white leading-[1.05] mb-4">
                       {current.name_en}
                     </h3>
+
+                    <div className="flex items-center gap-2 flex-wrap mb-4">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-black/30 text-white border border-white/20 capitalize">
+                        {current.degree_level.replace(/_/g, " ")}
+                      </span>
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-black/30 text-white border border-white/20 capitalize">
+                        {current.language.replace(/_/g, " ")}
+                      </span>
+                      {current.duration && (
+                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-black/30 text-white border border-white/20">
+                          {current.duration}
+                        </span>
+                      )}
+                    </div>
+
                     {current.description && (
                       <p className="hidden md:block text-white/80 text-base leading-relaxed line-clamp-4 max-w-lg">
                         {current.description}
@@ -206,51 +244,54 @@ export function FeaturedProgramsBento({ programs }: FeaturedProgramsProps) {
                   </div>
 
                   <div className="md:col-span-5 flex flex-col gap-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-brand-500 backdrop-blur-md border border-white/10 rounded-2xl p-4">
-                        <p className="text-xs font-bold uppercase tracking-widest text-white/90 mb-2">
-                          Level
-                        </p>
-                        <p className="text-white font-bold capitalize text-base">
-                          {current.degree_level.replace(/_/g, " ")}
-                        </p>
-                      </div>
-
-                      <div className="bg-brand-500 backdrop-blur-md border border-white/10 rounded-2xl p-4">
-                        <p className="text-xs font-bold uppercase tracking-widest text-white/90 mb-2">
-                          Language
-                        </p>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-white font-bold capitalize text-base">
-                            {current.language.replace(/_/g, " ")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-gold-600/90 backdrop-blur-md border border-white/10 rounded-2xl p-4">
-                      <p className="text-xs font-bold uppercase  text-white mb-2">
-                        Tuition
+                    <div className="bg-gold-600 border border-white/10 rounded-2xl p-5">
+                      <p className="text-xs font-bold uppercase text-white/90 mb-3">
+                        Tuition {tuitionPer ? `/ ${tuitionPer}` : ""}
                       </p>
                       {hasScholarship && originalAmt ? (
-                        <div className="flex items-center gap-3">
-                          <p className="text-sm font-medium text-white/60 line-through">
-                            {originalAmt.toLocaleString()} {currency}
-                          </p>
-                          <p className="text-white font-bold text-lg">
-                            {displayAmt === 0
-                              ? "Full Scholarship"
-                              : `${displayAmt?.toLocaleString()} ${currency}`}
-                          </p>
+                        <div className="space-y-2">
+                          <div className="flex items-baseline gap-3">
+                            <p className="text-sm font-medium text-white/50 line-through">
+                              {originalAmt.toLocaleString()} {currency}
+                            </p>
+                            <p className="text-white font-bold text-2xl">
+                              {displayAmt === 0
+                                ? "Full Scholarship"
+                                : `${displayAmt?.toLocaleString()} ${currency}`}
+                            </p>
+                          </div>
+                          {savings && savings > 0 && (
+                            <p className="text-sm font-bold text-white">
+                              You save {savings.toLocaleString()} {currency}
+                            </p>
+                          )}
                         </div>
                       ) : (
-                        <p className="text-white font-bold text-base">
+                        <p className="text-white font-bold text-xl">
                           {displayAmt != null
                             ? `${displayAmt.toLocaleString()} ${currency}`
                             : "Contact us"}
                         </p>
                       )}
                     </div>
+
+                    {(current.scholarship_policy_html ||
+                      (current as any).estimated_living_cost) && (
+                      <div className="bg-brand-700 border border-white/10 rounded-2xl p-4">
+                        <div className="flex flex-col gap-3">
+                          {current.scholarship_policy_html && (
+                            <div>
+                              <div
+                                className="text-white/90 text-sm leading-relaxed line-clamp-4 [&_ul]:list-disc [&_ul]:pl-4 [&_li]:text-white/90 [&_p]:mb-1 [&_h2]:font-bold [&_h3]:font-bold"
+                                dangerouslySetInnerHTML={{
+                                  __html: current.scholarship_policy_html,
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     <Link
                       href={`/universities/${university?.slug}/programs/${current.slug}`}
@@ -268,7 +309,7 @@ export function FeaturedProgramsBento({ programs }: FeaturedProgramsProps) {
                   onClick={() => go(-1)}
                   aria-label="Previous program"
                   className={twMerge(
-                    "size-10 rounded-full border border-white/20 bg-white backdrop-blur-sm text-brnad-600 flex items-center justify-center transition-all active:scale-90",
+                    "size-10 rounded-full border border-white/20 bg-white backdrop-blur-sm text-brand-600 flex items-center justify-center transition-all active:scale-90",
                     index === 0
                       ? "opacity-40 pointer-events-none"
                       : "hover:bg-white/20",

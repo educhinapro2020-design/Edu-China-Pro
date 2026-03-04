@@ -31,18 +31,6 @@ export function ProgramContent({ program }: ProgramContentProps) {
   return (
     <div className="bg-primary-50/30 py-6 md:py-16">
       <div className="container mx-auto px-6 max-w-6xl space-y-12">
-        {program.cover_image_url && (
-          <section>
-            <h2 className="heading-4 mb-6">Gallery</h2>
-            <ImageGallery
-              images={[
-                program.cover_image_url,
-                ...(program.detail_images || []),
-              ]}
-              title={program.name_en}
-            />
-          </section>
-        )}
         {program.description && (
           <section className="bg-white rounded-2xl border border-primary-100 shadow-sm p-6 md:p-12">
             <h2 className="heading-4 mb-4">About This Program</h2>
@@ -133,32 +121,6 @@ export function ProgramContent({ program }: ProgramContentProps) {
           </div>
         </section>
 
-        {program.scholarship_memo && !hasScholarship && (
-          <section className="bg-white rounded-2xl border border-primary-100 shadow-sm p-6 md:p-12">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-gold-50 flex items-center justify-center text-gold-600">
-                <FaGoogleScholar className="w-5 h-5" />
-              </div>
-              <h2 className="heading-4">Scholarship Information</h2>
-            </div>
-            <ul className="space-y-2 max-w-3xl">
-              {program.scholarship_memo
-                .split("\n")
-                .map((line) => line.replace(/^[•\-–—]\s*/, "").trim())
-                .filter(Boolean)
-                .map((line, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-3 text-primary-600 text-base leading-relaxed"
-                  >
-                    <span className="mt-2 size-1.5 rounded-full bg-brand-500 shrink-0" />
-                    {line}
-                  </li>
-                ))}
-            </ul>
-          </section>
-        )}
-
         {hasScholarship && (
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             <div className="lg:col-span-2 bg-white rounded-2xl border border-primary-100 shadow-sm p-8 md:p-12 flex flex-col">
@@ -168,20 +130,7 @@ export function ProgramContent({ program }: ProgramContentProps) {
                 </div>
                 <h2 className="heading-4">Scholarship & Funding</h2>
               </div>
-              <div className="prose prose-brand max-w-none prose-p:text-primary-600 prose-headings:font-serif flex-1">
-                {program.scholarship_policy_html ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: program.scholarship_policy_html,
-                    }}
-                  />
-                ) : (
-                  <p>
-                    This program offers competitive scholarship opportunities
-                    for qualified international students.
-                  </p>
-                )}
-              </div>
+
               {program.scholarship_type === "type_a" && (
                 <div className="mt-8 bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
                   <FiAlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
@@ -224,6 +173,17 @@ export function ProgramContent({ program }: ProgramContentProps) {
                   </div>
                 </div>
               )}
+
+              {program.scholarship_policy_html && hasScholarship && (
+                <section className="">
+                  <div
+                    className="prose prose-sm max-w-3xl text-primary-600 **:text-primary-600 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1 [&_h2]:text-primary-600 [&_h3]:text-primary-600 [&_strong]:text-primary-600 [&_table]:w-full [&_th]:p-2 [&_th]:bg-primary-600/20 [&_td]:p-2 [&_td]:border-b [&_td]:border-primary-600/10"
+                    dangerouslySetInnerHTML={{
+                      __html: program.scholarship_policy_html,
+                    }}
+                  />
+                </section>
+              )}
             </div>
 
             <div className="flex flex-col gap-6">
@@ -262,17 +222,6 @@ export function ProgramContent({ program }: ProgramContentProps) {
                           {displayAmt === 0
                             ? "Tuition Covered"
                             : `${displayAmt.toLocaleString()} ${currency}/${tuitionPer}`}
-                        </p>
-                      </div>
-                    )}
-
-                    {program.scholarship_memo && (
-                      <div className="pt-5 border-t border-white/10">
-                        <p className="text-xs text-white/60 mb-2 italic">
-                          Official Memo
-                        </p>
-                        <p className="text-sm text-white/80 leading-relaxed">
-                          {program.scholarship_memo}
                         </p>
                       </div>
                     )}
@@ -351,6 +300,19 @@ export function ProgramContent({ program }: ProgramContentProps) {
             </div>
           </div>
         </section>
+
+        {program.cover_image_url && (
+          <section>
+            <h2 className="heading-4 mb-6">Gallery</h2>
+            <ImageGallery
+              images={[
+                program.cover_image_url,
+                ...(program.detail_images || []),
+              ]}
+              title={program.name_en}
+            />
+          </section>
+        )}
       </div>
     </div>
   );

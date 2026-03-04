@@ -92,7 +92,7 @@ export function UniversityHeader({ university }: UniversityHeaderProps) {
               </div>
 
               <div className="flex items-center gap-4">
-                <Link href="#application" className="w-full sm:w-auto">
+                <Link href="#programs" className="w-full sm:w-auto">
                   <Button endIcon={<FiArrowRight />}>Apply Now</Button>
                 </Link>
               </div>
