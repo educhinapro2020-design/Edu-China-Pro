@@ -26,6 +26,7 @@ export const universityFormSchema = z.object({
   profile_html: z.string().optional().nullable(),
   profile_text: z.string().optional().nullable(),
   advantages_html: z.string().optional().nullable(),
+  scholarship_policy_html: z.string().optional().nullable(),
   accommodation_double_room: z.coerce.number().int().optional().nullable(),
   accommodation_single_room: z.coerce.number().int().optional().nullable(),
   accommodation_currency: z.string().default("RMB"),
@@ -72,14 +73,19 @@ export const programFormSchema = z.object({
   tuition_currency: z.string().default("RMB"),
   tuition_per: z.string().default("year"),
   scholarship_type: z
-    .enum(["self_financed", "type_a", "type_b", "type_c", "type_d"])
+    .enum([
+      "self_financed",
+      "type_a",
+      "type_b",
+      "type_c",
+      "type_d",
+      "full",
+      "partial",
+    ])
     .default("self_financed"),
   scholarship_duration: z.string().optional().nullable(),
-  scholarship_policy_html: z.string().optional().nullable(),
-  scholarship_memo: z.string().optional().nullable(),
   estimated_living_cost: z.coerce.number().int().optional().nullable(),
   estimated_living_currency: z.string().default("RMB"),
-  cover_image_url: z.string().optional().nullable(),
   is_self_funded: z.boolean().default(false),
   is_scholarship_program: z.boolean().default(false),
   document_requirements: z.array(z.string()).optional().nullable(),

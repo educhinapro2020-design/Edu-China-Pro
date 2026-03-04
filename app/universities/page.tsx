@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Footer } from "@/components/shared/Footer";
 import { Metadata } from "next";
 import { SITE_URL } from "@/lib/constants/seo";
+import { ConsultationSection } from "@/components/homepage/ConsultationSection";
 
 export const metadata: Metadata = {
   title: "Chinese Universities — Browse & Compare Top Institutions",
@@ -88,6 +89,7 @@ export default async function UniversitiesPage({
         }
         limit={typeof params.limit === "string" ? parseInt(params.limit) : 12}
       />
+      <ConsultationSection />
       <Footer />
     </>
   );

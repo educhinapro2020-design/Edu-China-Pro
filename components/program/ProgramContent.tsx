@@ -1,15 +1,15 @@
 import { Program } from "@/lib/types/university";
 import { getTuition } from "@/lib/utils/program";
+import { DocumentKey } from "@/lib/constants/documents";
+import { ProgramRequirements } from "./ProgramRequirements";
+
 import {
   FiCheckCircle,
   FiShield,
   FiPieChart,
   FiAlertCircle,
+  FiAward,
 } from "react-icons/fi";
-import { ProgramRequirements } from "./ProgramRequirements";
-import { DocumentKey } from "@/lib/constants/documents";
-import { ImageGallery } from "../shared/ImageGallery";
-import { FaGoogleScholar } from "react-icons/fa6";
 
 interface ProgramContentProps {
   program: Program;
@@ -28,21 +28,19 @@ export function ProgramContent({ program }: ProgramContentProps) {
     currency,
   } = getTuition(program);
 
+  const hasScholarshipPolicy = !!(
+    program as any
+  ).university?.scholarship_policy_html
+    ?.replace(/<[^>]*>/g, "")
+    .trim();
+
+  const hasSpecificScholarshipType = ["type_a", "type_b", "type_c"].includes(
+    program.scholarship_type ?? "",
+  );
+
   return (
     <div className="bg-primary-50/30 py-6 md:py-16">
       <div className="container mx-auto px-6 max-w-6xl space-y-12">
-        {program.cover_image_url && (
-          <section>
-            <h2 className="heading-4 mb-6">Gallery</h2>
-            <ImageGallery
-              images={[
-                program.cover_image_url,
-                ...(program.detail_images || []),
-              ]}
-              title={program.name_en}
-            />
-          </section>
-        )}
         {program.description && (
           <section className="bg-white rounded-2xl border border-primary-100 shadow-sm p-6 md:p-12">
             <h2 className="heading-4 mb-4">About This Program</h2>
@@ -133,33 +131,7 @@ export function ProgramContent({ program }: ProgramContentProps) {
           </div>
         </section>
 
-        {program.scholarship_memo && !hasScholarship && (
-          <section className="bg-white rounded-2xl border border-primary-100 shadow-sm p-6 md:p-12">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-gold-50 flex items-center justify-center text-gold-600">
-                <FaGoogleScholar className="w-5 h-5" />
-              </div>
-              <h2 className="heading-4">Scholarship Information</h2>
-            </div>
-            <ul className="space-y-2 max-w-3xl">
-              {program.scholarship_memo
-                .split("\n")
-                .map((line) => line.replace(/^[•\-–—]\s*/, "").trim())
-                .filter(Boolean)
-                .map((line, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-3 text-primary-600 text-base leading-relaxed"
-                  >
-                    <span className="mt-2 size-1.5 rounded-full bg-brand-500 shrink-0" />
-                    {line}
-                  </li>
-                ))}
-            </ul>
-          </section>
-        )}
-
-        {hasScholarship && (
+        {hasScholarship || hasScholarshipPolicy ? (
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             <div className="lg:col-span-2 bg-white rounded-2xl border border-primary-100 shadow-sm p-8 md:p-12 flex flex-col">
               <div className="flex items-center gap-4 mb-4">
@@ -168,22 +140,9 @@ export function ProgramContent({ program }: ProgramContentProps) {
                 </div>
                 <h2 className="heading-4">Scholarship & Funding</h2>
               </div>
-              <div className="prose prose-brand max-w-none prose-p:text-primary-600 prose-headings:font-serif flex-1">
-                {program.scholarship_policy_html ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: program.scholarship_policy_html,
-                    }}
-                  />
-                ) : (
-                  <p>
-                    This program offers competitive scholarship opportunities
-                    for qualified international students.
-                  </p>
-                )}
-              </div>
+
               {program.scholarship_type === "type_a" && (
-                <div className="mt-8 bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
+                <div className="mt-6 bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
                   <FiAlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                   <div className="text-sm text-amber-800">
                     <p className="font-bold mb-1">Type A - CSC Scholarship</p>
@@ -196,7 +155,7 @@ export function ProgramContent({ program }: ProgramContentProps) {
               )}
 
               {program.scholarship_type === "type_b" && (
-                <div className="mt-8 bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
+                <div className="mt-6 bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
                   <FiAlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                   <div className="text-sm text-amber-800">
                     <p className="font-bold mb-1">
@@ -211,7 +170,7 @@ export function ProgramContent({ program }: ProgramContentProps) {
               )}
 
               {program.scholarship_type === "type_c" && (
-                <div className="mt-8 bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
+                <div className="mt-6 bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
                   <FiAlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                   <div className="text-sm text-amber-800">
                     <p className="font-bold mb-1">
@@ -223,6 +182,34 @@ export function ProgramContent({ program }: ProgramContentProps) {
                     </p>
                   </div>
                 </div>
+              )}
+
+              {hasScholarshipPolicy ? (
+                <div className="mt-8">
+                  <div className="bg-gold-50 border border-gold-200 rounded-2xl p-6 md:p-8">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="size-7 rounded-lg bg-gold-100 flex items-center justify-center text-gold-600">
+                        <FiAward className="size-4" />
+                      </div>
+                      <h3 className="text-base font-bold text-gold-800 font-serif">
+                        Scholarship Policy
+                      </h3>
+                    </div>
+                    <div
+                      className="prose prose-sm max-w-none text-primary-700
+                                 [&_table]:w-full [&_table]:border-collapse [&_table]:my-4
+                                 [&_th]:text-left [&_th]:p-2 [&_th]:bg-gold-100 [&_th]:border [&_th]:border-gold-200
+                                 [&_td]:p-2 [&_td]:border [&_td]:border-gold-100"
+                      dangerouslySetInnerHTML={{
+                        __html: (program as any).university
+                          .scholarship_policy_html,
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                /* FALLBACK PRAISE: Show if NO specific Type A/B/C AND no Policy exists */
+                !hasSpecificScholarshipType && <ScholarshipPraiseContent />
               )}
             </div>
 
@@ -265,19 +252,35 @@ export function ProgramContent({ program }: ProgramContentProps) {
                         </p>
                       </div>
                     )}
-
-                    {program.scholarship_memo && (
-                      <div className="pt-5 border-t border-white/10">
-                        <p className="text-xs text-white/60 mb-2 italic">
-                          Official Memo
-                        </p>
-                        <p className="text-sm text-white/80 leading-relaxed">
-                          {program.scholarship_memo}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
+              </div>
+            </div>
+          </section>
+        ) : (
+          <section className="bg-white rounded-3xl border border-primary-100 shadow-sm overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gold-50/50 rounded-full blur-3xl -mr-48 -mt-48" />
+            <div className="p-8 md:p-12 relative z-10 flex flex-col md:flex-row items-center gap-10">
+              <div className="flex-1">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gold-50 flex items-center justify-center text-gold-600">
+                    <FiAward className="w-6 h-6" />
+                  </div>
+                  <h2 className="heading-4">
+                    Maximize Your Scholarship Chances
+                  </h2>
+                </div>
+                <ScholarshipPraiseContent isStandalone={true} />
+              </div>
+              <div className="w-full md:w-72 aspect-square rounded-2xl bg-brand-900 p-8 flex flex-col justify-center text-center shadow-2xl relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gold-600/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <FiShield className="size-12 text-gold-500 mx-auto mb-4" />
+                <p className="text-white font-bold text-xl mb-2">
+                  EduChinaPro Guarantee
+                </p>
+                <p className="text-white/70 text-sm">
+                  We negotiate the best terms for your future.
+                </p>
               </div>
             </div>
           </section>
@@ -351,6 +354,98 @@ export function ProgramContent({ program }: ProgramContentProps) {
             </div>
           </div>
         </section>
+      </div>
+    </div>
+  );
+}
+
+function ScholarshipPraiseContent({
+  isStandalone = false,
+}: {
+  isStandalone?: boolean;
+}) {
+  return (
+    <div
+      className={
+        isStandalone
+          ? "space-y-4 text-primary-600 leading-relaxed"
+          : "space-y-6"
+      }
+    >
+      <p
+        className={
+          isStandalone
+            ? "text-base font-serif italic text-primary-900"
+            : "p-6 bg-primary-50 rounded-2xl border border-primary-100 relative overflow-hidden group font-serif text-base leading-relaxed text-primary-900"
+        }
+      >
+        &quot;Our mission is to ensure every qualified student has access to the
+        best possible financial support in China.&quot;
+      </p>
+
+      {isStandalone && (
+        <p>
+          Even for programs without automatic or published scholarships,
+          EduChinaPro works directly with university admissions to identify
+          exclusive funding opportunities, grants, and stipends.
+        </p>
+      )}
+
+      <div
+        className={
+          isStandalone
+            ? "grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2"
+            : "grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8"
+        }
+      >
+        <div className="flex items-center gap-3">
+          <FiCheckCircle className="text-success size-5 shrink-0" />
+          <span
+            className={
+              isStandalone
+                ? "text-sm font-medium"
+                : "text-sm font-semibold text-primary-700"
+            }
+          >
+            Expert Application Strategy
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <FiCheckCircle className="text-success size-5 shrink-0" />
+          <span
+            className={
+              isStandalone
+                ? "text-sm font-medium"
+                : "text-sm font-semibold text-primary-700"
+            }
+          >
+            Internal Funding Access
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <FiCheckCircle className="text-success size-5 shrink-0" />
+          <span
+            className={
+              isStandalone
+                ? "text-sm font-medium"
+                : "text-sm font-semibold text-primary-700"
+            }
+          >
+            High Success Rate
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <FiCheckCircle className="text-success size-5 shrink-0" />
+          <span
+            className={
+              isStandalone
+                ? "text-sm font-medium"
+                : "text-sm font-semibold text-primary-700"
+            }
+          >
+            Full Support Guidance
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -56,7 +56,7 @@ export const homepageDataService = {
 
       programRepository.getPrograms({ limit: 8 }, supabase),
 
-      programRepository.getFeaturedPrograms(supabase),
+      programRepository.getFeaturedPrograms(supabase, 8),
 
       referenceRepository.getSubjectAreas(supabase),
     ]);

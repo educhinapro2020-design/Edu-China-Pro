@@ -192,7 +192,6 @@ export default function CounselorApplicationsPage() {
           </p>
         </div>
 
-        {/* Search + Filter */}
         <div className="flex flex-col sm:flex-row gap-3 w-full md:items-center">
           <div className="relative flex-1 min-w-0">
             <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-400 size-4 pointer-events-none" />
@@ -275,7 +274,6 @@ export default function CounselorApplicationsPage() {
           </div>
         </div>
 
-        {/* List */}
         <div className="w-full">
           <div className="flex items-center justify-between mb-4 w-full">
             <h2 className="text-base font-semibold text-brand-600 truncate pr-2">
@@ -400,7 +398,6 @@ export default function CounselorApplicationsPage() {
           )}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && !loading && (
           <div className="flex flex-wrap items-center justify-center gap-2 pt-4 pb-6 w-full">
             <button

@@ -36,6 +36,8 @@ export const DEGREE_LEVEL_OPTIONS = [
 
 export const SCHOLARSHIP_TYPE_OPTIONS = [
   { value: "self_financed", label: "Self Financed" },
+  { value: "full", label: "Full" },
+  { value: "partial", label: "Partial" },
   { value: "type_a", label: "Type A" },
   { value: "type_b", label: "Type B" },
   { value: "type_c", label: "Type C" },

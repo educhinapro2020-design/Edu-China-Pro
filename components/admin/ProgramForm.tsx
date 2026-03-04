@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import {
   useEffect,
   useState,
@@ -26,14 +27,14 @@ import {
   INTAKE_SEASON_OPTIONS,
   TEACHING_LANGUAGE_OPTIONS,
 } from "@/lib/constants/admin";
-import { DOCUMENT_REGISTRY } from "@/lib/constants/documents";
+import {
+  DOCUMENT_REGISTRY,
+  EDUCATION_DOCUMENTS,
+} from "@/lib/constants/documents";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import ImageUpload from "./ImageUpload";
-import MultiImageUpload from "./MultiAssetsUpload";
 import { twMerge } from "tailwind-merge";
-import { relocateFiles } from "@/lib/utils/storage";
 
 interface ProgramFormProps {
   initialData?: Program;
@@ -52,7 +53,6 @@ export function ProgramForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const sessionId = useRef(crypto.randomUUID());
-  const uploadFolder = `programs/${initialData?.id ?? `temp/${sessionId.current}`}`;
 
   useEffect(() => {
     universityRepository.getUniversities({ limit: 100 }).then(setUniversities);
@@ -81,18 +81,14 @@ export function ProgramForm({
     tuition_per: initialData?.tuition_per ?? "year",
     scholarship_type: initialData?.scholarship_type ?? "self_financed",
     scholarship_duration: initialData?.scholarship_duration ?? "",
-    scholarship_policy_html: initialData?.scholarship_policy_html ?? "",
-    scholarship_memo: initialData?.scholarship_memo ?? "",
     estimated_living_cost: initialData?.estimated_living_cost ?? "",
     estimated_living_currency: initialData?.estimated_living_currency ?? "RMB",
-    cover_image_url: initialData?.cover_image_url ?? null,
     is_self_funded: initialData?.is_self_funded ?? false,
     is_scholarship_program: initialData?.is_scholarship_program ?? false,
     document_requirements:
       initialData?.document_requirements ?? ([] as string[]),
     is_featured: initialData?.is_featured ?? false,
     description: initialData?.description ?? "",
-    detail_images: (initialData?.detail_images as string[]) ?? [],
   });
 
   const handleDocumentChange = (docId: string, checked: boolean) => {
@@ -161,19 +157,15 @@ export function ProgramForm({
       tuition_per: form.tuition_per,
       scholarship_type: form.scholarship_type as any,
       scholarship_duration: form.scholarship_duration || null,
-      scholarship_policy_html: form.scholarship_policy_html || null,
-      scholarship_memo: form.scholarship_memo || null,
       estimated_living_cost: form.estimated_living_cost
         ? Number(form.estimated_living_cost)
         : null,
       estimated_living_currency: form.estimated_living_currency,
-      cover_image_url: form.cover_image_url || null,
       is_self_funded: form.is_self_funded,
       is_scholarship_program: form.is_scholarship_program,
       document_requirements: form.document_requirements,
       is_featured: form.is_featured,
       description: form.description || null,
-      detail_images: form.detail_images,
     };
 
     const result = programFormSchema.safeParse(payload);
@@ -192,36 +184,13 @@ export function ProgramForm({
       if (isEditing && initialData?.id) {
         await programRepository.updateProgram(initialData.id, payload as any);
       } else {
-        const created = await programRepository.createProgram(payload as any);
-
-        const tempPrefix = `programs/temp/${sessionId.current}/`;
-        const realPrefix = `programs/${created.id}/`;
-
-        const allUrls = [
-          form.cover_image_url,
-          ...(Array.isArray(form.detail_images) ? form.detail_images : []),
-        ].filter(Boolean) as string[];
-
-        if (allUrls.length > 0) {
-          const relocated = await relocateFiles(
-            tempPrefix,
-            realPrefix,
-            allUrls,
-          );
-
-          const newCoverUrl = form.cover_image_url ? relocated[0] : null;
-          const newDetailImages = relocated.slice(form.cover_image_url ? 1 : 0);
-
-          await programRepository.updateProgram(created.id, {
-            cover_image_url: newCoverUrl,
-            detail_images: newDetailImages,
-          });
-        }
+        await programRepository.createProgram(payload as any);
       }
-      router.push(`${basePath}/programs`);
       router.refresh();
+      toast.success(isEditing ? "Program updated!" : "Program created!");
     } catch (error) {
       console.error(error);
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -335,23 +304,25 @@ export function ProgramForm({
               )}
             </div>
 
-            <div className="space-y-2.5">
-              <label className="label">University</label>
-              <Select
-                value={form.university_id}
-                onChange={(val) =>
-                  setForm((prev) => ({ ...prev, university_id: val }))
-                }
-                options={universities.map((u) => ({
-                  label: u.name_en,
-                  value: u.id,
-                }))}
-                placeholder="Select University"
-              />
-              {errors.university_id && (
-                <p className="caption text-error">{errors.university_id}</p>
-              )}
-            </div>
+            {!isEditing && (
+              <div className="space-y-2.5">
+                <label className="label">University</label>
+                <Select
+                  value={form.university_id}
+                  onChange={(val) =>
+                    setForm((prev) => ({ ...prev, university_id: val }))
+                  }
+                  options={universities.map((u) => ({
+                    label: u.name_en,
+                    value: u.id,
+                  }))}
+                  placeholder="Select University"
+                />
+                {errors.university_id && (
+                  <p className="caption text-error">{errors.university_id}</p>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2.5">
               <label className="label">Subject Area</label>
@@ -565,18 +536,6 @@ export function ProgramForm({
             </div>
 
             <div className="space-y-2.5">
-              <label className="label">Scholarship Policy (Memo)</label>
-              <Input
-                type="textarea"
-                name="scholarship_memo"
-                value={form.scholarship_memo}
-                onChange={handleChange}
-                placeholder="Additional details about the scholarship..."
-                className="h-10"
-              />
-            </div>
-
-            <div className="space-y-2.5">
               <label className="label">Estimated Living Cost (Monthly)</label>
               <div className="flex gap-2">
                 <Select
@@ -614,7 +573,12 @@ export function ProgramForm({
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.values(DOCUMENT_REGISTRY).map((doc) => (
+            {[
+              ...Object.values(DOCUMENT_REGISTRY),
+              ...Object.values(EDUCATION_DOCUMENTS).flatMap(
+                (level) => level.documents,
+              ),
+            ].map((doc) => (
               <label
                 key={doc.id}
                 className={`relative flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 group ${
@@ -658,52 +622,6 @@ export function ProgramForm({
               </label>
             ))}
           </div>
-        </div>
-        <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
-          <div>
-            <h2 className="heading-4">Program Cover Image</h2>
-            <p className="body-small text-primary-500 mt-1">
-              Main image shown in program listings.
-            </p>
-          </div>
-          <ImageUpload
-            uploadFolder={uploadFolder}
-            value={form.cover_image_url}
-            label="Program Cover Image"
-            onChange={(url) =>
-              setForm((prev) => ({ ...prev, cover_image_url: url }))
-            }
-            onSync={async (url) => {
-              if (initialData?.id) {
-                await programRepository.updateProgram(initialData.id, {
-                  cover_image_url: url,
-                });
-              }
-            }}
-          />
-
-          <hr className="border-primary-100" />
-
-          <div>
-            <h2 className="heading-4">Program Images</h2>
-            <p className="body-small text-primary-500 mt-1">
-              Detail images shown on the program page.
-            </p>
-          </div>
-          <MultiImageUpload
-            uploadFolder={uploadFolder}
-            value={form.detail_images}
-            onChange={(urls) =>
-              setForm((prev) => ({ ...prev, detail_images: urls }))
-            }
-            onSync={async (urls) => {
-              if (initialData?.id) {
-                await programRepository.updateProgram(initialData.id, {
-                  detail_images: urls,
-                });
-              }
-            }}
-          />
         </div>
       </div>
 

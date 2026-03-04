@@ -216,7 +216,6 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {kpis.map((k) => (
             <div
@@ -252,7 +251,6 @@ export default function AdminDashboardPage() {
           ))}
         </div>
 
-        {/* Pipeline */}
         <div className="bg-white rounded-2xl border border-primary-100 shadow-sm p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
             <div>

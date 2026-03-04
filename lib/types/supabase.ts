@@ -507,11 +507,9 @@ export type Database = {
           application_deadline: string | null
           application_fee_amount: number | null
           application_fee_currency: string | null
-          cover_image_url: string | null
           created_at: string
           degree_level: Database["public"]["Enums"]["degree_level"]
           description: string | null
-          detail_images: Json | null
           document_requirements: Json | null
           duration: string | null
           eligibility: Json | null
@@ -528,8 +526,6 @@ export type Database = {
           name_en: string
           name_local: string | null
           scholarship_duration: string | null
-          scholarship_memo: string | null
-          scholarship_policy_html: string | null
           scholarship_type:
             | Database["public"]["Enums"]["scholarship_type"]
             | null
@@ -548,11 +544,9 @@ export type Database = {
           application_deadline?: string | null
           application_fee_amount?: number | null
           application_fee_currency?: string | null
-          cover_image_url?: string | null
           created_at?: string
           degree_level: Database["public"]["Enums"]["degree_level"]
           description?: string | null
-          detail_images?: Json | null
           document_requirements?: Json | null
           duration?: string | null
           eligibility?: Json | null
@@ -569,8 +563,6 @@ export type Database = {
           name_en: string
           name_local?: string | null
           scholarship_duration?: string | null
-          scholarship_memo?: string | null
-          scholarship_policy_html?: string | null
           scholarship_type?:
             | Database["public"]["Enums"]["scholarship_type"]
             | null
@@ -589,11 +581,9 @@ export type Database = {
           application_deadline?: string | null
           application_fee_amount?: number | null
           application_fee_currency?: string | null
-          cover_image_url?: string | null
           created_at?: string
           degree_level?: Database["public"]["Enums"]["degree_level"]
           description?: string | null
-          detail_images?: Json | null
           document_requirements?: Json | null
           duration?: string | null
           eligibility?: Json | null
@@ -610,8 +600,6 @@ export type Database = {
           name_en?: string
           name_local?: string | null
           scholarship_duration?: string | null
-          scholarship_memo?: string | null
-          scholarship_policy_html?: string | null
           scholarship_type?:
             | Database["public"]["Enums"]["scholarship_type"]
             | null
@@ -782,6 +770,7 @@ export type Database = {
           profile_text: string | null
           qs_rank: number | null
           qs_rank_year: number | null
+          scholarship_policy_html: string | null
           self_financed_available: boolean | null
           shanghai_rank: number | null
           shanghai_rank_year: number | null
@@ -811,6 +800,7 @@ export type Database = {
           profile_text?: string | null
           qs_rank?: number | null
           qs_rank_year?: number | null
+          scholarship_policy_html?: string | null
           self_financed_available?: boolean | null
           shanghai_rank?: number | null
           shanghai_rank_year?: number | null
@@ -840,6 +830,7 @@ export type Database = {
           profile_text?: string | null
           qs_rank?: number | null
           qs_rank_year?: number | null
+          scholarship_policy_html?: string | null
           self_financed_available?: boolean | null
           shanghai_rank?: number | null
           shanghai_rank_year?: number | null
@@ -975,6 +966,8 @@ export type Database = {
         | "type_b"
         | "type_c"
         | "type_d"
+        | "full"
+        | "partial"
       teaching_language: "chinese" | "english" | "chinese_english_bilingual"
       user_role: "student" | "counselor" | "admin"
     }
@@ -1150,6 +1143,8 @@ export const Constants = {
         "type_b",
         "type_c",
         "type_d",
+        "full",
+        "partial",
       ],
       teaching_language: ["chinese", "english", "chinese_english_bilingual"],
       user_role: ["student", "counselor", "admin"],

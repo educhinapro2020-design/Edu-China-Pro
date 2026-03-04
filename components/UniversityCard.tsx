@@ -51,7 +51,7 @@ export default function UniversityCard({
         )}
 
         {rank && (
-          <div className="absolute flex items-center gap-1 top-2 left-2 bg-gold-50 text-gold-700 border border-gold-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+          <div className="absolute flex items-center gap-1 top-2 left-2 bg-gold-600 text-white border border-gold-200 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
             <FiAward /> {rank} {rankLabel}
           </div>
         )}

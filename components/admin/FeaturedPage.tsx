@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   FiMenu,
   FiTrash2,
-  FiExternalLink,
+  FiEdit,
   FiBook,
   FiHome,
   FiLoader,
@@ -247,6 +247,12 @@ export function FeaturedPage() {
                   />
                 ) : tab === "universities" ? (
                   <FiHome className="size-4 text-primary-400" />
+                ) : (item as any).university?.logo_url ? (
+                  <img
+                    src={(item as any).university.logo_url}
+                    alt={(item as any).university.name_en}
+                    className="w-full h-full object-contain p-1"
+                  />
                 ) : (
                   <FiBook className="size-4 text-brand-500" />
                 )}
@@ -261,9 +267,11 @@ export function FeaturedPage() {
                     {(item as any).city.name_en}
                   </p>
                 )}
-                {tab === "programs" && (item as any).degree_level && (
-                  <p className="text-xs text-primary-400 capitalize">
-                    {(item as any).degree_level}
+                {tab === "programs" && (
+                  <p className="text-xs text-primary-400 truncate">
+                    {(item as any).university?.name_en}
+                    {(item as any).degree_level &&
+                      ` · ${(item as any).degree_level.replace(/_/g, " ")}`}
                   </p>
                 )}
               </div>
@@ -274,7 +282,7 @@ export function FeaturedPage() {
                   title="Edit"
                   className="p-1.5 text-primary-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
                 >
-                  <FiExternalLink className="size-3.5" />
+                  <FiEdit className="size-3.5" />
                 </Link>
                 <button
                   onClick={() => setConfirmId(item.id)}

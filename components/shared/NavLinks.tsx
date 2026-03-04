@@ -21,6 +21,7 @@ const NAV_LINKS: NavLink[] = [
     href: "/universities",
   },
   { label: "Explore Programs", href: "/programs", icon: MdOutlineSchool },
+  { label: "Scholarships", href: "/scholarships" },
 ];
 
 export function NavLinks() {

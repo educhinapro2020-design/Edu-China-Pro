@@ -153,7 +153,6 @@ function VerifyEmailContent() {
           </div>
 
           <div className="space-y-8">
-            {/* OTP Input */}
             <div className="flex justify-center gap-3" onPaste={handlePaste}>
               {otp.map((digit, index) => (
                 <input

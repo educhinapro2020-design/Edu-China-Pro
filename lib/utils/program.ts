@@ -70,7 +70,10 @@ export const getTuition = (program: Program) => {
   const original = program.tuition_original;
   const after = program.tuition_after_scholarship;
   const scholarshipType = program.scholarship_type;
-  const hasScholarship = after != null && original != null && after < original;
+  const hasScholarship =
+    scholarshipType === "full" ||
+    scholarshipType === "partial" ||
+    (after != null && original != null && after < original);
 
   const originalAmt = original ?? null;
   const afterScholarshipAmt = hasScholarship ? after : null;
