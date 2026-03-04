@@ -510,6 +510,7 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           degree_level: Database["public"]["Enums"]["degree_level"]
+          description: string | null
           detail_images: Json | null
           document_requirements: Json | null
           duration: string | null
@@ -550,6 +551,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           degree_level: Database["public"]["Enums"]["degree_level"]
+          description?: string | null
           detail_images?: Json | null
           document_requirements?: Json | null
           duration?: string | null
@@ -590,6 +592,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           degree_level?: Database["public"]["Enums"]["degree_level"]
+          description?: string | null
           detail_images?: Json | null
           document_requirements?: Json | null
           duration?: string | null

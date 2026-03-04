@@ -27,7 +27,7 @@ type FeaturedProgram = Program & {
 };
 
 export function FeaturedPage() {
-  const [tab, setTab] = useState<Tab>("universities");
+  const [tab, setTab] = useState<Tab>("programs");
 
   const [featuredUniversities, setFeaturedUniversities] = useState<
     FeaturedUniversity[]
@@ -112,7 +112,6 @@ export function FeaturedPage() {
     dragItem.current = null;
     setDragOverIndex(null);
 
-    // Auto-save
     setIsSaving(true);
     try {
       await Promise.all([
@@ -163,7 +162,7 @@ export function FeaturedPage() {
       </div>
 
       <div className="flex gap-1 p-1 bg-primary-50 rounded-xl w-fit border border-primary-100">
-        {(["universities", "programs"] as Tab[]).map((t) => (
+        {(["programs", "universities"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}

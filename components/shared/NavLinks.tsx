@@ -19,7 +19,6 @@ const NAV_LINKS: NavLink[] = [
   {
     label: "Find Universities",
     href: "/universities",
-    icon: LiaUniversitySolid,
   },
   { label: "Explore Programs", href: "/programs", icon: MdOutlineSchool },
 ];
@@ -39,7 +38,7 @@ export function NavLinks() {
             key={link.href}
             href={link.href}
             className={twMerge(
-              "font-semibold text-sm flex items-center gap-2 transition-colors",
+              "font-medium text-sm flex items-center gap-2 transition-colors",
               active
                 ? "text-brand-600"
                 : "text-primary-600 hover:text-brand-600",

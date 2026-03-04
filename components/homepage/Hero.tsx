@@ -45,7 +45,7 @@ export default function Hero() {
             </div>
 
             <div className="flex items-center gap-6 pt-4">
-              <p className="text-sm font-medium text-primary-500">
+              <p className="hidden md:block text-sm font-medium text-primary-500">
                 Nepal's Dedicated Pathway to study in China
               </p>
             </div>

@@ -14,20 +14,20 @@ export const SOCIAL_LINKS: SocialLink[] = [
     label: "Facebook",
     href: "https://www.facebook.com/profile.php?id=61583342317872",
     icon: FiFacebook,
-    color: "hover:bg-[#1877F2]",
+    color: "bg-[#1877F2]",
   },
   {
     label: "Instagram",
     href: "https://instagram.com/educhinapro",
     icon: FiInstagram,
     color:
-      "hover:bg-[linear-gradient(45deg,#f09433_0%,#e6683c_25%,#dc2743_50%,#cc2366_75%,#bc1888_100%)]",
+      "bg-[linear-gradient(45deg,#f09433_0%,#e6683c_25%,#dc2743_50%,#cc2366_75%,#bc1888_100%)]",
   },
   {
     label: "WhatsApp",
     href: "https://wa.me/+8615213620160",
     icon: FaWhatsapp,
-    color: "hover:bg-[#25D366]",
+    color: "bg-[#25D366]",
   },
   {
     label: "Email",

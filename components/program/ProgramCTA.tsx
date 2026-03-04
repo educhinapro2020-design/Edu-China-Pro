@@ -52,7 +52,7 @@ export function ProgramCTA({ program }: ProgramCTAProps) {
   return (
     <div
       className={twMerge(
-        "fixed bottom-0 left-0 right-0 z-50 transition-all duration-500 transform",
+        "fixed bottom-2 left-0 right-0 z-50 transition-all duration-500 transform",
         isVisible && !footerVisible
           ? "translate-y-0 opacity-100"
           : "translate-y-full opacity-0",

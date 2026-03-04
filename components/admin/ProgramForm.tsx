@@ -91,6 +91,7 @@ export function ProgramForm({
     document_requirements:
       initialData?.document_requirements ?? ([] as string[]),
     is_featured: initialData?.is_featured ?? false,
+    description: initialData?.description ?? "",
     detail_images: (initialData?.detail_images as string[]) ?? [],
   });
 
@@ -171,6 +172,7 @@ export function ProgramForm({
       is_scholarship_program: form.is_scholarship_program,
       document_requirements: form.document_requirements,
       is_featured: form.is_featured,
+      description: form.description || null,
       detail_images: form.detail_images,
     };
 
@@ -285,6 +287,18 @@ export function ProgramForm({
               {errors.name_en && (
                 <p className="caption text-error">{errors.name_en}</p>
               )}
+            </div>
+
+            <div className="space-y-2.5 md:col-span-2">
+              <label className="label">Description</label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                placeholder="Brief description of the program..."
+                rows={4}
+                className="flex w-full rounded-xl border border-primary-200 bg-white px-4 py-3 text-primary-900 placeholder:text-primary-400 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 resize-none"
+              />
             </div>
 
             <div className="space-y-2.5 md:col-span-2 bg-primary-50/50 p-5 rounded-2xl border border-primary-100">
