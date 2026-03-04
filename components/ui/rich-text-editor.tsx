@@ -51,7 +51,6 @@ export function RichTextEditor({
         className,
       )}
     >
-      {/* Toolbar */}
       <div className="flex items-center gap-0.5 p-2 border-b border-primary-100 bg-primary-50/50 flex-wrap">
         <ToolbarButton
           active={editor.isActive("heading", { level: 2 })}
@@ -114,7 +113,6 @@ export function RichTextEditor({
         </ToolbarButton>
       </div>
 
-      {/* Editor */}
       <EditorContent editor={editor} />
     </div>
   );

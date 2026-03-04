@@ -40,6 +40,7 @@ import { twMerge } from "tailwind-merge";
 import ImageUpload from "./ImageUpload";
 import MultiImageUpload from "./MultiAssetsUpload";
 import { relocateFiles } from "@/lib/utils/storage";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 interface UniversityFormProps {
   initialData?: University;
@@ -454,6 +455,7 @@ export function UniversityForm({
     profile_html: initialData?.profile_html ?? "",
     profile_text: initialData?.profile_text ?? "",
     advantages_html: initialData?.advantages_html ?? "",
+    scholarship_policy_html: initialData?.scholarship_policy_html ?? "",
     accommodation_double_room: initialData?.accommodation_double_room ?? "",
     accommodation_single_room: initialData?.accommodation_single_room ?? "",
     accommodation_currency: initialData?.accommodation_currency ?? "RMB",
@@ -531,6 +533,7 @@ export function UniversityForm({
       profile_html: form.profile_html || null,
       profile_text: form.profile_text || null,
       advantages_html: form.advantages_html || null,
+      scholarship_policy_html: form.scholarship_policy_html || null,
       accommodation_double_room: form.accommodation_double_room
         ? Number(form.accommodation_double_room)
         : null,
@@ -938,6 +941,28 @@ export function UniversityForm({
                 </span>
               </div>
             </label>
+          </div>
+
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-6">
+            <div>
+              <h2 className="heading-4">Scholarship Policy</h2>
+              <p className="body-small text-primary-500 mt-1">
+                Detailed funding information and criteria for all programs in
+                this university.
+              </p>
+            </div>
+            <div className="max-w-4xl">
+              <RichTextEditor
+                value={form.scholarship_policy_html}
+                onChange={(html) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    scholarship_policy_html: html,
+                  }))
+                }
+                placeholder="Detail the scholarship coverage, stipend, and terms..."
+              />
+            </div>
           </div>
           <div className="bg-white p-6 md:p-8 rounded-3xl border border-primary-100 shadow-sm space-y-8">
             <div>

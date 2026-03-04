@@ -45,15 +45,25 @@ export interface University extends Omit<
 > {
   country_specific_data: CountrySpecificData;
   albums: UniversityAlbums | null;
+  scholarship_policy_html: string | null;
 }
 
 export interface Program extends Omit<
   Row<"programs">,
-  "eligibility" | "detail_images" | "document_requirements"
+  "eligibility" | "detail_images" | "document_requirements" | "scholarship_type"
 > {
   eligibility: ProgramEligibility | null;
   detail_images: string[];
   document_requirements: string[] | null;
+  scholarship_type:
+    | "self_financed"
+    | "type_a"
+    | "type_b"
+    | "type_c"
+    | "type_d"
+    | "full"
+    | "partial"
+    | null;
 }
 
 export interface UniversityFilter {

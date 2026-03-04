@@ -52,28 +52,23 @@ export function FeaturedProgramsBento({
     <section className={twMerge("py-24 bg-white", hideHeader && "py-12")}>
       <div className="container mx-auto px-6">
         {!hideHeader && (
-          <div className="flex flex-col md:flex-row justify-between items-baseline mb-12 gap-4">
+          <div className="mb-12">
             <div className="space-y-3">
               <h2 className="heading-1 !leading-tight">
                 {title || (
                   <>
                     Featured{" "}
                     <span className="text-gold-600 font-serif">
-                      Scholarships
+                      Scholarships in China
                     </span>
                   </>
                 )}
               </h2>
               <p className="body-large text-primary-500">
-                Hand-selected scholarship programs at China's top institutions.
+                Hand-selected scholarship programs at China&apos;s top
+                institutions.
               </p>
             </div>
-            <Link
-              href="/scholarships"
-              className="hidden md:flex items-center gap-2 text-gold-600 font-semibold text-sm hover:text-gold-700 transition-all group"
-            >
-              View All
-            </Link>
           </div>
         )}
 
@@ -117,9 +112,13 @@ export function FeaturedProgramsBento({
                 transition={{ duration: 0.8, ease: "easeInOut" }}
                 style={{ position: "absolute", inset: 0, zIndex: 0 }}
               >
-                {current.cover_image_url ? (
+                {(current as any).cover_image_url ||
+                university?.cover_image_url ? (
                   <Image
-                    src={current.cover_image_url}
+                    src={
+                      (current as any).cover_image_url ||
+                      university!.cover_image_url
+                    }
                     alt=""
                     fill
                     sizes="(max-width: 768px) 100vw, 90vw"
@@ -170,7 +169,8 @@ export function FeaturedProgramsBento({
                 <div className="flex items-center gap-2 flex-wrap">
                   {current.application_deadline ? (
                     (() => {
-                      const deadline = new Date(current.application_deadline);
+                      const deadline = new Date(current.application_deadline!);
+
                       const daysLeft = Math.ceil(
                         (deadline.getTime() - Date.now()) /
                           (1000 * 60 * 60 * 24),
@@ -198,7 +198,9 @@ export function FeaturedProgramsBento({
                   ) : (
                     <span className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-white bg-emerald-500 shadow-lg">
                       <FaCalendar className="size-3.5" />
-                      Open Intake
+                      {current.intake_season || current.intake_year
+                        ? `${current.intake_season ? current.intake_season.charAt(0).toUpperCase() + current.intake_season.slice(1) : ""} ${current.intake_year || ""} Intake`.trim()
+                        : "Open Intake"}
                     </span>
                   )}
                 </div>
@@ -274,24 +276,6 @@ export function FeaturedProgramsBento({
                         </p>
                       )}
                     </div>
-
-                    {(current.scholarship_policy_html ||
-                      (current as any).estimated_living_cost) && (
-                      <div className="bg-brand-700 border border-white/10 rounded-2xl p-4">
-                        <div className="flex flex-col gap-3">
-                          {current.scholarship_policy_html && (
-                            <div>
-                              <div
-                                className="text-white/90 text-sm leading-relaxed line-clamp-4 [&_ul]:list-disc [&_ul]:pl-4 [&_li]:text-white/90 [&_p]:mb-1 [&_h2]:font-bold [&_h3]:font-bold"
-                                dangerouslySetInnerHTML={{
-                                  __html: current.scholarship_policy_html,
-                                }}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
 
                     <Link
                       href={`/universities/${university?.slug}/programs/${current.slug}`}
@@ -371,6 +355,18 @@ export function FeaturedProgramsBento({
               ))}
             </div>
           </div>
+
+          {!hideHeader && (
+            <div className="flex justify-center mt-8">
+              <Link
+                href="/scholarships"
+                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 text-white font-semibold text-sm shadow-lg shadow-gold-500/25 hover:shadow-xl hover:shadow-gold-500/30 hover:-translate-y-0.5 transition-all"
+              >
+                View more Scholarships
+                <FiArrowRight className="size-4" />
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </section>

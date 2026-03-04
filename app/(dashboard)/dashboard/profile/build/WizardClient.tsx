@@ -1172,7 +1172,6 @@ export function WizardClient({
         )}
       </AnimatePresence>
 
-      {/* Show floating checklist when arriving with ?helper=true */}
       {searchParams.get("helper") === "true" && (
         <ProfileChecklistModal profile={formData} documents={documents} />
       )}

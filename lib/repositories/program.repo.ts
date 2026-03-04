@@ -11,7 +11,9 @@ export const programRepository = {
     const supabase = client ?? createClient();
     let query = supabase
       .from("programs")
-      .select("*, university:universities(name_en, slug, logo_url)");
+      .select(
+        "*, university:universities(name_en, slug, logo_url, cover_image_url, albums, scholarship_policy_html)",
+      );
 
     if (filter.search) {
       query = query.ilike("name_en", `%${filter.search}%`);
@@ -77,9 +79,12 @@ export const programRepository = {
     const supabase = client ?? createClient();
     let query = supabase
       .from("programs")
-      .select("*, university:universities(name_en, slug, logo_url)", {
-        count: "exact",
-      });
+      .select(
+        "*, university:universities(name_en, slug, logo_url, cover_image_url, albums, scholarship_policy_html)",
+        {
+          count: "exact",
+        },
+      );
 
     if (filter.search) {
       query = query.ilike("name_en", `%${filter.search}%`);
@@ -153,7 +158,9 @@ export const programRepository = {
     const supabase = client ?? createClient();
     const { data, error } = await supabase
       .from("programs")
-      .select("*, university:universities(name_en, slug, logo_url)")
+      .select(
+        "*, university:universities(name_en, slug, logo_url, cover_image_url, albums, scholarship_policy_html)",
+      )
       .eq("id", id)
       .single();
 
@@ -173,7 +180,9 @@ export const programRepository = {
     const { data, error } = await supabase
       .from("programs")
       .insert(input)
-      .select("*, university:universities(name_en, slug, logo_url)")
+      .select(
+        "*, university:universities(name_en, slug, logo_url, cover_image_url, albums, scholarship_policy_html)",
+      )
       .single();
 
     if (error) {
@@ -194,7 +203,9 @@ export const programRepository = {
       .from("programs")
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", id)
-      .select("*, university:universities(name_en, slug, logo_url)")
+      .select(
+        "*, university:universities(name_en, slug, logo_url, cover_image_url, albums, scholarship_policy_html)",
+      )
       .single();
 
     if (error) {
@@ -205,13 +216,24 @@ export const programRepository = {
     return data as unknown as Program;
   },
 
-  async getFeaturedPrograms(client?: SupabaseClient): Promise<Program[]> {
+  async getFeaturedPrograms(
+    client?: SupabaseClient,
+    limit?: number,
+  ): Promise<Program[]> {
     const supabase = client ?? createClient();
-    const { data, error } = await supabase
+    let query = supabase
       .from("programs")
-      .select("*, university:universities(name_en, slug, logo_url)")
+      .select(
+        "*, university:universities(name_en, slug, logo_url, cover_image_url, albums, scholarship_policy_html)",
+      )
       .eq("is_featured", true)
       .order("featured_order", { ascending: true, nullsFirst: false });
+
+    if (limit) {
+      query = query.not("featured_order", "is", null).limit(limit);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Error fetching featured programs:", error);

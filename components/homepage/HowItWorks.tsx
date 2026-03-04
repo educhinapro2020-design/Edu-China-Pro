@@ -118,8 +118,6 @@ function DesktopCard({
           {step.desc}
         </p>
       </div>
-
-      {/* No connector line to prevent "hanging" look */}
     </motion.div>
   );
 }
@@ -246,7 +244,6 @@ export function HowItWorks() {
           </div>
         </div>
 
-        {/* ── Mobile Serpentine (Zig-Zag) ── */}
         <div className="lg:hidden relative pb-10">
           <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-full max-w-[340px] pointer-events-none">
             <svg
@@ -339,7 +336,6 @@ export function HowItWorks() {
           </div>
         </div>
 
-        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}

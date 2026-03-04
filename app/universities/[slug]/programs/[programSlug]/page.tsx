@@ -41,15 +41,23 @@ export async function generateMetadata({
       description,
       url,
       siteName: SITE_NAME,
-      images: program.cover_image_url
-        ? [{ url: program.cover_image_url, width: 1200, height: 630 }]
+      images: university?.cover_image_url
+        ? [
+            {
+              url: university.cover_image_url,
+              width: 1200,
+              height: 630,
+            },
+          ]
         : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: program.cover_image_url ? [program.cover_image_url] : undefined,
+      images: university?.cover_image_url
+        ? [{ url: university.cover_image_url, width: 1200, height: 630 }]
+        : undefined,
     },
   };
 }
@@ -74,7 +82,7 @@ function buildJsonLd(program: any) {
     ...(program.duration_years
       ? { timeRequired: `P${program.duration_years}Y` }
       : {}),
-    image: program.cover_image_url || undefined,
+    image: university?.cover_image_url || undefined,
     offers: program.tuition_fee_cny
       ? {
           "@type": "Offer",

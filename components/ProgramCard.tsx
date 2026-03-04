@@ -85,7 +85,7 @@ export default function ProgramCard({
                 <div className="flex items-center gap-2 flex-wrap">
                   {hasScholarship ? (
                     <>
-                      <span className="font-bold text-emerald-600">
+                      <span className="font-bold text-gold-600">
                         {displayAmt === 0
                           ? `${
                               program.scholarship_type
@@ -95,7 +95,7 @@ export default function ProgramCard({
                           : `${displayAmt.toLocaleString()} ${currency}`}
                       </span>
                       {originalAmt && (
-                        <span className="text-xs text-primary-400 line-through decoration-primary-300">
+                        <span className="text-xs text-primary-500 line-through decoration-primary-500">
                           {originalAmt.toLocaleString()} {currency}
                         </span>
                       )}
