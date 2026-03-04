@@ -77,7 +77,7 @@ export default function WhyChooseECP() {
           <div className="relative z-20 my-12 lg:my-0 shrink-0">
             <div className="w-72 h-[420px] rounded-[40px] overflow-hidden border-[12px] border-brand-50 shadow-2xl relative">
               <img
-                src="/images/marketing/why-choose-ecp.webp"
+                src="/images/marketing/Why-choose-ecp.webp"
                 alt="Graduate"
                 className="w-full h-full object-cover"
               />
