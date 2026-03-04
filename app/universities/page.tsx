@@ -4,6 +4,21 @@ import UniversitySearchInterface from "@/components/universities/UniversitySearc
 import { Navbar } from "@/components/shared/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { Footer } from "@/components/shared/Footer";
+import { Metadata } from "next";
+import { SITE_URL } from "@/lib/constants/seo";
+
+export const metadata: Metadata = {
+  title: "Chinese Universities — Browse & Compare Top Institutions",
+  description:
+    "Explore China's top universities including 985, 211, and Double First-Class institutions. Filter by city, type, and ranking to find your perfect match.",
+  alternates: { canonical: `${SITE_URL}/universities` },
+  openGraph: {
+    title: "Chinese Universities — Browse & Compare",
+    description:
+      "Explore China's top universities. Filter by city, type, and ranking.",
+    url: `${SITE_URL}/universities`,
+  },
+};
 
 interface UniversitiesPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

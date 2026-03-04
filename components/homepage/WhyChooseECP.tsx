@@ -222,7 +222,7 @@ export default function WhyChooseECP() {
                 </svg>
               ),
               title: "Full Spectrum of Programs",
-              desc: "Medical, Engineering, Business, and more at all levels.",
+              desc: "MBBS, Engineering, Business, and Computer Science at all levels.",
               bg: "bg-slate-50",
               iconColor: "text-primary-600",
             },

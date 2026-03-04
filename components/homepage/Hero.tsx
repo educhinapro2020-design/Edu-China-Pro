@@ -22,9 +22,9 @@ export default function Hero() {
                 China.
               </h1>
               <p className="text-lg text-primary-500 max-w-xl leading-relaxed">
-                Scholarships, Admissions, and Visa support. Our dual-country
-                presence ensures smooth, reliable guidance at every step of your
-                education.
+                Scholarships, Admissions, and Visa support for MBBS,
+                Engineering, Business, and more. Our dual-country presence in
+                Nepal and China ensures smooth, reliable guidance at every step.
               </p>
             </div>
 
@@ -77,7 +77,8 @@ export default function Hero() {
                 </h4>
               </div>
               <p className="text-xs text-primary-500 leading-relaxed">
-                Guidance for CSC, BRI, and Provincial funding.
+                Medical (MBBS), Engineering, Business, and Computer Science
+                programs at all levels.
               </p>
             </motion.div>
 

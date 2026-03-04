@@ -268,7 +268,7 @@ export default function ProgramSearchInterface({
             5000+ Programs · 1000+ Universities
           </span>
           <h1 className="text-3xl md:text-5xl font-sans font-bold py-2 mb-4 brand-text">
-            Find Your Perfect Program in China
+            Study in China: Bachelor&apos;s, Master&apos;s & PhD Programs
           </h1>
           <p className="text-primary-500 text-base md:text-lg mb-10 max-w-3xl mx-auto">
             Find bachelor's, master's, and doctoral programs taught in English

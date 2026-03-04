@@ -14,12 +14,65 @@ import { ClosingCTA } from "@/components/homepage/ClosingCTA";
 import { ConsultationSection } from "@/components/homepage/ConsultationSection";
 import { FeaturedProgramsBento } from "@/components/homepage/FeaturedProgramsBento";
 import Hero from "@/components/homepage/Hero";
+import { Metadata } from "next";
+import {
+  SITE_URL,
+  SITE_NAME,
+  SITE_DESCRIPTION,
+  OG_IMAGE,
+} from "@/lib/constants/seo";
+
+export const metadata: Metadata = {
+  title: `${SITE_NAME} — Study in China from Nepal | Scholarships & Admissions`,
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    title: `${SITE_NAME} — Study in China from Nepal`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    images: [{ url: OG_IMAGE, width: 1200, height: 630 }],
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}/images/logo/educhinapro-logo.svg`,
+      description: SITE_DESCRIPTION,
+      sameAs: ["https://www.facebook.com/profile.php?id=61583342317872"],
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer service",
+        areaServed: "NP",
+        availableLanguage: ["English", "Nepali"],
+      },
+    },
+    {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/universities?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
 
 export default async function HomePage() {
   const data = await homepageDataService.getHomepageData();
 
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <Hero />

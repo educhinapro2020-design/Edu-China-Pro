@@ -222,7 +222,7 @@ export default function UniversitySearchInterface({
 
         <div className="container mx-auto px-4 md:px-6 text-center max-w-4xl">
           <h1 className="text-3xl md:text-5xl font-serif font-bold mb-4 brand-text">
-            Discover Universities in China
+            Top Universities in China for International Students
           </h1>
           <p className="text-primary-500 text-base md:text-lg mb-10 max-w-2xl mx-auto">
             Browse hundreds of accredited Chinese universities offering programs
