@@ -32,6 +32,7 @@ export const metadata: Metadata = {
     "Chinese universities",
     "China scholarships",
     "CSC scholarship",
+    "Study MBBS in China",
     "study abroad China",
     "EduChinaPro",
     "Nepal China education",
