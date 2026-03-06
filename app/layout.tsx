@@ -69,6 +69,8 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
 };
 
+import { ChatManager } from "@/components/shared/ChatManager";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -109,6 +111,7 @@ export default function RootLayout({
             },
           }}
         />
+        <ChatManager />
         <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
           strategy="afterInteractive"
