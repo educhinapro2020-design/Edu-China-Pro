@@ -183,22 +183,20 @@ function computeScore(form: FormData): ScoreResult {
         : "bg-amber-50 border-amber-200";
 
   const recommendations: string[] = [];
-  if (gpa < 70)
+  if (gpa < 60)
     recommendations.push(
-      "Strengthen your academic record — universities like Tsinghua and Fudan require 75%+ for competitive programs.",
+      "Lower GPAs are not a barrier to study in China. Book a free consultation to find out the right universities for you.",
     );
   if (form.chineseLevel === "none")
     recommendations.push(
-      "Starting HSK 1–3 before arrival dramatically improves campus experience and visa strength.",
+      "A lot of Chinese universities offer English-medium programs. We'll find the right one for you.",
     );
-  if (form.scholarship === "csc" && gpa < 80)
+  if (form.scholarship === "csc" && gpa >= 80)
     recommendations.push(
-      "CSC is highly competitive. Add provincial or university scholarships as strategic backups.",
+      "You have a strong profile for CSC. We'll guide you through the process.",
     );
   if (form.scholarship !== "self" && form.budget === "under-3k")
-    recommendations.push(
-      "Your scholarship choice can fully cover tuition. Focus your strategy on scholarship confirmation first.",
-    );
+    recommendations.push("Your budget is perfect for self-financed students.");
   if (recommendations.length === 0)
     recommendations.push(
       "Your profile is well-aligned for China. A strategic counseling session will finalize your best-fit universities.",
@@ -318,7 +316,6 @@ export function SmartScoreSection() {
 
   useEffect(() => {
     if (phase === "contact") {
-      // Small delay to ensure DOM is ready
       const t = setTimeout(renderTurnstile, 300);
       return () => clearTimeout(t);
     }
@@ -347,7 +344,7 @@ export function SmartScoreSection() {
     }
   };
 
-  const handleContactSubmit = async (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!result) return;
     setSending(true);
@@ -371,10 +368,6 @@ export function SmartScoreSection() {
       setSending(false);
       setPhase("result");
     }
-  };
-
-  const handleSkipContact = () => {
-    setPhase("result");
   };
 
   const handleReset = () => {
