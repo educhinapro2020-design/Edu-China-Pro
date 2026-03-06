@@ -522,7 +522,7 @@ export function UniversityForm({
       institution_type: form.institution_type as "public" | "private",
       level: form.level || null,
       logo_url: form.logo_url || null,
-      cover_image_url: initialData?.cover_image_url || null,
+      cover_image_url: form.cover_image_url || null,
       shanghai_rank: form.shanghai_rank ? Number(form.shanghai_rank) : null,
       shanghai_rank_year: form.shanghai_rank_year
         ? Number(form.shanghai_rank_year)

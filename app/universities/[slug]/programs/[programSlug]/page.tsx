@@ -11,6 +11,7 @@ import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { Metadata } from "next";
 import { SITE_URL, SITE_NAME } from "@/lib/constants/seo";
+import { ImageGallery } from "@/components/shared/ImageGallery";
 
 interface PageProps {
   params: Promise<{ slug: string; programSlug: string }>;
@@ -122,6 +123,28 @@ export default async function ProgramPage({ params }: PageProps) {
         <ProgramBento program={program} />
 
         <ProgramContent program={program} />
+
+        {university?.is_featured && (
+          <section className="py-12 border-t border-primary-100 bg-white">
+            <div className="container mx-auto px-6 max-w-6xl">
+              <ImageGallery
+                images={[
+                  ...(university.cover_image_url
+                    ? [university.cover_image_url]
+                    : []),
+                  ...(Array.isArray(university.albums)
+                    ? university.albums
+                        .map((img: any) =>
+                          typeof img === "string" ? img : img.url,
+                        )
+                        .filter(Boolean)
+                    : []),
+                ]}
+                title="University Campus & Life"
+              />
+            </div>
+          </section>
+        )}
 
         {similarPrograms.length > 0 && (
           <section className="py-20 border-t border-primary-100 bg-white">

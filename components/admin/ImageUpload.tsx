@@ -44,6 +44,15 @@ export default function ImageUpload({
 
       if (error) throw error;
 
+      if (value && !value.startsWith("blob:")) {
+        const oldStoragePath = extractStoragePath(value);
+        if (oldStoragePath) {
+          await supabase.storage
+            .from(ADMIN_ASSETS_BUCKET)
+            .remove([oldStoragePath]);
+        }
+      }
+
       const { data } = supabase.storage
         .from(ADMIN_ASSETS_BUCKET)
         .getPublicUrl(path);

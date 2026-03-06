@@ -6,6 +6,7 @@ import ProgramCard from "@/components/ProgramCard";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { ImageGallery } from "@/components/shared/ImageGallery";
 import {
   FiInfo,
   FiSearch,
@@ -13,6 +14,7 @@ import {
   FiX,
   FiFilter,
   FiTrendingUp,
+  FiImage,
 } from "react-icons/fi";
 
 interface UniversityContentProps {
@@ -27,6 +29,20 @@ export function UniversityContent({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDegree, setSelectedDegree] = useState("all");
   const [selectedIntake, setSelectedIntake] = useState("all");
+
+  const galleryImages = useMemo(() => {
+    if (!university.is_featured) return [];
+
+    const albumList = Array.isArray(university.albums)
+      ? university.albums
+      : university.albums && typeof university.albums === "object"
+        ? Object.values(university.albums as object)
+        : [];
+
+    return [university.cover_image_url, ...albumList].filter(
+      (img): img is string => typeof img === "string" && img.length > 0,
+    );
+  }, [university]);
 
   const degreeOptions = useMemo(() => {
     const degrees = Array.from(new Set(programs.map((p) => p.degree_level)));
@@ -87,6 +103,20 @@ export function UniversityContent({
   return (
     <div className="bg-primary-50/30 py-16">
       <div className="container mx-auto px-6 max-w-5xl space-y-16">
+        {galleryImages.length > 0 && (
+          <section id="gallery" className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gold-50 flex items-center justify-center text-gold-600">
+                <FiImage className="w-5 h-5" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-primary-900 font-serif">
+                Campus Gallery
+              </h2>
+            </div>
+            <ImageGallery images={galleryImages} title={university.name_en} />
+          </section>
+        )}
+
         <section id="programs">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="max-w-2xl">

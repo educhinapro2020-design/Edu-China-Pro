@@ -220,7 +220,7 @@ export default function AdminDashboardPage() {
           {kpis.map((k) => (
             <div
               key={k.label}
-              className={`bg-white rounded-2xl border shadow-sm px-4 py-4 flex flex-col gap-2 ${k.urgent ? "border-red-200 ring-1 ring-red-100" : "border-primary-100"}`}
+              className={`bg-white rounded-2xl border shadow-sm px-5 py-5 flex flex-col gap-2.5 ${k.urgent ? "border-red-200 ring-1 ring-red-100" : "border-primary-100"}`}
             >
               <div className="flex items-center justify-between">
                 <div
@@ -238,11 +238,11 @@ export default function AdminDashboardPage() {
                 )}
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary-400 mb-0.5 leading-tight">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-primary-400 mb-1 leading-tight">
                   {k.label}
                 </p>
                 <p
-                  className={`text-2xl font-bold font-serif leading-none ${k.urgent ? "text-red-600" : "text-primary-900"}`}
+                  className={`text-2xl font-semibold font-serif leading-none ${k.urgent ? "text-red-600" : "text-primary-900"}`}
                 >
                   {k.value}
                 </p>
@@ -428,7 +428,7 @@ export default function AdminDashboardPage() {
 
             {ops?.recent_activity?.length > 0 && (
               <div className="min-h-0 flex flex-col">
-                <p className="text-xs font-bold uppercase tracking-widest text-primary-500 mb-4 shrink-0">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-primary-500 mb-4 shrink-0">
                   Recent Activity
                 </p>
                 <div className="overflow-y-auto max-h-[240px] space-y-0.5 pr-1">
@@ -471,7 +471,7 @@ export default function AdminDashboardPage() {
                             </p>
                           </div>
                         </div>
-                        <span className="text-[10px] text-primary-500 shrink-0 ml-2">
+                        <span className="text-[11px] text-primary-400 font-medium shrink-0 ml-2">
                           {new Date(a.changed_at).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",

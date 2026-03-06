@@ -1,4 +1,3 @@
-import { FloatingChat } from "@/components/chat/FloatingChat";
 import { StudentNavbar } from "@/components/dashboard/StudentNavbar";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -23,7 +22,6 @@ export default async function DashboardLayout({
       <main className="flex-1 container mx-auto px-4 py-8 flex flex-col">
         {children}
       </main>
-      <FloatingChat currentUserId={user.id} currentUserRole="student" />
     </div>
   );
 }

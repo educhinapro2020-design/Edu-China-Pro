@@ -3,6 +3,7 @@ import { Inter, Outfit } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import { ChatManager } from "@/components/shared/ChatManager";
 import {
   SITE_NAME,
   SITE_DESCRIPTION,
@@ -26,12 +27,16 @@ export const metadata: Metadata = {
     default: `${SITE_NAME} — ${SITE_DESCRIPTION.split(".")[0]}`,
     template: `%s | ${SITE_NAME}`,
   },
+  verification: {
+    google: "0HBRXUCY-PHfanP8CylJ9RMQdtmeT6q3HJVAxdifwDs",
+  },
   description: SITE_DESCRIPTION,
   keywords: [
     "study in China",
     "Chinese universities",
     "China scholarships",
     "CSC scholarship",
+    "Study MBBS in China",
     "study abroad China",
     "EduChinaPro",
     "Nepal China education",
@@ -109,6 +114,7 @@ export default function RootLayout({
             },
           }}
         />
+        <ChatManager />
         <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
           strategy="afterInteractive"
