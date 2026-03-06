@@ -10,7 +10,7 @@ import {
   FiChevronRight,
   FiAward,
 } from "react-icons/fi";
-import { CiCalendar } from "react-icons/ci";
+import { CiCalendar, CiLocationOn } from "react-icons/ci";
 import { FaCalendar } from "react-icons/fa";
 import { Program } from "@/lib/types/university";
 import { getTuition } from "@/lib/utils/program";
@@ -54,7 +54,7 @@ export function FeaturedProgramsBento({
         {!hideHeader && (
           <div className="mb-12">
             <div className="space-y-3">
-              <h2 className="heading-1 !leading-tight">
+              <h2 className="heading-1 leading-tight!">
                 {title || (
                   <>
                     Featured{" "}
@@ -127,10 +127,10 @@ export function FeaturedProgramsBento({
                     loading={index === 0 ? "eager" : "lazy"}
                   />
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-brand-900 to-primary-950" />
+                  <div className="absolute inset-0 bg-linear-to-br from-brand-900 to-primary-950" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-black/0" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/0" />
+                <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/30 to-black/0" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-black/0" />
               </motion.div>
             </AnimatePresence>
 
@@ -138,10 +138,10 @@ export function FeaturedProgramsBento({
               className="relative flex flex-col justify-between min-h-[80vh] p-8 md:p-12"
               style={{ zIndex: 1 }}
             >
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center justify-between gap-4 flex-wrap mb-4 md:mb-2">
                 <Link
                   href={`/universities/${university?.slug}`}
-                  className="flex items-center gap-3 group/uni"
+                  className="hidden md:flex items-center gap-3 group/uni"
                 >
                   <div className="size-11 rounded-xl bg-white overflow-hidden flex items-center justify-center p-1.5 shrink-0">
                     {university?.logo_url && (
@@ -162,6 +162,14 @@ export function FeaturedProgramsBento({
                     </p>
                     <p className="text-white font-semibold text-sm group-hover/uni:underline underline-offset-2">
                       {university?.name_en}
+                      {university?.city && (
+                        <span className="text-white/90 inline-flex items-center font-medium ml-2 border-l border-white/80 pl-2">
+                          <CiLocationOn className="size-4 mr-1" />
+                          {typeof university.city === "object"
+                            ? university.city.name_en
+                            : university.city}
+                        </span>
+                      )}
                     </p>
                   </div>
                 </Link>
@@ -215,12 +223,12 @@ export function FeaturedProgramsBento({
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-end"
                 >
-                  <div className="md:col-span-7 space-y-2">
+                  <div className="md:col-span-7 space-y-4">
                     <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gold-600 text-white shadow-lg w-fit">
                       <FiAward className="size-4" />
                       Scholarship Available
                     </span>
-                    <h3 className="text-4xl md:text-6xl capitalize font-serif font-bold text-white leading-[1.05] mb-4">
+                    <h3 className="text-3xl md:text-6xl capitalize font-serif font-bold text-white leading-[1.05] mb-4">
                       {current.name_en}
                     </h3>
 
@@ -360,7 +368,7 @@ export function FeaturedProgramsBento({
             <div className="flex justify-center mt-8">
               <Link
                 href="/scholarships"
-                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 text-white font-semibold text-sm shadow-lg shadow-gold-500/25 hover:shadow-xl hover:shadow-gold-500/30 hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-linear-to-r from-gold-500 to-gold-600 text-white font-semibold text-sm shadow-lg shadow-gold-500/25 hover:shadow-xl hover:shadow-gold-500/30 hover:-translate-y-0.5 transition-all"
               >
                 View more Scholarships
                 <FiArrowRight className="size-4" />
