@@ -3,6 +3,7 @@ import { Inter, Outfit } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import { ChatManager } from "@/components/shared/ChatManager";
 import {
   SITE_NAME,
   SITE_DESCRIPTION,
@@ -25,6 +26,9 @@ export const metadata: Metadata = {
   title: {
     default: `${SITE_NAME} — ${SITE_DESCRIPTION.split(".")[0]}`,
     template: `%s | ${SITE_NAME}`,
+  },
+  verification: {
+    google: "0HBRXUCY-PHfanP8CylJ9RMQdtmeT6q3HJVAxdifwDs",
   },
   description: SITE_DESCRIPTION,
   keywords: [
@@ -69,8 +73,6 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.webmanifest",
 };
-
-import { ChatManager } from "@/components/shared/ChatManager";
 
 export default function RootLayout({
   children,
