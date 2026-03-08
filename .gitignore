@@ -45,3 +45,7 @@ scrape-china-universities/
 
 #scripts
 scripts/seed-universities.ts
+
+# opennextjs
+.open-next
+.wrangler
