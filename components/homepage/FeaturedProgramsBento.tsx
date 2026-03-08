@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -45,6 +45,21 @@ export function FeaturedProgramsBento({
     setDirection(dir);
     setIndex((prev) => (prev + dir + programs.length) % programs.length);
   };
+
+  useEffect(() => {
+    const nextIndex = (index + 1) % programs.length;
+    const prevIndex = (index - 1 + programs.length) % programs.length;
+
+    [nextIndex, prevIndex].forEach((i) => {
+      const program = programs[i];
+      const uni = (program as any).university;
+      const src = program.cover_image_url || uni?.cover_image_url;
+      if (src) {
+        const img = new window.Image();
+        img.src = src;
+      }
+    });
+  }, [index, programs]);
 
   if (!programs.length) return null;
 
@@ -112,14 +127,10 @@ export function FeaturedProgramsBento({
                 transition={{ duration: 0.8, ease: "easeInOut" }}
                 style={{ position: "absolute", inset: 0, zIndex: 0 }}
               >
-                {(current as any).cover_image_url ||
-                university?.cover_image_url ? (
+                {current.cover_image_url || university?.cover_image_url ? (
                   <Image
-                    src={
-                      (current as any).cover_image_url ||
-                      university!.cover_image_url
-                    }
-                    alt=""
+                    src={current.cover_image_url || university!.cover_image_url}
+                    alt={current.name_en}
                     fill
                     sizes="(max-width: 768px) 100vw, 90vw"
                     className="object-cover"

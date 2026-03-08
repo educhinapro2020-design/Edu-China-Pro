@@ -54,6 +54,7 @@ export interface Program extends Omit<
 > {
   eligibility: ProgramEligibility | null;
   detail_images: string[];
+  cover_image_url: string | null;
   document_requirements: string[] | null;
   scholarship_type:
     | "self_financed"
