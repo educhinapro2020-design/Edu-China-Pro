@@ -20,6 +20,7 @@ export interface SelectProps {
   className?: string;
   disabled?: boolean;
   id?: string;
+  searchable?: boolean;
 }
 
 export function Select({
@@ -31,11 +32,21 @@ export function Select({
   className,
   disabled,
   id,
+  searchable = false,
 }: SelectProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [search, setSearch] = React.useState("");
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const searchRef = React.useRef<HTMLInputElement>(null);
 
   const selectedOption = options.find((opt) => opt.value === value);
+
+  const filtered =
+    searchable && search.trim()
+      ? options.filter((o) =>
+          o.label.toLowerCase().includes(search.toLowerCase()),
+        )
+      : options;
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -44,16 +55,24 @@ export function Select({
         !containerRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
+        setSearch("");
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  React.useEffect(() => {
+    if (isOpen && searchable) {
+      setTimeout(() => searchRef.current?.focus(), 50);
+    }
+    if (!isOpen) setSearch("");
+  }, [isOpen, searchable]);
+
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
     setIsOpen(false);
+    setSearch("");
   };
 
   return (
@@ -93,10 +112,22 @@ export function Select({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-primary-100 bg-white p-2 shadow-xl shadow-primary-900/10"
+            className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-primary-100 bg-white shadow-xl shadow-primary-900/10"
           >
-            <div className="max-h-60 overflow-auto">
-              {options.map((option) => (
+            {searchable && (
+              <div className="p-2 border-b border-primary-100">
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search..."
+                  className="w-full px-3 py-3 text-sm rounded-xl border border-primary-200 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 placeholder:text-primary-400"
+                />
+              </div>
+            )}
+            <div className="max-h-60 overflow-auto p-2">
+              {filtered.map((option) => (
                 <button
                   key={option.value}
                   type="button"
@@ -120,9 +151,9 @@ export function Select({
                   )}
                 </button>
               ))}
-              {options.length === 0 && (
+              {filtered.length === 0 && (
                 <div className="p-3 text-center text-sm text-primary-400">
-                  No options available
+                  No options found
                 </div>
               )}
             </div>

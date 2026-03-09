@@ -55,7 +55,7 @@ export function ProgramForm({
   const sessionId = useRef(crypto.randomUUID());
 
   useEffect(() => {
-    universityRepository.getUniversities({ limit: 100 }).then(setUniversities);
+    universityRepository.getUniversities({}).then(setUniversities);
     referenceRepository.getSubjectAreas().then(setSubjectAreas);
   }, []);
 
@@ -308,6 +308,7 @@ export function ProgramForm({
               <div className="space-y-2.5">
                 <label className="label">University</label>
                 <Select
+                  searchable
                   value={form.university_id}
                   onChange={(val) =>
                     setForm((prev) => ({ ...prev, university_id: val }))
