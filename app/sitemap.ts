@@ -36,8 +36,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.9,
     },
-    { url: `${BASE}/login`, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE}/signup`, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const universityPages: MetadataRoute.Sitemap = (universities ?? []).map(
