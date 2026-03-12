@@ -39,6 +39,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          created_at: string
+          desktop_image_url: string
+          display_order: number
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          link_url: string | null
+          mobile_image_url: string | null
+          starts_at: string | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          desktop_image_url: string
+          display_order?: number
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          link_url?: string | null
+          mobile_image_url?: string | null
+          starts_at?: string | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          desktop_image_url?: string
+          display_order?: number
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          link_url?: string | null
+          mobile_image_url?: string | null
+          starts_at?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       application_notes: {
         Row: {
           application_id: string

@@ -1,6 +1,5 @@
 import {
   FiLayout,
-  FiBell,
   FiBook,
   FiBookOpen,
   FiFile,
@@ -9,6 +8,7 @@ import {
   FiStar,
 } from "react-icons/fi";
 import { MdOutlineSchool } from "react-icons/md";
+import { CiBullhorn } from "react-icons/ci";
 import { IconType } from "react-icons";
 
 export interface AdminNavItem {
@@ -24,6 +24,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { name: "Universities", href: "/admin/universities", icon: MdOutlineSchool },
   { name: "Programs", href: "/admin/programs", icon: FiBookOpen },
   { name: "Featured", href: "/admin/featured", icon: FiStar },
+  { name: "Announcements", href: "/admin/announcements", icon: CiBullhorn },
   { name: "Users", href: "/admin/users", icon: FiUsers },
 ];
 
