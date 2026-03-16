@@ -11,6 +11,7 @@ import {
   FiMenu,
   FiX,
   FiLayout,
+  FiCompass,
 } from "react-icons/fi";
 import { authService } from "@/lib/services/auth.service";
 import { User } from "@supabase/supabase-js";
@@ -31,6 +32,7 @@ const navItems = [
   },
   { name: "Find Programs", href: "/programs", icon: FiSearch },
   { name: "My Profile", href: "/dashboard/profile", icon: FiUser },
+  { name: "Guide", href: "/guide", icon: FiCompass },
 ];
 
 interface StudentNavbarProps {

@@ -9,7 +9,7 @@ import { Footer } from "@/components/shared/Footer";
 import { homepageDataService } from "@/lib/services/homepage-data";
 import { SmartScoreSection } from "@/components/homepage/SmartScore";
 import WhyChooseECP from "@/components/homepage/WhyChooseECP";
-import { HowItWorks } from "@/components/homepage/HowItWorks";
+import HowItWorks from "@/components/homepage/HowItWorks";
 import { ClosingCTA } from "@/components/homepage/ClosingCTA";
 import { ConsultationSection } from "@/components/homepage/ConsultationSection";
 import { FeaturedProgramsBento } from "@/components/homepage/FeaturedProgramsBento";
@@ -152,6 +152,8 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
+
+      <HowItWorks />
 
       <ClosingCTA />
       <ConsultationSection />
