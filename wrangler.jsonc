@@ -2,10 +2,20 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
   "name": "educhinapro",
-  "compatibility_date": "2026-03-08",
+  "compatibility_date": "2026-03-12",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
+  },
+  "routes": [
+    {
+      "pattern": "educhinapro.com",
+      "zone_name": "educhinapro.com",
+      "custom_domain": true,
+    },
+  ],
+  "vars": {
+    "INTERNAL_ALERT_TO": "educhinapro2020@gmail.com",
   },
 }

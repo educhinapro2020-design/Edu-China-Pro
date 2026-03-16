@@ -16,7 +16,7 @@ export default function HeroClient({ announcements }: HeroClientProps) {
   return (
     <section className="relative flex flex-col bg-white">
       {announcements.length > 0 && (
-        <div className="w-full z-40 bg-white relative">
+        <div className="w-full mt-6 md:mt-10 z-40 bg-white relative">
           <AnnouncementBar announcements={announcements} />
         </div>
       )}
