@@ -29,7 +29,7 @@ export default async function CounselorLayout({
   }
 
   return (
-    <div className="min-h-screen bg-primary-50 flex">
+    <div className="h-screen overflow-hidden bg-primary-50 flex">
       <CounselorSidebar
         user={{
           id: user.id,
@@ -63,8 +63,8 @@ export default async function CounselorLayout({
           )}
         </Link>
       </div>
-      <main className="flex-1 min-h-[calc(100vh-40px)] mt-10 min-w-0 flex flex-col">
-        <div className="flex-1 p-4 md:p-8 flex flex-col h-full">{children}</div>
+      <main className="flex-1 mt-10 min-w-0 flex flex-col min-h-0 overflow-y-auto">
+        <div className="flex-1 p-4 md:p-8 flex flex-col min-h-0">{children}</div>
       </main>{" "}
     </div>
   );

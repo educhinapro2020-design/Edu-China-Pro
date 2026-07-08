@@ -6,7 +6,8 @@ import { chatService } from "@/lib/services/chat.service";
 import { MessageWithSender } from "@/lib/repositories/chat.repo";
 import { Database } from "@/lib/types/supabase";
 import { FiSend, FiLoader } from "react-icons/fi";
-import { div } from "framer-motion/client";
+
+const PAGE_SIZE = 50;
 
 interface ChatWindowProps {
   conversationId: string;
@@ -68,9 +69,14 @@ export function ChatWindow({
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [hasOlderMessages, setHasOlderMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const topSentinelRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const pageRef = useRef(1);
 
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -108,10 +114,15 @@ export function ChatWindow({
 
     async function load() {
       setLoading(true);
+      pageRef.current = 1;
       try {
-        const { data } = await chatService.getMessages(conversationId);
+        const { data, total_count } = await chatService.getMessages(
+          conversationId,
+          { page: 1, pageSize: PAGE_SIZE },
+        );
         if (!cancelled) {
           setMessages(data);
+          setHasOlderMessages(total_count > PAGE_SIZE);
           setTimeout(() => scrollToBottom(false), 50);
         }
       } finally {
@@ -124,6 +135,48 @@ export function ChatWindow({
       cancelled = true;
     };
   }, [conversationId, scrollToBottom]);
+
+  const loadOlderMessages = useCallback(async () => {
+    if (loadingOlder || !hasOlderMessages) return;
+    setLoadingOlder(true);
+
+    const container = scrollContainerRef.current;
+    const prevScrollHeight = container?.scrollHeight ?? 0;
+    const nextPage = pageRef.current + 1;
+
+    try {
+      const { data, total_count } = await chatService.getMessages(
+        conversationId,
+        { page: nextPage, pageSize: PAGE_SIZE },
+      );
+
+      pageRef.current = nextPage;
+      setMessages((prev) => [...data, ...prev]);
+      setHasOlderMessages(total_count > nextPage * PAGE_SIZE);
+
+      requestAnimationFrame(() => {
+        if (container) {
+          container.scrollTop = container.scrollHeight - prevScrollHeight;
+        }
+      });
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [conversationId, loadingOlder, hasOlderMessages]);
+
+  useEffect(() => {
+    if (loading || loadingOlder || !hasOlderMessages) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadOlderMessages();
+      },
+      { threshold: 0.1 },
+    );
+
+    if (topSentinelRef.current) observer.observe(topSentinelRef.current);
+    return () => observer.disconnect();
+  }, [loading, loadingOlder, hasOlderMessages, loadOlderMessages]);
 
   useEffect(() => {
     if (isOwner) chatService.markAsRead(conversationId, currentUserId);
@@ -200,7 +253,10 @@ export function ChatWindow({
 
   return (
     <div className="flex flex-col h-full bg-white">
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scroll-smooth">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scroll-smooth"
+      >
         {loading ? (
           <div className="space-y-3">
             <MessageSkeleton isOwn={false} />
@@ -222,13 +278,20 @@ export function ChatWindow({
             </p>
           </div>
         ) : (
-          messages.map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              isOwn={message.sender_id === currentUserId}
-            />
-          ))
+          <>
+            <div ref={topSentinelRef} className="flex justify-center py-1">
+              {loadingOlder && (
+                <FiLoader className="w-4 h-4 text-primary-300 animate-spin" />
+              )}
+            </div>
+            {messages.map((message) => (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                isOwn={message.sender_id === currentUserId}
+              />
+            ))}
+          </>
         )}
         {isTyping && (
           <TypingIndicator

@@ -155,11 +155,13 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                     )}
                   />
 
-                  {item.href.includes("messages") && unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 size-4 rounded-full bg-brand-600 text-white text-[9px] font-bold flex items-center justify-center">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
+                  {item.href.includes("messages") &&
+                    unreadCount > 0 &&
+                    (isCollapsed && !mobile) && (
+                      <span className="absolute -top-1 -right-1 size-4 rounded-full bg-brand-600 text-white text-[9px] font-bold flex items-center justify-center">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
                 </div>
 
                 <motion.span
@@ -174,19 +176,13 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 >
                   {item.name}
                 </motion.span>
-                {item.href.includes("messages") && unreadCount > 0 && (
-                  <>
-                    {!isCollapsed || mobile ? (
-                      <span className="ml-auto shrink-0 size-4.5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
-                    ) : (
-                      <span className="absolute top-1 right-1 size-4 rounded-full bg-brand-600 text-white text-[9px] font-bold flex items-center justify-center">
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
-                    )}
-                  </>
-                )}
+                {item.href.includes("messages") &&
+                  unreadCount > 0 &&
+                  (!isCollapsed || mobile) && (
+                    <span className="ml-auto shrink-0 size-4.5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
               </Link>
             );
           })}
